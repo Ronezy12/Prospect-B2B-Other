@@ -3,14 +3,17 @@
 
 @section('content')
 <div class="page-header">
-    <h1>Entreprises et contacts</h1>
+    <div>
+        <h1>Contacts</h1>
+        <p class="subtitle">{{ number_format($contacts->total(), 0, ',', ' ') }} interlocuteur(s) dans les entreprises de votre périmètre</p>
+    </div>
 </div>
 
 <form class="card" method="GET" action="{{ route('pm.contacts.index') }}" role="search">
     <div class="filters">
-        <div class="field">
+        <div class="field wide">
             <label for="q">Recherche</label>
-            <input type="search" id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nom, e-mail, fonction, entreprise…">
+            <div class="searchbox"><x-icon name="search" /><input type="search" id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nom, e-mail, fonction, entreprise…"></div>
         </div>
         <div class="field">
             <label for="sector_id">Secteur de l'entreprise</label>
@@ -39,8 +42,8 @@
                 @endforeach
             </select>
         </div>
-        <div class="field">
-            <button type="submit" class="btn btn-primary">Filtrer</button>
+        <div class="field buttons">
+            <button type="submit" class="btn btn-primary"><x-icon name="search" /> Filtrer</button>
             <a class="btn" href="{{ route('pm.contacts.index') }}">Réinitialiser</a>
         </div>
     </div>
@@ -55,26 +58,26 @@
             <tbody>
             @forelse ($contacts as $contact)
                 <tr>
-                    <td>{{ $contact->fullName() }}</td>
+                    <td><span class="person"><x-avatar :name="$contact->fullName()" size="sm" /> <span class="row-title">{{ $contact->fullName() }}</span></span></td>
                     <td>{{ $contact->job_title ?? '—' }}</td>
                     <td>
                         @if ($contact->company)
                             <a href="{{ route('pm.companies.show', $contact->company) }}">{{ $contact->company->name }}</a>
-                            <div class="small muted">{{ $contact->company->city }}</div>
+                            <div class="sub">{{ $contact->company->city }}</div>
                         @else — @endif
                     </td>
                     <td>
                         @if ($contact->email)<div>{{ $contact->email }}</div>@endif
-                        @if ($contact->phone ?? $contact->mobile)<div>{{ $contact->phone ?? $contact->mobile }}</div>@endif
+                        @if ($contact->phone ?? $contact->mobile)<div class="sub">{{ \App\Support\Normalizer::displayPhone($contact->phone ?? $contact->mobile) }}</div>@endif
                     </td>
                     <td>
-                        <span class="badge">{{ strtoupper($contact->audience_type) }}</span>
+                        <span class="badge plain">{{ strtoupper($contact->audience_type) }}</span>
                         @if ($contact->email && isset($suppressed[$contact->email]))<span class="badge badge-danger">Opposition</span>@endif
                     </td>
                     <td>{{ $contact->owner?->name ?? '—' }}</td>
                 </tr>
             @empty
-                <tr><td colspan="6" class="table-empty">Aucun contact ne correspond à ces critères.</td></tr>
+                <tr><td colspan="6" class="table-empty"><div class="empty-state"><x-icon name="contact-round" /><strong>Aucun contact trouvé</strong>Les interlocuteurs s'ajoutent depuis la fiche d'une entreprise.</div></td></tr>
             @endforelse
             </tbody>
         </table>

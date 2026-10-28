@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
     <title>@yield('title') — {{ config('app.name') }}</title>
-    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=1">
+    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=2">
+    <script src="{{ asset('js/theme.js') }}?v=2"></script>
 </head>
 <body>
-<main class="guest">
+@hasSection('bare')
     @yield('content')
-</main>
+@else
+    <main class="guest">@yield('content')</main>
+@endif
 </body>
 </html>

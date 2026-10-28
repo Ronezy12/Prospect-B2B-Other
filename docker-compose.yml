@@ -1,0 +1,27 @@
+# Lancement de test en une commande :  docker compose up --build
+# Puis ouvrir http://localhost:8000  (comptes de démonstration affichés dans les logs).
+services:
+  app:
+    build: .
+    image: entreprise-ar/prospection:demo
+    ports:
+      - "8000:80"
+    environment:
+      APP_NAME: "Entreprise AR - Prospection"
+      APP_ENV: demo
+      APP_DEBUG: "false"
+      APP_URL: http://localhost:8000
+      APP_LOCALE: fr
+      DB_CONNECTION: sqlite
+      DB_DATABASE: /var/www/html/database/data/database.sqlite
+      SESSION_DRIVER: database
+      SESSION_SECURE_COOKIE: "false"
+      QUEUE_CONNECTION: database
+      CACHE_STORE: database
+      MAIL_MAILER: log
+      LOG_CHANNEL: stderr
+      PM_DEMO: "true"
+    volumes:
+      - prospection-data:/var/www/html/database/data
+volumes:
+  prospection-data:

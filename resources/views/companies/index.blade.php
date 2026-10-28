@@ -3,25 +3,29 @@
 
 @section('content')
 <div class="page-header">
-    <h1>Base de prospects</h1>
+    <div>
+        <h1>Base de prospects</h1>
+        <p class="subtitle">{{ number_format($companies->total(), 0, ',', ' ') }} fiche(s) correspondant à vos critères</p>
+    </div>
     <div class="actions">
         @can('prospects.export')
-            <a class="btn" href="{{ route('pm.companies.export', request()->query()) }}">Exporter la sélection filtrée (CSV)</a>
+            <a class="btn" href="{{ route('pm.companies.export', request()->query()) }}"><x-icon name="download" /> Exporter</a>
         @endcan
         @can('prospects.import')
-            <a class="btn" href="{{ route('pm.imports.create') }}">Importer</a>
+            <a class="btn" href="{{ route('pm.imports.create') }}"><x-icon name="upload" /> Importer</a>
         @endcan
         @can('prospects.create')
-            <a class="btn btn-primary" href="{{ route('pm.companies.create') }}">Nouveau prospect</a>
+            <a class="btn btn-primary" href="{{ route('pm.companies.create') }}"><x-icon name="plus" /> Nouveau prospect</a>
         @endcan
     </div>
 </div>
 
+@php($advanced = collect($filters)->except(['q', 'lifecycle'])->count())
 <form class="card" method="GET" action="{{ route('pm.companies.index') }}" role="search">
     <div class="filters">
-        <div class="field">
+        <div class="field wide">
             <label for="q">Recherche</label>
-            <input type="search" id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nom, ville, e-mail, SIREN…">
+            <div class="searchbox"><x-icon name="search" /><input type="search" id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Nom, ville, e-mail, SIREN, interlocuteur…"></div>
         </div>
         <div class="field">
             <label for="lifecycle">Cycle</label>
@@ -31,6 +35,13 @@
                 <option value="all" @selected(request('lifecycle') === 'all')>Tous</option>
             </select>
         </div>
+        <div class="field buttons">
+            <button type="submit" class="btn btn-primary"><x-icon name="search" /> Rechercher</button>
+        </div>
+    </div>
+    <details class="filter-panel section-gap" @if ($advanced) open @endif>
+        <summary><x-icon name="filter" /> Filtres avancés @if ($advanced)<span class="filter-count">{{ $advanced }}</span>@endif</summary>
+    <div class="filters">
         <div class="field">
             <label for="sector_id">Secteur</label>
             <select id="sector_id" name="sector_id">
@@ -104,11 +115,12 @@
                 <option value="asc" @selected($direction === 'asc')>Croissant</option>
             </select>
         </div>
-        <div class="field">
-            <button type="submit" class="btn btn-primary">Filtrer</button>
-            <a class="btn" href="{{ route('pm.companies.index') }}">Réinitialiser</a>
+        <div class="field buttons">
+            <button type="submit" class="btn">Appliquer</button>
+            <a class="btn btn-ghost" href="{{ route('pm.companies.index') }}">Réinitialiser</a>
         </div>
     </div>
+    </details>
 </form>
 
 <div class="card flush">
@@ -144,7 +156,7 @@
             <span data-bulk-option="add_tag" hidden>
                 <input type="text" name="tag" maxlength="80" aria-label="Tag" placeholder="Nom du tag">
             </span>
-            <button type="submit" class="btn btn-sm btn-primary" data-bulk-submit disabled>Appliquer</button>
+            <button type="submit" class="btn btn-sm btn-primary" data-bulk-submit disabled>Appliquer à la sélection</button>
         </div>
         @endcan
 
@@ -171,19 +183,19 @@
                             <td><input type="checkbox" name="ids[]" value="{{ $company->id }}" data-bulk-item aria-label="Sélectionner {{ $company->name }}"></td>
                         @endcan
                         <td>
-                            <a href="{{ route('pm.companies.show', $company) }}"><strong>{{ $company->name }}</strong></a>
+                            <a class="row-title" href="{{ route('pm.companies.show', $company) }}">{{ $company->name }}</a>
                             @if ($company->isClient())<span class="badge badge-success">Client</span>@endif
-                            <div>@foreach ($company->tags as $tag)<span class="tag">{{ $tag->name }}</span>@endforeach</div>
+                            @if ($company->tags->isNotEmpty())<div>@foreach ($company->tags as $tag)<span class="tag">{{ $tag->name }}</span>@endforeach</div>@endif
                         </td>
                         <td>{{ $company->sector?->name ?? '—' }}</td>
                         <td>{{ trim($company->postal_code.' '.$company->city) ?: '—' }}</td>
-                        <td><span class="badge badge-primary">{{ $company->statusLabel() }}</span></td>
-                        <td>{{ $company->owner?->name ?? 'Non assigné' }}</td>
-                        <td>{{ $company->contacts_count }}</td>
-                        <td class="nowrap">{{ $company->created_at->format('d/m/Y') }}</td>
+                        <td>@include('partials.status-badge', ['status' => $company->status])</td>
+                        <td>@if ($company->owner)<span class="person"><x-avatar :user="$company->owner" size="sm" /> {{ $company->owner->name }}</span>@else<span class="muted">Non assigné</span>@endif</td>
+                        <td class="num">{{ $company->contacts_count }}</td>
+                        <td class="nowrap muted">{{ $company->created_at->format('d/m/Y') }}</td>
                     </tr>
                 @empty
-                    <tr><td colspan="8" class="table-empty">Aucun prospect ne correspond à ces critères.</td></tr>
+                    <tr><td colspan="8" class="table-empty"><div class="empty-state"><x-icon name="building-2" /><strong>Aucun prospect trouvé</strong>Modifiez vos filtres ou créez un nouveau prospect.</div></td></tr>
                 @endforelse
                 </tbody>
             </table>

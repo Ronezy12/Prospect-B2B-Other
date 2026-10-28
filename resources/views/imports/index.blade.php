@@ -3,8 +3,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1>Imports et historique</h1>
-    <div class="actions"><a class="btn btn-primary" href="{{ route('pm.imports.create') }}">Nouvel import</a></div>
+    <div>
+        <h1>Imports</h1>
+        <p class="subtitle">Historique des fichiers importés et rapports de traitement</p>
+    </div>
+    <div class="actions"><a class="btn btn-primary" href="{{ route('pm.imports.create') }}"><x-icon name="upload" /> Nouvel import</a></div>
 </div>
 
 <div class="card flush">
@@ -16,8 +19,8 @@
             <tbody>
             @forelse ($imports as $import)
                 <tr>
-                    <td><a href="{{ route('pm.imports.show', $import) }}">{{ $import->original_name }}</a></td>
-                    <td>{{ $import->user?->name ?? '—' }}</td>
+                    <td><a class="row-title" href="{{ route('pm.imports.show', $import) }}"><x-icon name="file-spreadsheet" /> {{ $import->original_name }}</a></td>
+                    <td>@if ($import->user)<span class="person"><x-avatar :user="$import->user" size="sm" /> {{ $import->user->name }}</span>@else — @endif</td>
                     <td class="nowrap">{{ $import->created_at->format('d/m/Y H:i') }}</td>
                     <td>
                         <span @class(['badge', 'badge-success' => $import->status === 'completed', 'badge-danger' => $import->status === 'failed', 'badge-warning' => in_array($import->status, ['queued', 'processing'])])>{{ $import->statusLabel() }}</span>
@@ -29,7 +32,7 @@
                     <td>{{ $import->error_count }}</td>
                 </tr>
             @empty
-                <tr><td colspan="9" class="table-empty">Aucun import pour le moment.</td></tr>
+                <tr><td colspan="9" class="table-empty"><div class="empty-state"><x-icon name="file-spreadsheet" /><strong>Aucun import pour le moment</strong>Importez un fichier CSV ou Excel pour remplir votre base.</div></td></tr>
             @endforelse
             </tbody>
         </table>

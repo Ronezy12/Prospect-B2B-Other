@@ -15,7 +15,7 @@
     <input type="hidden" name="company_id" value="{{ $company->id }}">
 
     <fieldset>
-        <legend>Identité et coordonnées professionnelles</legend>
+        <legend><x-icon name="contact-round" /> Identité et coordonnées professionnelles</legend>
         <div class="form-grid">
             <div class="field">
                 <label for="civility">Civilité</label>
@@ -66,7 +66,7 @@
     </fieldset>
 
     <fieldset>
-        <legend>Conformité (RGPD)</legend>
+        <legend><x-icon name="shield-check" /> Conformité (RGPD)</legend>
         <div class="form-grid">
             <div class="field">
                 <label for="audience_type">Type de contact *</label>
@@ -110,7 +110,7 @@
 
     <div class="form-actions">
         <a class="btn" href="{{ route('pm.companies.show', $company) }}">Annuler</a>
-        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <button type="submit" class="btn btn-primary"><x-icon name="check" /> Enregistrer</button>
     </div>
 </form>
 @endsection

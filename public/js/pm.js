@@ -13,6 +13,19 @@
       });
     }
 
+    // Thème clair / sombre (préférence locale, sinon thème du système)
+    var themeBtn = document.querySelector('[data-theme-toggle]');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', function () {
+        var root = document.documentElement;
+        var current = root.getAttribute('data-theme') ||
+          (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        var next = current === 'dark' ? 'light' : 'dark';
+        root.setAttribute('data-theme', next);
+        try { localStorage.setItem('pm-theme', next); } catch (e) { /* ignoré */ }
+      });
+    }
+
     // Confirmation des actions sensibles
     document.querySelectorAll('form[data-confirm]').forEach(function (form) {
       form.addEventListener('submit', function (event) {

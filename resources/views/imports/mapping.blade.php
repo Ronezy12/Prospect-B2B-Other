@@ -5,11 +5,12 @@
 <div class="page-header">
     <div>
         <div class="breadcrumb"><a href="{{ route('pm.imports.index') }}">Imports</a> › {{ $import->original_name }}</div>
-        <h1>Nouvel import — étape 2 sur 2</h1>
+        <h1>Correspondance des colonnes</h1>
     </div>
 </div>
+<div class="steps"><span class="step done"><b><x-icon name="check" /></b> Fichier</span><span class="step current"><b>2</b> Correspondance</span><span class="step"><b>3</b> Traitement</span></div>
 
-<div class="alert alert-info">{{ number_format($import->total_rows, 0, ',', ' ') }} ligne(s) de données détectée(s) dans « {{ $import->original_name }} ».</div>
+<div class="alert alert-info"><x-icon name="file-spreadsheet" /> <span>{{ number_format($import->total_rows, 0, ',', ' ') }} ligne(s) de données détectée(s) dans « {{ $import->original_name }} ».</span></div>
 @if ($sameFile)
     <div class="alert alert-warning">Ce fichier identique a déjà été importé le {{ $sameFile->created_at->format('d/m/Y à H:i') }} (<a href="{{ route('pm.imports.show', $sameFile) }}">voir l'import</a>). Les doublons seront traités selon la stratégie choisie ci-dessous.</div>
 @endif
@@ -33,7 +34,7 @@
 <form method="POST" action="{{ route('pm.imports.start', $import) }}" class="card">
     @csrf
     <fieldset>
-        <legend>Correspondance des colonnes</legend>
+        <legend><x-icon name="arrow-right-left" /> Correspondance des colonnes</legend>
         @error('mapping')<div class="alert alert-danger">{{ $message }}</div>@enderror
         <div class="form-grid">
             @foreach ($fields as $key => $field)
@@ -51,15 +52,17 @@
     </fieldset>
 
     <fieldset>
-        <legend>Doublons</legend>
+        <legend><x-icon name="layers" /> Doublons</legend>
         <p class="small muted">Détection par SIREN, puis domaine du site web, puis raison sociale + code postal ; contacts par adresse e-mail. Les entreprises déjà clientes ne sont jamais modifiées.</p>
+        <div class="choice-list">
         @foreach ($strategies as $key => $label)
             <label class="checkbox"><input type="radio" name="duplicate_strategy" value="{{ $key }}" @checked(old('duplicate_strategy', 'skip') === $key)> {{ $label }}</label>
         @endforeach
+        </div>
     </fieldset>
 
     <fieldset>
-        <legend>Valeurs par défaut et conformité</legend>
+        <legend><x-icon name="shield-check" /> Valeurs par défaut et conformité</legend>
         <div class="form-grid">
             <div class="field">
                 <label for="default_sector_id">Secteur par défaut</label>
@@ -120,7 +123,7 @@
 
     <div class="form-actions">
         <a class="btn" href="{{ route('pm.imports.index') }}">Annuler</a>
-        <button type="submit" class="btn btn-primary">Lancer l'import</button>
+        <button type="submit" class="btn btn-primary"><x-icon name="upload" /> Lancer l'import</button>
     </div>
 </form>
 @endsection

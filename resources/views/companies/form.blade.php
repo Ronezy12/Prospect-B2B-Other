@@ -4,19 +4,19 @@
 @section('content')
 <div class="page-header">
     <div>
-        <div class="breadcrumb"><a href="{{ route('pm.companies.index') }}">Base de prospects</a></div>
+        <div class="breadcrumb"><a href="{{ route('pm.companies.index') }}">Base de prospects</a> <x-icon name="chevron-right" /> {{ $company->exists ? 'Modifier' : 'Création' }}</div>
         <h1>{{ $company->exists ? 'Modifier « '.$company->name.' »' : 'Nouveau prospect' }}</h1>
     </div>
 </div>
 
 @if ($duplicate = session('duplicate'))
     <div class="alert alert-warning" role="alert">
-        <strong>Fiche similaire détectée :</strong> « {{ $duplicate['name'] }} »
+        <x-icon name="circle-alert" /><div><strong>Fiche similaire détectée :</strong> « {{ $duplicate['name'] }} »
         @if ($duplicate['trashed']) (fiche supprimée)
         @elseif ($duplicate['client']) (déjà client)
         @elseif ($duplicate['id']) — <a href="{{ route('pm.companies.show', $duplicate['id']) }}">ouvrir la fiche existante</a>
         @endif.
-        Si ce n'est pas la même entreprise, cochez « Créer malgré la ressemblance » en bas du formulaire.
+        Si ce n'est pas la même entreprise, cochez « Créer malgré la ressemblance » en bas du formulaire.</div>
     </div>
 @endif
 
@@ -25,7 +25,7 @@
     @if ($company->exists) @method('PUT') @endif
 
     <fieldset>
-        <legend>Entreprise</legend>
+        <legend><x-icon name="building-2" /> Entreprise</legend>
         <div class="form-grid">
             <div class="field">
                 <label for="name">Raison sociale *</label>
@@ -93,7 +93,7 @@
     </fieldset>
 
     <fieldset>
-        <legend>Suivi commercial</legend>
+        <legend><x-icon name="target" /> Suivi commercial</legend>
         <div class="form-grid">
             <div class="field">
                 <label for="status">Statut *</label>
@@ -145,7 +145,7 @@
 
     @unless ($company->exists)
     <fieldset>
-        <legend>Premier interlocuteur (facultatif)</legend>
+        <legend><x-icon name="user-plus" /> Premier interlocuteur <span class="muted small">facultatif</span></legend>
         <div class="form-grid">
             <div class="field">
                 <label for="contact_first_name">Prénom</label>
@@ -195,7 +195,7 @@
 
     <div class="form-actions">
         <a class="btn" href="{{ $company->exists ? route('pm.companies.show', $company) : route('pm.companies.index') }}">Annuler</a>
-        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <button type="submit" class="btn btn-primary"><x-icon name="check" /> Enregistrer</button>
     </div>
 </form>
 @endsection

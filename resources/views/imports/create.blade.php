@@ -5,9 +5,10 @@
 <div class="page-header">
     <div>
         <div class="breadcrumb"><a href="{{ route('pm.imports.index') }}">Imports</a></div>
-        <h1>Nouvel import — étape 1 sur 2</h1>
+        <h1>Nouvel import</h1>
     </div>
 </div>
+<div class="steps"><span class="step current"><b>1</b> Fichier</span><span class="step"><b>2</b> Correspondance</span><span class="step"><b>3</b> Traitement</span></div>
 
 <div class="grid grid-sidebar">
     <form method="POST" action="{{ route('pm.imports.store') }}" enctype="multipart/form-data" class="card">
@@ -20,7 +21,7 @@
         </div>
         <div class="form-actions">
             <a class="btn" href="{{ route('pm.imports.index') }}">Annuler</a>
-            <button type="submit" class="btn btn-primary">Analyser le fichier</button>
+            <button type="submit" class="btn btn-primary"><x-icon name="sparkles" /> Analyser le fichier</button>
         </div>
     </form>
 

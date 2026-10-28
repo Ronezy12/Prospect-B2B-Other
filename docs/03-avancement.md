@@ -6,7 +6,8 @@
 | 2 — Cahier technique | Terminé — [01-audit-et-cahier-technique.md](01-audit-et-cahier-technique.md) |
 | 3 — Validation | Terminé (décisions consignées dans le cahier) |
 | 4 — Socle et gestion des prospects | **Terminé** (détail ci-dessous) |
-| 5 — Pipelines, tâches, permissions avancées | À faire |
+| 4 bis — Refonte du design et environnement de test | **Terminé** (détail ci-dessous) |
+| 5 — Pipelines, tâches, permissions avancées | À faire (après la recette utilisateur) |
 | 6 — E-mails, modèles, programmation | À faire |
 | 7 — Statistiques, webhooks, automatisations | À faire |
 | 8 — Réseaux sociaux | À faire |
@@ -37,7 +38,7 @@
 
 **Opposition** : liste centrale `pm_suppressions` stockant uniquement une empreinte HMAC-SHA256 de l'adresse normalisée, par périmètre (toutes communications, prospection, newsletters). Vérifiée à la saisie manuelle et à l'import : une adresse opposée ne peut pas être réintroduite. L'empreinte survit à la suppression de la fiche.
 
-**Tests** : 44 tests automatisés (connexion, limitation, périmètres et droits, validation, doublons, conversion, export, imports CSV/XLSX, encodages, stratégies de doublons, opposition, idempotence, purge).
+**Tests** : 46 tests automatisés (connexion, limitation, périmètres et droits, validation, doublons, conversion, export, imports CSV/XLSX, encodages, stratégies de doublons, opposition, idempotence, purge).
 
 ## Règles de conformité implémentées — validation humaine requise
 
@@ -52,3 +53,13 @@
 - La gestion des secteurs/sources depuis l'interface (ajout, renommage) arrive avec les pipelines en phase 5 ; les secteurs par défaut sont créés par le seeder.
 - La fusion manuelle de deux fiches existantes n'est pas encore disponible (les doublons sont empêchés à la création et à l'import).
 - Sur mobile, le bloc de filtres de la liste est long ; il pourra être replié dans une prochaine itération.
+
+## Phase 4 bis — design et environnement de test
+
+- **Design SaaS** : panneaux flottants, dégradé violet → rose → orange réservé aux actions principales, police Inter auto-hébergée (licence OFL), icônes Lucide intégrées en SVG (licence ISC), thème clair / sombre (préférence système ou bouton), page de connexion en deux panneaux, tableau de bord avec bandeau d'accueil, avatars des responsables, cartes d'interlocuteurs, étapes d'import. Aucune ressource externe : la CSP stricte est conservée.
+- **Navigation** : les sections des phases suivantes apparaissent grisées avec leur numéro de phase, sans lien actif.
+- **Données de démonstration** : `php artisan pm:demo` crée 5 comptes (un par rôle) et 24 entreprises fictives (domaines `.test`, tag « Exemple démo »). Commande refusée en production.
+- **Docker** : `docker compose up --build` lance l'application de test (Apache + PHP 8.3 + SQLite, worker et planificateur inclus) sur http://localhost:8000.
+- **Aperçu cliquable** publié à partir des écrans réellement rendus : https://claude.ai/artifact/UX9eoxccjdTrMgRy7XvDTD
+
+Limite : l'environnement de développement bloque l'accès aux dépôts Debian et limite Docker Hub. L'image Docker n'a donc pas pu être construite jusqu'au bout ici. Le démarrage de l'application, les migrations, la commande de démonstration et le worker ont été validés hors conteneur. La première construction de l'image se fera sur votre poste ou votre VPS.

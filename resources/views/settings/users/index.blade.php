@@ -3,8 +3,11 @@
 
 @section('content')
 <div class="page-header">
-    <h1>Utilisateurs et rôles</h1>
-    <div class="actions"><a class="btn btn-primary" href="{{ route('pm.settings.users.create') }}">Nouvel utilisateur</a></div>
+    <div>
+        <h1>Utilisateurs et rôles</h1>
+        <p class="subtitle">Comptes, rôles et équipes. Les droits sont vérifiés côté serveur.</p>
+    </div>
+    <div class="actions"><a class="btn btn-primary" href="{{ route('pm.settings.users.create') }}"><x-icon name="user-plus" /> Nouvel utilisateur</a></div>
 </div>
 
 <div class="card flush">
@@ -14,13 +17,13 @@
             <tbody>
             @foreach ($users as $user)
                 <tr>
-                    <td>{{ $user->name }}</td>
-                    <td>{{ $user->email }}</td>
-                    <td>{{ $user->roles->map(fn ($r) => $roleLabels[$r->name] ?? $r->name)->implode(', ') ?: '—' }}</td>
+                    <td><span class="person"><x-avatar :user="$user" size="sm" /> <span class="row-title">{{ $user->name }}</span></span></td>
+                    <td class="muted">{{ $user->email }}</td>
+                    <td><span class="badge badge-primary plain">{{ $user->roles->map(fn ($r) => $roleLabels[$r->name] ?? $r->name)->implode(', ') ?: '—' }}</span></td>
                     <td>{{ $user->team?->name ?? '—' }}</td>
                     <td>@if ($user->is_active)<span class="badge badge-success">Actif</span>@else<span class="badge badge-danger">Désactivé</span>@endif</td>
                     <td>{{ $user->last_login_at?->format('d/m/Y H:i') ?? 'Jamais' }}</td>
-                    <td><a class="btn btn-sm" href="{{ route('pm.settings.users.edit', $user) }}">Modifier</a></td>
+                    <td><a class="btn btn-sm" href="{{ route('pm.settings.users.edit', $user) }}"><x-icon name="pencil" /> Modifier</a></td>
                 </tr>
             @endforeach
             </tbody>

@@ -20,7 +20,7 @@
             @endcan
         @endif
         @if ($import->processed_rows > 0)
-            <a class="btn" href="{{ route('pm.imports.report', $import) }}">Rapport des anomalies (CSV)</a>
+            <a class="btn" href="{{ route('pm.imports.report', $import) }}"><x-icon name="download" /> Rapport des anomalies</a>
         @endif
     </div>
 </div>
