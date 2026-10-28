@@ -1,7 +1,15 @@
 # Prospection & Marketing — Entreprise AR
 ## Phase 1 (audit) et Phase 2 (cahier technique)
 
-Date : 28/10/2026 — Statut : **proposition à valider** (aucun code applicatif écrit à ce stade).
+Date : 28/10/2026 — Statut : **validé le 28/10/2026** (décisions ci-dessous).
+
+> **Décisions validées (phase 3)**
+> - Projet **autonome**, sans lien avec un CRM existant.
+> - Framework : **Laravel** (version 13 installée, PHP ≥ 8.3).
+> - Hébergement : **VPS / serveur dédié** (worker de file supervisé + cron).
+> - Fournisseur e-mail API : **aucun choisi pour l'instant** ; le module prévoit un emplacement « fournisseur API » configurable (type + clé chiffrée) à activer plus tard. Le SMTP sera fonctionnel en phase 6.
+> - Éditeur de modèles : **GrapesJS**.
+> - Charte graphique : aucune fournie → charte sobre neutre (modifiable via les variables CSS de `public/css/pm.css`).
 
 ---
 
