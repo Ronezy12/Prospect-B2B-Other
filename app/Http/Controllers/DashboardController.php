@@ -47,9 +47,15 @@ class DashboardController extends Controller
                 ->where('subject_type', (new Company)->getMorphClass())
                 ->whereIn('subject_id', $visibleIds)
                 ->latest('occurred_at')->latest('id')->limit(6)->get(),
+            // Prospects jamais travaillés : rien de prévu, statut « nouveau ».
+            'toCall' => $user->can('prospects.update') ? Company::visibleTo($user)->prospects()->where('status', 'nouveau')
+                ->where(fn ($q) => $q->where('owner_id', $user->id)->orWhereNull('owner_id'))
+                ->whereDoesntHave('tasks', fn ($t) => $t->where('status', 'a_faire'))
+                ->with(['contacts' => fn ($c) => $c->orderByDesc('is_primary')])
+                ->latest('id')->limit(5)->get() : collect(),
             'myTasks' => Task::where('assignee_id', $user->id)->where('status', 'a_faire')
                 ->where('due_at', '<=', today()->endOfDay())
-                ->with(['company:id,name', 'opportunity:id,title', 'assignee:id,name'])
+                ->with(['company', 'contact', 'opportunity:id,title', 'assignee:id,name'])
                 ->orderBy('due_at')->limit(8)->get(),
             'openOpportunities' => Opportunity::visibleTo($user)->active()->whereNull('closed_at')->count(),
             'campaignsThisMonth' => $user->can('campaigns.view') ? Campaign::where('type', '!=', 'individuel')->where('started_at', '>=', now()->startOfMonth())->count() : 0,

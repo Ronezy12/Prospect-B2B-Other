@@ -1,5 +1,5 @@
 @extends('layouts.app')
-@section('title', 'Accueil')
+@section('title', 'Ma journée')
 
 @section('content')
 <section class="hero">
@@ -8,105 +8,83 @@
         <h1>Bonjour {{ \Illuminate\Support\Str::before(auth()->user()->name, ' ') }}</h1>
         <p>
             @if ($myTasks->isNotEmpty())
-                Vous avez {{ $myTasks->count() }} tâche(s) à traiter aujourd'hui{{ $socialToDo ? ' et '.$socialToDo.' profil(s) à contacter sur les réseaux' : '' }}.
+                {{ $myTasks->count() }} chose(s) à faire aujourd'hui. Appelez, puis cliquez sur « Résultat » : l'outil s'occupe du reste.
+            @elseif ($toCall->isNotEmpty())
+                Rien de prévu aujourd'hui : voici des prospects à appeler en premier.
             @elseif ($totals['prospects'] === 0)
-                Votre base est vide : commencez par ajouter ou importer vos premiers prospects.
+                Commencez par ajouter vos premiers prospects.
             @else
-                Rien d'urgent aujourd'hui. {{ number_format($totals['prospects'], 0, ',', ' ') }} prospects dans votre périmètre.
+                Rien d'urgent aujourd'hui.
             @endif
         </p>
     </div>
-    <div class="actions">
-        @can('prospects.import')
-            <a class="btn btn-glass" href="{{ route('pm.imports.create') }}"><x-icon name="upload" /> Importer</a>
-        @endcan
-        @can('prospects.create')
-            <a class="btn btn-white" href="{{ route('pm.companies.create') }}"><x-icon name="plus" /> Nouveau prospect</a>
-        @endcan
-    </div>
 </section>
 
-<div class="welcome-banner">
-    <x-icon name="circle-help" />
-    <div class="grow"><strong>Nouveau sur la plateforme ?</strong> <span class="muted">Le guide explique les mots utilisés et chaque étape, en 5 minutes.</span></div>
-    <a class="btn btn-sm btn-primary" href="{{ route('pm.guide') }}">Ouvrir le guide</a>
+<div class="big-actions">
+    @can('prospects.create')
+        <a class="big-action" href="{{ route('pm.companies.create') }}"><span class="big-icon"><x-icon name="plus" /></span><strong>Ajouter un prospect</strong><span>Une entreprise à démarcher</span></a>
+    @endcan
+    @can('campaigns.manage')
+        <a class="big-action" href="{{ route('pm.simple-email.create') }}"><span class="big-icon"><x-icon name="mail" /></span><strong>Écrire à plusieurs entreprises</strong><span>Un e-mail en 3 étapes</span></a>
+    @endcan
+    <a class="big-action" href="{{ route('pm.pipelines.show') }}"><span class="big-icon"><x-icon name="kanban" /></span><strong>Où en sont mes affaires</strong><span>{{ $openOpportunities }} en cours</span></a>
+    @can('prospects.import')
+        <a class="big-action" href="{{ route('pm.imports.create') }}"><span class="big-icon"><x-icon name="upload" /></span><strong>Importer un fichier</strong><span>Excel ou CSV</span></a>
+    @endcan
 </div>
 
-<h2 class="section-title">Comment fonctionne le module</h2>
-<ol class="journey">
-    <li class="journey-step">
-        <span class="journey-num">1</span>
-        <strong>Constituer la base</strong>
-        <span class="muted small">Ajoutez vos prospects un par un ou importez un fichier Excel / CSV.</span>
-        <span class="step-figure">{{ number_format($totals['prospects'], 0, ',', ' ') }} <small>prospects</small></span>
-        <a class="btn btn-sm" href="{{ route('pm.companies.index') }}">Voir les prospects <x-icon name="arrow-right" /></a>
-    </li>
-    <li class="journey-step">
-        <span class="journey-num">2</span>
-        <strong>Suivre les affaires</strong>
-        <span class="muted small">Chaque affaire avance de colonne en colonne, avec des rappels de relance.</span>
-        <span class="step-figure">{{ $openOpportunities }} <small>en cours</small></span>
-        <a class="btn btn-sm" href="{{ route('pm.pipelines.show') }}">Ouvrir le pipeline <x-icon name="arrow-right" /></a>
-    </li>
-    <li class="journey-step">
-        <span class="journey-num">3</span>
-        <strong>Contacter</strong>
-        <span class="muted small">Par e-mail (à une personne ou à plusieurs entreprises d’un coup) ou sur les réseaux sociaux.</span>
-        @canany(['campaigns.view', 'social.use'])
-            <span class="step-figure">@can('campaigns.view'){{ $campaignsThisMonth }} <small>e-mail(s) groupé(s) ce mois</small>@else{{ $socialToDo }} <small>profil(s) à contacter</small>@endcan</span>
-            <span class="step-links">
-                @can('campaigns.view')<a class="btn btn-sm" href="{{ route('pm.campaigns.index') }}">E-mails <x-icon name="arrow-right" /></a>@endcan
-                @can('social.use')<a class="btn btn-sm" href="{{ route('pm.social.index') }}">Réseaux <x-icon name="arrow-right" /></a>@endcan
-            </span>
-        @else
-            <span class="muted small">Utilisez le bouton « E-mail » d'une fiche contact.</span>
-        @endcanany
-    </li>
-    <li class="journey-step">
-        <span class="journey-num">4</span>
-        <strong>Mesurer et automatiser</strong>
-        <span class="muted small">Suivez les résultats et laissez les scénarios créer les relances à votre place.</span>
-        <span class="step-figure">{{ number_format($totals['clients'], 0, ',', ' ') }} <small>client(s) gagné(s)</small></span>
-        <span class="step-links">
-            @can('reports.view')<a class="btn btn-sm" href="{{ route('pm.reports.index') }}">Statistiques <x-icon name="arrow-right" /></a>@endcan
-            @can('automations.manage')<a class="btn btn-sm" href="{{ route('pm.automations.index') }}">Scénarios <x-icon name="arrow-right" /></a>@endcan
-        </span>
-    </li>
-</ol>
-
-<div class="grid grid-2 section-gap">
-    <section class="card flush" data-tour="today">
-        <div class="card-head">
-            <h2><x-icon name="alarm-clock" /> À faire aujourd'hui</h2>
-            <a class="btn btn-sm" href="{{ route('pm.tasks.index') }}">Toutes mes tâches</a>
+<section class="card flush section-gap" data-tour="today">
+    <div class="card-head">
+        <h2><x-icon name="alarm-clock" /> À faire aujourd'hui</h2>
+        <a class="btn btn-sm" href="{{ route('pm.tasks.index') }}">Tout voir</a>
+    </div>
+    @forelse ($myTasks as $task)
+        @include('tasks.row', ['task' => $task])
+    @empty
+        <div class="empty-state"><x-icon name="circle-check" /><strong>Rien de prévu aujourd'hui</strong>Les rappels se créent tout seuls quand vous cliquez sur un résultat.</div>
+    @endforelse
+    @if ($socialToDo)
+        <div class="task-row">
+            <div class="grow"><a class="t-title" href="{{ route('pm.social.index') }}">{{ $socialToDo }} profil(s) à contacter sur les réseaux sociaux</a></div>
+            <a class="btn btn-sm" href="{{ route('pm.social.index') }}"><x-icon name="share-2" /> Y aller</a>
         </div>
-        @forelse ($myTasks as $task)
-            @include('tasks.row', ['task' => $task])
-        @empty
-            <div class="empty-state"><x-icon name="circle-check" /><strong>Rien d'urgent</strong>Aucune tâche prévue aujourd'hui ni en retard.</div>
-        @endforelse
-        @if ($socialToDo)
-            <div class="task-row">
-                <div class="grow"><a class="t-title" href="{{ route('pm.social.index') }}">{{ $socialToDo }} profil(s) à contacter sur les réseaux sociaux</a></div>
-                <x-icon name="share-2" />
-            </div>
-        @endif
-    </section>
+    @endif
+</section>
 
-    <section class="card">
-        <h2><x-icon name="history" /> Dernières activités</h2>
-        @forelse ($recentActivities as $activity)
-            @if ($loop->first)<ul class="timeline">@endif
-            <li>
-                <div class="meta">{{ $activity->occurred_at->format('d/m à H:i') }} · {{ $activity->user?->name ?? 'Système' }}
-                    @if ($activity->subject) · <a href="{{ route('pm.companies.show', $activity->subject_id) }}">{{ $activity->subject->name }}</a>@endif
+@if ($toCall->isNotEmpty())
+    <section class="card flush section-gap" data-tour="tocall">
+        <div class="card-head">
+            <h2><x-icon name="phone" /> Prospects à appeler en premier</h2>
+            <span class="small muted">Nouveaux, jamais contactés</span>
+        </div>
+        @foreach ($toCall as $company)
+            @php($contact = $company->contacts->first())
+            @php($phone = $contact?->mobile ?? $contact?->phone ?? $company->phone)
+            <div class="task-row">
+                <div class="grow">
+                    <a class="t-title" href="{{ route('pm.companies.show', $company) }}">{{ $company->name }}</a>
+                    <div class="t-meta">@if ($contact)<span>{{ $contact->fullName() }}@if ($contact->job_title) · {{ $contact->job_title }}@endif</span>@endif @if ($company->city)<span>{{ $company->city }}</span>@endif</div>
                 </div>
-                <div class="body">{{ \Illuminate\Support\Str::limit($activity->body, 110) }}</div>
-            </li>
-            @if ($loop->last)</ul>@endif
-        @empty
-            <div class="empty-state"><x-icon name="history" /><strong>Aucune activité</strong>Les créations, notes et changements de statut apparaîtront ici.</div>
-        @endforelse
+                @if ($phone)<a class="btn btn-sm" href="tel:{{ $phone }}"><x-icon name="phone" /> <span class="hide-sm">{{ \App\Support\Normalizer::displayPhone($phone) }}</span></a>@endif
+                @include('partials.outcomes', ['company' => $company, 'compact' => true])
+            </div>
+        @endforeach
     </section>
-</div>
+@endif
+
+<section class="card section-gap">
+    <h2><x-icon name="history" /> Dernières activités</h2>
+    @forelse ($recentActivities as $activity)
+        @if ($loop->first)<ul class="timeline">@endif
+        <li>
+            <div class="meta">{{ $activity->occurred_at->format('d/m à H:i') }} · {{ $activity->user?->name ?? 'Système' }}
+                @if ($activity->subject) · <a href="{{ route('pm.companies.show', $activity->subject_id) }}">{{ $activity->subject->name }}</a>@endif
+            </div>
+            <div class="body">{{ \Illuminate\Support\Str::limit($activity->body, 110) }}</div>
+        </li>
+        @if ($loop->last)</ul>@endif
+    @empty
+        <div class="empty-state"><x-icon name="history" /><strong>Aucune activité</strong>Tout ce qui est fait apparaîtra ici.</div>
+    @endforelse
+</section>
 @endsection

@@ -6,6 +6,7 @@
     <div>
         <h1>Modèles d'e-mails</h1>
         <p class="subtitle">Le contenu de vos e-mails, réutilisable. Les mots comme &#123;&#123;prenom&#125;&#125; ou &#123;&#123;entreprise&#125;&#125; sont remplacés automatiquement pour chaque destinataire.</p>
+        <p class="small"><a href="{{ route('pm.segments.index') }}">Listes de destinataires</a> · <a href="{{ route('pm.newsletters.index') }}">Newsletters</a> · <a href="{{ route('pm.campaigns.create') }}">Préparer un envoi manuellement</a></p>
     </div>
     @can('templates.manage')<div class="actions"><a class="btn btn-primary" href="{{ route('pm.templates.create') }}"><x-icon name="plus" /> Nouveau modèle</a></div>@endcan
 </div>

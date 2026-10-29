@@ -10,7 +10,8 @@
     @can('campaigns.manage')
         <div class="actions">
             <a class="btn" href="{{ route('pm.campaigns.create', ['type' => 'newsletter']) }}"><x-icon name="newspaper" /> Newsletter</a>
-            <a class="btn btn-primary" href="{{ route('pm.campaigns.create') }}"><x-icon name="plus" /> Nouvel e-mail groupé</a>
+            <a class="btn" href="{{ route('pm.campaigns.create') }}">Préparer manuellement</a>
+            <a class="btn btn-primary" href="{{ route('pm.simple-email.create') }}"><x-icon name="mail" /> Écrire à plusieurs entreprises</a>
         </div>
     @endcan
 </div>

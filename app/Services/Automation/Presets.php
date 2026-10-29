@@ -5,6 +5,17 @@ namespace App\Services\Automation;
 /** Scénarios prêts à l'emploi (exemples du cahier des charges), modifiables avant activation. */
 final class Presets
 {
+    /** Phrase simple affichée sur l'interrupteur de chaque relance automatique. */
+    public const PLAIN = [
+        'nouveau_prospect' => ['j\'ajoute un prospect', 'me créer la tâche « Appeler » pour le lendemain'],
+        'relance_pertinente' => ['un nouveau prospect n\'a pas répondu au bout de 3 jours', 'créer une relance'],
+        'reponse_recue' => ['quelqu\'un répond à un e-mail', 'arrêter les relances automatiques et me prévenir'],
+        'reponse_sociale' => ['quelqu\'un répond sur un réseau social', 'me créer la tâche « Répondre »'],
+        'desabonnement' => ['quelqu\'un se désinscrit', 'arrêter toute relance'],
+        'changement_statut' => ['le statut d\'un prospect change', 'prévenir son responsable'],
+        'opportunite_gagnee' => ['une affaire est gagnée', 'passer l\'entreprise en client'],
+    ];
+
     public static function all(): array
     {
         return [

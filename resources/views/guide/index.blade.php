@@ -73,12 +73,13 @@
 
 <section class="card guide-section" id="affaires">
     <h2><x-icon name="kanban" /> Suivre une affaire</h2>
+    <p><strong>Le plus simple : après chaque appel, cliquez sur le résultat.</strong> Sur la fiche du prospect ou dans « Ma journée » (bouton <em>Résultat</em>) : <em>Pas de réponse</em>, <em>Intéressé</em>, <em>Rendez-vous pris</em>, <em>Devis envoyé</em>, <em>Signé !</em>, <em>Pas intéressé</em>.</p>
     <ol class="howto">
-        <li>Depuis la fiche du prospect, cliquez sur <em>Nouvelle opportunité</em> : elle apparaît dans le pipeline de son secteur.</li>
-        <li>Dans <em>Pipeline</em>, faites glisser la carte vers la colonne suivante quand l'affaire avance (rendez-vous obtenu, devis envoyé…).</li>
-        <li>Planifiez la prochaine relance : elle apparaît dans <em>Tâches</em> le jour venu, et en rouge si elle est en retard.</li>
-        <li>Affaire signée ? Mettez-la dans « Gagné » puis convertissez le prospect en client.</li>
+        <li>L'outil note l'appel dans l'historique.</li>
+        <li>Il met à jour le statut du prospect et fait avancer son affaire dans le pipeline (il la crée si besoin).</li>
+        <li>Il coche le rappel du jour et crée le suivant, à la bonne date (jamais le week-end).</li>
     </ol>
+    <p class="small muted">Vous pouvez toujours déplacer les cartes à la main dans <em>Pipeline</em>.</p>
     <div class="guide-actions"><a class="btn btn-sm" href="{{ route('pm.pipelines.show') }}">Ouvrir le pipeline <x-icon name="arrow-right" /></a><a class="btn btn-sm" href="{{ route('pm.tasks.index') }}">Mes tâches <x-icon name="arrow-right" /></a></div>
 </section>
 
@@ -86,12 +87,11 @@
     <h2><x-icon name="mail" /> Envoyer un e-mail à plusieurs entreprises</h2>
     <p class="muted">Pour écrire à <strong>une seule</strong> personne, c'est plus simple : ouvrez sa fiche et cliquez sur <em>E-mail</em> à côté de son nom. Pour en toucher <strong>plusieurs</strong>, suivez ces 5 étapes :</p>
     <ol class="howto big">
-        <li><strong>Écrire le message</strong> — E-mails › <em>Modèles</em> › <em>Nouveau modèle</em>. Glissez les blocs (texte, image, bouton), ajoutez « Prénom » ou « Entreprise » pour personnaliser.</li>
-        <li><strong>Choisir à qui l'envoyer</strong> — E-mails › <em>Listes de destinataires</em> › <em>Nouvelle liste</em>. Cochez les critères (secteur, ville, statut…). Le nombre d'entreprises concernées s'affiche.</li>
-        <li><strong>Préparer l'envoi</strong> — E-mails › <em>E-mails groupés</em> › <em>Nouvel e-mail groupé</em>. Choisissez le modèle et la liste.</li>
-        <li><strong>Vérifier</strong> — cliquez sur <em>Envoyer un test</em> pour le recevoir vous-même. L'outil vous dit combien de personnes vont le recevoir et combien sont retirées (personnes opposées, adresses invalides…).</li>
-        <li><strong>Envoyer</strong> — maintenant, ou à une date choisie. Vous pouvez mettre en pause ou annuler à tout moment.</li>
+        <li><strong>À qui ?</strong> — E-mails › <em>Écrire à plusieurs entreprises</em>. Choisissez un secteur et/ou une ville : le nombre de personnes s'affiche.</li>
+        <li><strong>Quel message ?</strong> — partez d'un exemple, ajustez le texte, et utilisez les boutons « Prénom » et « Entreprise » pour personnaliser.</li>
+        <li><strong>Vérifier et envoyer</strong> — regardez l'aperçu, envoyez-vous un test si vous voulez, cochez la case puis cliquez sur <em>Envoyer</em>.</li>
     </ol>
+    <p class="small muted">L'outil prépare tout seul la liste et le modèle. Pour des mises en page élaborées (images, boutons), l'onglet <em>Avancé</em> propose l'éditeur complet.</p>
     <p class="small muted">« Envoyé » veut dire que le serveur a accepté l'e-mail, pas forcément qu'il est arrivé ou qu'il a été lu. Les personnes qui se désinscrivent sont retirées automatiquement des envois suivants.</p>
     @can('campaigns.view')<div class="guide-actions"><a class="btn btn-primary btn-sm" href="{{ route('pm.campaigns.index') }}">Aller aux e-mails groupés <x-icon name="arrow-right" /></a></div>@endcan
 </section>
@@ -101,7 +101,7 @@
     <ol class="howto">
         <li>Sur la fiche d'un prospect, rubrique <em>Réseaux sociaux</em>, collez l'adresse de son profil.</li>
         <li>Dans <em>Réseaux sociaux</em>, ouvrez le profil, copiez le message proposé et envoyez-le <strong>vous-même</strong> sur le réseau.</li>
-        <li>Revenez cliquer sur <em>Enregistrer l'action</em> (invitation envoyée, réponse reçue…) et choisissez la date de la prochaine relance.</li>
+        <li>Revenez cliquer sur ce que vous avez fait (<em>J'ai envoyé une invitation</em>, <em>Il/elle a répondu</em>…) : le prochain rappel se crée tout seul.</li>
     </ol>
     <p class="small muted">L'outil ne publie et n'envoie rien à votre place sur LinkedIn : c'est interdit par le réseau et risquerait de faire bloquer votre compte.</p>
 </section>
@@ -114,11 +114,8 @@
         <div class="rule"><span class="rule-when">Quand</span> un contact répond à un e-mail <span class="rule-then">alors</span> arrêter les relances automatiques et prévenir le commercial</div>
         <div class="rule"><span class="rule-when">Quand</span> un prospect est créé <span class="rule-then">alors</span> attendre 3 jours, <span class="rule-if">seulement si</span> il n'a pas répondu, créer une relance</div>
     </div>
-    <ol class="howto">
-        <li>Partez d'un <strong>modèle tout prêt</strong> (Automatisations › <em>Partir d'un modèle</em>) plutôt que d'une page blanche.</li>
-        <li>Cliquez sur <em>Lancer le test</em> sur une fiche : l'outil montre ce qu'il ferait, sans rien faire réellement.</li>
-        <li>Si le résultat vous convient, cliquez sur <em>Activer</em>. Vous pouvez le mettre en pause ou l'arrêter à tout moment.</li>
-    </ol>
+    <p>Dans <em>Relances auto</em>, chaque règle a un <strong>interrupteur</strong> : cliquez pour l'activer, recliquez pour l'arrêter. C'est tout.</p>
+    <p class="small muted">Besoin d'une règle sur mesure ? L'onglet <em>Mode avancé</em> permet de la construire et de la tester sur une fiche avant de l'activer.</p>
     @can('automations.manage')<div class="guide-actions"><a class="btn btn-sm" href="{{ route('pm.automations.index') }}">Voir les automatisations <x-icon name="arrow-right" /></a></div>@endcan
 </section>
 

@@ -15,7 +15,7 @@ class TourTest extends TestCase
 
         $this->actingAs($user)->get(route('pm.dashboard'))->assertOk()
             ->assertSee('id="pm-tour"', false)->assertSee('data-autostart="1"', false)
-            ->assertSee('Bienvenue sur votre espace de prospection')->assertSee('Ajouter mon premier prospect');
+            ->assertSee('Bienvenue !')->assertSee('Ajouter mon premier prospect');
 
         $this->actingAs($user)->postJson(route('pm.tours.done'), ['key' => 'pm.dashboard'])->assertOk();
         $this->actingAs($user)->postJson(route('pm.tours.done'), ['key' => 'pm.dashboard'])->assertOk();

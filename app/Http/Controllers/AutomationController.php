@@ -36,6 +36,46 @@ class AutomationController extends Controller
 
     public function __construct(private readonly AuditLogger $audit, private readonly DefinitionValidator $validator) {}
 
+    /** Relances automatiques : un interrupteur par règle, en français simple. */
+    public function simple(Request $request): View
+    {
+        $this->guard($request);
+        $byPreset = Automation::whereNotNull('preset')->get()->keyBy('preset');
+
+        return view('automations.simple', [
+            'rules' => collect(Presets::PLAIN)->map(fn ($plain, $key) => ['key' => $key, 'when' => $plain[0], 'then' => $plain[1], 'automation' => $byPreset[$key] ?? null]),
+            'customCount' => Automation::whereNull('preset')->count(),
+        ]);
+    }
+
+    public function toggle(Request $request, string $preset): RedirectResponse
+    {
+        $this->guard($request);
+        abort_unless(isset(Presets::PLAIN[$preset], Presets::all()[$preset]), 404);
+        $on = $request->validate(['on' => ['required', 'boolean']])['on'];
+        $automation = Automation::where('preset', $preset)->first();
+
+        if ($on) {
+            if (! $automation) {
+                $definition = Presets::all()[$preset];
+                $automation = Automation::create(['name' => $definition['name'], 'trigger' => $definition['trigger']]);
+                $automation->forceFill(['created_by' => $request->user()->id, 'preset' => $preset])->save();
+                $automation->addVersion(['steps' => $definition['steps']], $request->user()->id);
+            }
+            $version = $automation->latestVersion;
+            if (! $version || $this->validator->validate($version->steps())) {
+                return back()->withErrors(['automation' => 'Cette règle a été modifiée et contient une erreur : ouvrez le mode avancé pour la corriger.']);
+            }
+            $automation->forceFill(['status' => 'active', 'active_version_id' => $version->id])->save();
+            $this->audit->log('automation.activated', $automation, ['version' => $version->version, 'origine' => 'interrupteur']);
+        } elseif ($automation && $automation->status === 'active') {
+            $automation->forceFill(['status' => 'en_pause'])->save();
+            $this->audit->log('automation.paused', $automation, ['origine' => 'interrupteur']);
+        }
+
+        return back()->with('success', $on ? 'Activé : quand '.Presets::PLAIN[$preset][0].', alors '.Presets::PLAIN[$preset][1].'.' : 'Désactivé.');
+    }
+
     public function index(Request $request): View
     {
         $this->guard($request);

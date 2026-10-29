@@ -17,7 +17,7 @@ final class Navigation
     {
         $sections = [
             [
-                'key' => 'accueil', 'label' => 'Accueil', 'icon' => 'house', 'can' => 'prospects.view',
+                'key' => 'accueil', 'label' => 'Ma journée', 'icon' => 'house', 'can' => 'prospects.view',
                 'active' => ['pm.dashboard', 'pm.notifications.*'],
                 'tabs' => [],
             ],
@@ -50,13 +50,12 @@ final class Navigation
                 'tabs' => [],
             ],
             [
-                'key' => 'emails', 'label' => 'E-mails', 'icon' => 'mail', 'can' => 'campaigns.view', 'help' => 'Pour écrire à plusieurs entreprises : 1. un modèle, 2. une liste de destinataires, 3. un e-mail groupé.', 'guide' => 'emails',
-                'active' => ['pm.campaigns.*', 'pm.newsletters.*', 'pm.templates.*', 'pm.segments.*'],
+                'key' => 'emails', 'label' => 'E-mails', 'icon' => 'mail', 'can' => 'campaigns.view', 'help' => 'Pour écrire à plusieurs entreprises, utilisez l\'onglet « Écrire » : 3 étapes, l\'outil prépare tout.', 'guide' => 'emails',
+                'active' => ['pm.campaigns.*', 'pm.newsletters.*', 'pm.templates.*', 'pm.segments.*', 'pm.simple-email.*'],
                 'tabs' => [
-                    ['label' => 'E-mails groupés', 'route' => 'pm.campaigns.index', 'active' => ['pm.campaigns.*']],
-                    ['label' => 'Newsletters', 'route' => 'pm.newsletters.index', 'active' => ['pm.newsletters.*']],
-                    ['label' => 'Modèles', 'route' => 'pm.templates.index', 'active' => ['pm.templates.*']],
-                    ['label' => 'Listes de destinataires', 'route' => 'pm.segments.index', 'active' => ['pm.segments.*']],
+                    ['label' => 'Écrire à plusieurs entreprises', 'route' => 'pm.simple-email.create', 'can' => 'campaigns.manage', 'active' => ['pm.simple-email.*']],
+                    ['label' => 'Mes envois', 'route' => 'pm.campaigns.index', 'active' => ['pm.campaigns.*']],
+                    ['label' => 'Avancé', 'route' => 'pm.templates.index', 'active' => ['pm.templates.*', 'pm.segments.*', 'pm.newsletters.*']],
                 ],
             ],
             [
@@ -69,9 +68,12 @@ final class Navigation
                 ],
             ],
             [
-                'key' => 'automatisations', 'label' => 'Automatisations', 'icon' => 'sparkles', 'can' => 'automations.manage', 'help' => 'Des règles « Quand… alors… » qui créent les relances à votre place. Testez avant d\'activer.', 'guide' => 'automatisations',
+                'key' => 'automatisations', 'label' => 'Relances auto', 'icon' => 'sparkles', 'can' => 'automations.manage', 'help' => 'Allumez ce que l\'outil doit faire à votre place : créer les rappels, arrêter les relances quand on vous répond…', 'guide' => 'automatisations',
                 'active' => ['pm.automations.*'],
-                'tabs' => [],
+                'tabs' => [
+                    ['label' => 'Relances automatiques', 'route' => 'pm.automations.simple', 'active' => ['pm.automations.simple']],
+                    ['label' => 'Mode avancé', 'route' => 'pm.automations.index', 'active' => ['pm.automations.index', 'pm.automations.show', 'pm.automations.edit']],
+                ],
             ],
             [
                 'key' => 'statistiques', 'label' => 'Statistiques', 'icon' => 'chart-column', 'can' => 'reports.view',

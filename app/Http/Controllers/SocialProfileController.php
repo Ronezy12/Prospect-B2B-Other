@@ -129,6 +129,24 @@ class SocialProfileController extends Controller
         return redirect()->route('pm.social.show', $profile)->with('success', 'Action enregistrée dans l\'historique du prospect.');
     }
 
+    /** Un clic : l'action est notée, le statut suit et le prochain rappel est créé tout seul. */
+    public function quick(Request $request, SocialProfile $profile): RedirectResponse
+    {
+        $this->authorizeProfile($request, $profile);
+        $key = $request->validate(['action' => ['required', Rule::in(array_keys(config('prospection.social.quick_actions')))]])['action'];
+        $action = config('prospection.social.quick_actions.'.$key);
+        if ($profile->isOpposed() && in_array($action['type'], config('prospection.social.outbound_types'), true)) {
+            return back()->withErrors(['type' => 'Ce profil a demandé à ne plus être contacté.']);
+        }
+        $next = $action['next'] !== null ? now()->addDays($action['next'])->setTime(9, 0) : null;
+        while ($next && $next->isWeekend()) {
+            $next->addDay();
+        }
+        $this->social->logInteraction($profile, $action['type'], $key === 'non' ? 'Pas intéressé.' : null, now(), $action['status'], $next, $request->user(), $next !== null);
+
+        return back()->with('success', 'C\'est noté'.($next ? ' : rappel « '.$action['task'].' » le '.$next->locale('fr')->isoFormat('dddd D MMMM').'.' : '.'));
+    }
+
     public function update(Request $request, SocialProfile $profile): RedirectResponse
     {
         $this->authorizeProfile($request, $profile);

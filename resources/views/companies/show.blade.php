@@ -25,6 +25,12 @@
     </div>
 </div>
 
+@unless ($company->isClient())
+    <section class="card outcome-card" data-tour="outcomes">
+        @include('partials.outcomes', ['company' => $company])
+    </section>
+@endunless
+
 <div class="grid grid-sidebar">
     <div class="stack">
         <section class="card">

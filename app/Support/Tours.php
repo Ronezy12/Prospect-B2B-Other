@@ -17,17 +17,45 @@ final class Tours
     {
         $tour = match ($route) {
             'pm.dashboard' => [
-                'title' => 'Accueil',
+                'title' => 'Ma journée',
                 'steps' => [
-                    ['title' => 'Bienvenue sur votre espace de prospection', 'text' => 'Cette visite vous montre où trouver chaque chose, en quelques clics. Vous pourrez la relancer à tout moment avec le bouton « Visite guidée » en bas à droite.'],
-                    ['target' => '.sidebar nav', 'title' => 'Le menu', 'text' => 'Chaque rubrique correspond à une partie de votre travail : les entreprises à démarcher, le suivi des affaires, les rappels, les e-mails…'],
-                    ['target' => '.journey', 'title' => 'Le module en 4 étapes', 'text' => 'Constituer la base, suivre les affaires, contacter, puis mesurer. Chaque carte vous emmène au bon endroit.'],
-                    ['target' => '[data-tour=today]', 'title' => 'Votre journée', 'text' => 'Les rappels du jour et ceux en retard apparaissent ici. Commencez chaque matin par cette liste.'],
-                    ['target' => '.welcome-banner', 'title' => 'Le guide', 'text' => 'Un mot vous échappe ? Le guide explique tout le vocabulaire avec des exemples.'],
-                    ['target' => '.icon-btn.bell', 'title' => 'Les notifications', 'text' => 'La cloche vous prévient quand une automatisation vous confie quelque chose ou qu\'un prospect répond.'],
+                    ['title' => 'Bienvenue !', 'text' => 'Ici, tout est fait pour aller vite : vous appelez, vous cliquez sur le résultat, et l\'outil s\'occupe du reste (statut, suivi, prochain rappel).'],
+                    ['target' => '.big-actions', 'title' => 'Les actions principales', 'text' => 'Ajouter un prospect, écrire à plusieurs entreprises, voir vos affaires : un clic.'],
+                    ['target' => '[data-tour=today]', 'title' => 'À faire aujourd\'hui', 'text' => 'Vos rappels du jour. Le numéro de téléphone est à côté : appelez directement.'],
+                    ['target' => '.outcome-menu', 'title' => 'Le bouton « Résultat »', 'text' => 'Après l\'appel, cliquez ici et choisissez ce qui s\'est passé : pas de réponse, intéressé, rendez-vous… Le prochain rappel se crée tout seul.'],
+                    ['target' => '[data-tour=tocall]', 'title' => 'Qui appeler en premier', 'text' => 'Les nouveaux prospects jamais contactés.'],
+                    ['target' => '.icon-btn.bell', 'title' => 'Les notifications', 'text' => 'La cloche vous prévient quand quelqu\'un répond ou qu\'une relance vous est confiée.'],
                 ],
                 'next' => self::link($user, 'prospects.create', 'Ajouter mon premier prospect', 'pm.companies.create')
                     ?? self::link($user, 'prospects.view', 'Voir les prospects', 'pm.companies.index'),
+            ],
+            'pm.simple-email.create' => [
+                'title' => 'Écrire à plusieurs entreprises',
+                'steps' => [
+                    ['target' => '.wizard-steps', 'title' => '3 étapes seulement', 'text' => 'À qui, quel message, puis vérifier et envoyer. Rien ne part avant votre clic final.'],
+                    ['target' => '#sector_id', 'title' => 'Choisissez les entreprises', 'text' => 'Un secteur, une ville… ou rien pour écrire à tous vos prospects. Cliquez sur « Voir » pour compter.'],
+                    ['target' => '.wizard-count', 'title' => 'Combien vont le recevoir', 'text' => 'Les personnes qui ont refusé d\'être contactées sont retirées automatiquement.'],
+                ],
+            ],
+            'pm.simple-email.message' => [
+                'title' => 'Le message',
+                'steps' => [
+                    ['target' => '.example-picker', 'title' => 'Partez d\'un exemple', 'text' => 'Choisissez un texte tout prêt, puis adaptez-le.'],
+                    ['target' => '.insert-bar', 'title' => 'Personnalisez', 'text' => 'Ces boutons ajoutent le prénom ou le nom de l\'entreprise : il sera remplacé pour chaque destinataire.'],
+                ],
+            ],
+            'pm.simple-email.confirm' => [
+                'title' => 'Vérifier et envoyer',
+                'steps' => [
+                    ['target' => '.mail-preview', 'title' => 'L\'aperçu', 'text' => 'Voici l\'e-mail tel que le recevra la première personne de la liste.'],
+                    ['target' => '.wizard-count form', 'title' => 'Envoyer', 'text' => 'Cochez la case, choisissez maintenant ou plus tard, puis envoyez. Vous pourrez suivre l\'envoi ensuite.'],
+                ],
+            ],
+            'pm.automations.simple' => [
+                'title' => 'Relances automatiques',
+                'steps' => [
+                    ['target' => '.rule-list', 'title' => 'Des interrupteurs', 'text' => 'Chaque ligne est une chose que l\'outil peut faire à votre place. Cliquez sur l\'interrupteur pour l\'activer ou la désactiver.'],
+                ],
             ],
             'pm.companies.index' => [
                 'title' => 'Base de prospects',
@@ -53,7 +81,7 @@ final class Tours
             'pm.companies.show' => [
                 'title' => 'Fiche prospect',
                 'steps' => [
-                    ['target' => '.page-header', 'title' => 'La fiche de l\'entreprise', 'text' => 'Tout ce qui concerne ce prospect est réuni sur cette page.'],
+                    ['target' => '[data-tour=outcomes]', 'title' => 'Après chaque appel', 'text' => 'Cliquez sur ce qui s\'est passé. L\'outil met à jour le statut, l\'affaire et crée le prochain rappel.'],
                     ['target' => '[data-tour=contacts]', 'title' => 'Les interlocuteurs', 'text' => 'Les personnes à joindre. Le bouton « E-mail » permet de leur écrire directement.'],
                     ['target' => '#reseaux', 'title' => 'Réseaux sociaux', 'text' => 'Collez l\'adresse de son profil LinkedIn ou de sa page Facebook pour suivre vos prises de contact.'],
                     ['target' => '#opportunites', 'title' => 'Les affaires', 'text' => 'Créez une opportunité dès qu\'une vente se dessine : elle apparaît dans le pipeline.'],
@@ -153,7 +181,7 @@ final class Tours
                 'steps' => [
                     ['target' => '.page-header .btn-primary', 'title' => '1. Ouvrez le profil', 'text' => 'Il s\'ouvre dans un nouvel onglet, sur le réseau.'],
                     ['target' => '.copy-block', 'title' => '2. Copiez un message', 'text' => 'Le prénom et l\'entreprise sont déjà remplis. Relisez, puis collez-le sur le réseau.'],
-                    ['target' => '#action', 'title' => '3. Notez ce que vous avez fait', 'text' => 'Choisissez l\'action et la date de la prochaine relance : un rappel peut être créé automatiquement.'],
+                    ['target' => '#action', 'title' => '3. Cliquez sur ce que vous avez fait', 'text' => 'Un clic : l\'action est notée et le prochain rappel est créé tout seul.'],
                 ],
             ],
             'pm.automations.index' => [

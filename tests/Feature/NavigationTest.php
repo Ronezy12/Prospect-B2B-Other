@@ -13,7 +13,7 @@ class NavigationTest extends TestCase
     {
         $sales = $this->userWithRole('commercial');
         $this->actingAs($sales)->get(route('pm.dashboard'))->assertOk()
-            ->assertSee('Comment fonctionne le module')
+            ->assertSee('À faire aujourd')->assertDontSee(route('pm.simple-email.create'))
             ->assertSee('Réseaux sociaux')
             ->assertDontSee(route('pm.settings.index'))
             ->assertDontSee(route('pm.automations.index'));

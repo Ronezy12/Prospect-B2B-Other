@@ -231,6 +231,14 @@ return [
             'rdv' => 'rdv_obtenu',
         ],
         'outbound_types' => ['invitation_envoyee', 'message_envoye'],
+        // Boutons rapides : type d'action, statut, délai avant le rappel automatique (jours, null = aucun).
+        'quick_actions' => [
+            'invitation' => ['label' => 'J\'ai envoyé une invitation', 'type' => 'invitation_envoyee', 'status' => null, 'next' => 5, 'task' => 'Vérifier si l\'invitation est acceptée'],
+            'message' => ['label' => 'J\'ai envoyé un message', 'type' => 'message_envoye', 'status' => null, 'next' => 4, 'task' => 'Relancer sur le réseau'],
+            'reponse' => ['label' => 'Il/elle a répondu', 'type' => 'message_recu', 'status' => null, 'next' => 1, 'task' => 'Répondre sur le réseau'],
+            'rdv' => ['label' => 'Rendez-vous obtenu', 'type' => 'rdv', 'status' => null, 'next' => null, 'task' => null],
+            'non' => ['label' => 'Pas intéressé', 'type' => 'autre', 'status' => 'pas_interesse', 'next' => null, 'task' => null],
+        ],
         'template_kinds' => [
             'invitation' => 'Note d\'invitation',
             'message' => 'Premier message',
@@ -250,6 +258,21 @@ return [
             'messenger' => 'Messenger (Page Facebook)',
             'instagram' => 'Instagram (messages directs)',
         ],
+    ],
+
+    /*
+    | Boutons de résultat « en un clic » : chacun met à jour le prospect et son affaire,
+    | clôt le rappel du jour et crée le suivant. stage = nom d'étape recherché dans la
+    | pipeline (à défaut, type won/lost) ; next = [titre, type de tâche, délai en jours].
+    */
+    'quick_outcomes' => [
+        'pas_de_reponse' => ['label' => 'Pas de réponse', 'icon' => 'phone', 'tone' => '', 'activity' => 'appel', 'text' => 'Appel sans réponse.', 'status' => null, 'stage' => null, 'next' => ['Rappeler', 'appel', 2]],
+        'interesse' => ['label' => 'Intéressé', 'icon' => 'sparkles', 'tone' => 'good', 'activity' => 'appel', 'text' => 'Le prospect est intéressé.', 'status' => 'qualifie', 'stage' => 'Intéressé', 'next' => ['Relancer', 'relance', 3]],
+        'rdv' => ['label' => 'Rendez-vous pris', 'icon' => 'calendar', 'tone' => 'good', 'activity' => 'rendez_vous', 'text' => 'Rendez-vous fixé.', 'status' => 'qualifie', 'stage' => 'Rendez-vous', 'next' => ['Rendez-vous', 'rendez_vous', 2], 'asks_date' => true],
+        'devis' => ['label' => 'Devis envoyé', 'icon' => 'file-spreadsheet', 'tone' => 'good', 'activity' => 'email', 'text' => 'Devis envoyé.', 'status' => 'qualifie', 'stage' => 'Proposition envoyée', 'next' => ['Relancer le devis', 'devis', 7]],
+        'gagne' => ['label' => 'Signé !', 'icon' => 'circle-check', 'tone' => 'win', 'activity' => 'note', 'text' => 'Affaire signée.', 'status' => 'qualifie', 'stage' => 'won', 'next' => null],
+        'plus_tard' => ['label' => 'À rappeler plus tard', 'icon' => 'clock', 'tone' => '', 'activity' => 'appel', 'text' => 'Pas le bon moment : à recontacter plus tard.', 'status' => 'en_sommeil', 'stage' => null, 'next' => ['Recontacter', 'relance', 30]],
+        'pas_interesse' => ['label' => 'Pas intéressé', 'icon' => 'x', 'tone' => 'bad', 'activity' => 'appel', 'text' => 'Pas intéressé.', 'status' => 'non_pertinent', 'stage' => 'lost', 'next' => null],
     ],
 
     'automation' => [

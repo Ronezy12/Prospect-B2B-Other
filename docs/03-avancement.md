@@ -343,3 +343,25 @@ Deuxième passe, après les premiers retours de l'utilisateur :
   - les étapes dont l'élément est absent sont sautées ;
   - sans dépendance externe et compatible avec la politique de sécurité ; sur mobile, la bulle s'affiche en bas de l'écran.
 
+## Simplification générale (retour utilisateur : « plus simple, que ça le fasse tout seul »)
+
+Les écrans détaillés restent disponibles, mais le parcours par défaut devient :
+- **Boutons de résultat** (`QuickOutcomeService`) sur la fiche prospect, dans « Ma journée » et dans les tâches : *Pas de réponse*, *Intéressé*, *Rendez-vous pris* (avec la date), *Devis envoyé*, *Signé !*, *À rappeler plus tard*, *Pas intéressé*. Un clic suffit :
+  - l'appel est noté dans l'historique ;
+  - le statut est mis à jour ;
+  - l'affaire avance dans la pipeline, et elle est créée si besoin ;
+  - les rappels du jour sont cochés et le suivant est créé, jamais un week-end ;
+  - *Signé !* convertit l'entreprise en client si le rôle le permet ;
+  - *Pas intéressé* clôt l'affaire en perdue et annule les rappels.
+- **Ma journée** (accueil) : grands boutons d'action, rappels du jour avec le numéro à appeler et le bouton *Résultat*, et « Prospects à appeler en premier » (nouveaux, jamais contactés).
+- **Écrire à plusieurs entreprises** (`SimpleEmailController`), en 3 écrans :
+  1. À qui : secteur, ville, statut, avec le nombre de destinataires et les personnes retirées expliquées en clair ;
+  2. Quel message : exemples prêts à l'emploi et boutons Prénom / Entreprise / Ville ;
+  3. Aperçu, test et envoi.
+
+  La liste de destinataires, le modèle et l'envoi groupé sont créés en coulisse, avec la même chaîne de conformité. Le texte saisi est échappé. Les personnes contactées depuis moins de 30 jours sont exclues par défaut (case pour les inclure). Un rôle sans droit d'envoi prépare l'e-mail, et un responsable le valide.
+- **Relances automatiques** : un interrupteur par règle, rédigé en français simple (« Quand j'ajoute un prospect, alors me créer la tâche Appeler… »). Le constructeur passe dans « Mode avancé ».
+- **Réseaux sociaux** : boutons *J'ai envoyé une invitation*, *J'ai envoyé un message*, *Il/elle a répondu*, *Rendez-vous obtenu*, *Pas intéressé*, avec le rappel suivant créé automatiquement. Le formulaire complet est replié sous « Plus d'options ».
+- **Menu E-mails** : « Écrire à plusieurs entreprises », « Mes envois », « Avancé » (modèles, listes, newsletters).
+- Visites guidées et guide mis à jour pour ces nouveaux parcours.
+

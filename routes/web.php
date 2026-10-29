@@ -18,6 +18,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\PipelineBoardController;
+use App\Http\Controllers\QuickOutcomeController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SegmentController;
 use App\Http\Controllers\Settings\InboxController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\Settings\SettingsHomeController;
 use App\Http\Controllers\Settings\SocialAccountController;
 use App\Http\Controllers\Settings\TrackingSettingsController;
 use App\Http\Controllers\Settings\UserController;
+use App\Http\Controllers\SimpleEmailController;
 use App\Http\Controllers\SocialInboxController;
 use App\Http\Controllers\SocialProfileController;
 use App\Http\Controllers\SocialTemplateController;
@@ -69,6 +71,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('prospects/actions-groupees', CompanyBulkController::class)->name('companies.bulk');
         Route::get('prospects/export', CompanyExportController::class)->middleware('throttle:10,1')->name('companies.export');
+        Route::post('prospects/{company}/resultat', QuickOutcomeController::class)->middleware('throttle:60,1')->name('companies.outcome');
         Route::post('prospects/{company}/convertir', [CompanyController::class, 'convert'])->name('companies.convert');
         Route::post('prospects/{company}/activites', [ActivityController::class, 'store'])->name('companies.activities.store');
         Route::resource('prospects', CompanyController::class)->parameters(['prospects' => 'company'])->names('companies');
@@ -109,6 +112,15 @@ Route::middleware('auth')->group(function () {
         Route::post('newsletters/{list}/abonnes', [NewsletterController::class, 'subscribe'])->name('newsletters.subscribe');
         Route::post('abonnements/{subscription}/desabonner', [NewsletterController::class, 'unsubscribe'])->name('subscriptions.unsubscribe');
 
+        Route::get('ecrire', [SimpleEmailController::class, 'create'])->name('simple-email.create');
+        Route::post('ecrire/destinataires', [SimpleEmailController::class, 'storeWho'])->name('simple-email.who');
+        Route::get('ecrire/message', [SimpleEmailController::class, 'message'])->name('simple-email.message');
+        Route::post('ecrire/message', [SimpleEmailController::class, 'storeMessage'])->name('simple-email.message.store');
+        Route::get('ecrire/verifier', [SimpleEmailController::class, 'confirm'])->name('simple-email.confirm');
+        Route::post('ecrire/test', [SimpleEmailController::class, 'test'])->middleware('throttle:10,1')->name('simple-email.test');
+        Route::post('ecrire/envoyer', [SimpleEmailController::class, 'send'])->middleware('throttle:10,1')->name('simple-email.send');
+        Route::post('ecrire/recommencer', [SimpleEmailController::class, 'reset'])->name('simple-email.reset');
+
         Route::post('campagnes/{campaign}/test', [CampaignController::class, 'test'])->middleware('throttle:10,1')->name('campaigns.test');
         Route::post('campagnes/{campaign}/programmer', [CampaignController::class, 'schedule'])->name('campaigns.schedule');
         Route::post('campagnes/{campaign}/pause', [CampaignController::class, 'pause'])->name('campaigns.pause');
@@ -123,6 +135,7 @@ Route::middleware('auth')->group(function () {
         Route::put('reseaux-sociaux/profils/{profile}', [SocialProfileController::class, 'update'])->name('social.update');
         Route::delete('reseaux-sociaux/profils/{profile}', [SocialProfileController::class, 'destroy'])->name('social.destroy');
         Route::post('reseaux-sociaux/profils/{profile}/actions', [SocialProfileController::class, 'interaction'])->middleware('throttle:120,1')->name('social.interaction');
+        Route::post('reseaux-sociaux/profils/{profile}/rapide', [SocialProfileController::class, 'quick'])->middleware('throttle:120,1')->name('social.quick');
         Route::post('reseaux-sociaux/profils/{profile}/opposition', [SocialProfileController::class, 'oppose'])->name('social.oppose');
         Route::resource('reseaux-sociaux/modeles', SocialTemplateController::class)->except(['show', 'destroy'])->parameters(['modeles' => 'template'])->names('social.templates');
         Route::get('reseaux-sociaux/messages', [SocialInboxController::class, 'index'])->name('social.inbox.index');
@@ -137,6 +150,8 @@ Route::middleware('auth')->group(function () {
         Route::get('notifications/{notification}', [NotificationController::class, 'open'])->name('notifications.open');
         Route::post('notifications/tout-lire', [NotificationController::class, 'readAll'])->name('notifications.read_all');
 
+        Route::get('relances-automatiques', [AutomationController::class, 'simple'])->name('automations.simple');
+        Route::post('relances-automatiques/{preset}', [AutomationController::class, 'toggle'])->name('automations.toggle');
         Route::post('automatisations/{automation}/activer', [AutomationController::class, 'activate'])->name('automations.activate');
         Route::post('automatisations/{automation}/pause', [AutomationController::class, 'pause'])->name('automations.pause');
         Route::post('automatisations/{automation}/reprendre', [AutomationController::class, 'resume'])->name('automations.resume');

@@ -25,9 +25,18 @@
 
 <div class="grid grid-sidebar">
     <div class="stack">
-        <section class="card" id="action">
-            <h2><x-icon name="plus" /> Enregistrer une action</h2>
-            <p class="small muted">Réalisez l'action sur {{ $profile->platformLabel() }}, puis consignez-la ici : elle apparaît dans l'historique du prospect et met à jour le suivi.</p>
+        <section class="card outcome-card" id="action">
+            <p class="outcomes-q">Qu'avez-vous fait sur {{ $profile->platformLabel() }} ?</p>
+            <form method="POST" action="{{ route('pm.social.quick', $profile) }}" class="outcome-buttons">
+                @csrf
+                @foreach (config('prospection.social.quick_actions') as $key => $a)
+                    @continue($profile->isOpposed() && in_array($a['type'], config('prospection.social.outbound_types'), true))
+                    <button type="submit" name="action" value="{{ $key }}" @class(['outcome', 'tone-good' => in_array($key, ['reponse', 'rdv'], true), 'tone-bad' => $key === 'non'])>{{ $a['label'] }}</button>
+                @endforeach
+            </form>
+            <p class="small muted">Le rappel suivant est créé tout seul. Pour une date ou une note précise :</p>
+            <details class="more-options">
+            <summary>Plus d'options</summary>
             <form method="POST" action="{{ route('pm.social.interaction', $profile) }}">
                 @csrf
                 <div class="form-grid">
@@ -72,6 +81,7 @@
                 </div>
                 <div class="form-actions"><button type="submit" class="btn btn-primary"><x-icon name="check" /> Enregistrer l'action</button></div>
             </form>
+            </details>
         </section>
 
         @if ($templates->isNotEmpty())

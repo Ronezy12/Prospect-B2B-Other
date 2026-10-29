@@ -274,4 +274,22 @@ class AutomationTest extends CampaignTestCase
         $this->actingAs($this->userWithRole('commercial'))->get(route('pm.automations.index'))->assertForbidden();
         $this->actingAs($this->userWithRole('lecture_seule'))->post(route('pm.automations.store'))->assertForbidden();
     }
+
+    public function test_simple_switches_create_activate_and_pause_rules(): void
+    {
+        $this->actingAs($this->marketer)->get(route('pm.automations.simple'))->assertOk()->assertSee('ajoute un prospect', false);
+        $this->actingAs($this->marketer)->post(route('pm.automations.toggle', 'nouveau_prospect'), ['on' => 1])->assertSessionHas('success');
+        $automation = Automation::where('preset', 'nouveau_prospect')->firstOrFail();
+        $this->assertSame('active', $automation->status);
+
+        $company = $this->newCompany('Agence Interrupteur');
+        $this->assertTrue(Task::where('company_id', $company->id)->exists(), 'la règle allumée agit');
+
+        $this->actingAs($this->marketer)->post(route('pm.automations.toggle', 'nouveau_prospect'), ['on' => 0]);
+        $this->assertSame('en_pause', $automation->fresh()->status);
+        $this->actingAs($this->marketer)->post(route('pm.automations.toggle', 'nouveau_prospect'), ['on' => 1]);
+        $this->assertSame(1, Automation::where('preset', 'nouveau_prospect')->count(), 'pas de doublon');
+        $this->actingAs($this->marketer)->post(route('pm.automations.toggle', 'inconnu'), ['on' => 1])->assertNotFound();
+        $this->actingAs($this->userWithRole('commercial'))->post(route('pm.automations.toggle', 'nouveau_prospect'), ['on' => 0])->assertForbidden();
+    }
 }

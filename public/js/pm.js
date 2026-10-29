@@ -27,6 +27,20 @@
     }
 
     // Confirmation des actions sensibles
+    // Assistant e-mail : insère une variable ({{prenom}}…) à l'emplacement du curseur.
+    document.querySelectorAll('[data-insert]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var field = document.getElementById(button.getAttribute('data-into'));
+        if (!field) { return; }
+        var text = button.getAttribute('data-insert');
+        var start = field.selectionStart || 0;
+        var end = field.selectionEnd || 0;
+        field.value = field.value.slice(0, start) + text + field.value.slice(end);
+        field.focus();
+        field.selectionStart = field.selectionEnd = start + text.length;
+      });
+    });
+
     // Réseaux sociaux : copier un message type, compteur de caractères.
     document.querySelectorAll('[data-copy]').forEach(function (button) {
       button.addEventListener('click', function () {

@@ -271,7 +271,7 @@ class SeedDemo extends Command
         foreach (['nouveau_prospect', 'reponse_recue', 'opportunite_gagnee', 'relance_pertinente'] as $i => $key) {
             $preset = Presets::all()[$key];
             $automation = Automation::create(['name' => $preset['name'], 'trigger' => $preset['trigger']]);
-            $automation->forceFill(['created_by' => $marketer->id])->save();
+            $automation->forceFill(['created_by' => $marketer->id, 'preset' => $i < 3 ? $key : null])->save();
             $version = $automation->addVersion(['steps' => $preset['steps']], $marketer->id);
             if ($i < 3) {
                 $automation->forceFill(['status' => 'active', 'active_version_id' => $version->id])->save();

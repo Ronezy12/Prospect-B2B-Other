@@ -20,6 +20,11 @@
         </div>
         @if ($task->description)<div class="small pre">{{ $task->description }}</div>@endif
     </div>
+    @if ($task->isOpen() && $task->company)
+        @php($phone = $task->contact?->mobile ?? $task->contact?->phone ?? $task->company->contacts()->orderByDesc('is_primary')->whereNotNull('phone')->value('phone') ?? $task->company->phone)
+        @if ($phone)<a class="btn btn-sm" href="tel:{{ $phone }}" title="Appeler"><x-icon name="phone" /> <span class="hide-sm">{{ \App\Support\Normalizer::displayPhone($phone) }}</span></a>@endif
+        @include('partials.outcomes', ['company' => $task->company, 'compact' => true])
+    @endif
     @can('update', $task)
         <a class="btn btn-sm btn-ghost" href="{{ route('pm.tasks.edit', $task) }}" aria-label="Modifier la tâche"><x-icon name="pencil" /></a>
     @endcan

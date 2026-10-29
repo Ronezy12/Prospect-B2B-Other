@@ -330,4 +330,18 @@ class SocialTest extends TestCase
         $this->assertStringContainsString('code 190', $result);
         $this->assertStringNotContainsString('EAAB-jeton-page', $result);
     }
+
+    public function test_quick_buttons_log_and_schedule_next_reminder(): void
+    {
+        $profile = $this->addProfile();
+        $this->actingAs($this->sales)->post(route('pm.social.quick', $profile), ['action' => 'invitation'])->assertSessionHas('success', fn ($m) => str_contains($m, 'rappel'));
+        $profile->refresh();
+        $this->assertSame('invitation_envoyee', $profile->status);
+        $task = Task::where('company_id', $this->company->id)->where('status', 'a_faire')->firstOrFail();
+        $this->assertFalse($task->due_at->isWeekend());
+
+        $this->actingAs($this->sales)->post(route('pm.social.quick', $profile), ['action' => 'non']);
+        $this->assertSame('pas_interesse', $profile->fresh()->status);
+        $this->actingAs($this->sales)->post(route('pm.social.quick', $profile), ['action' => 'pirate'])->assertSessionHasErrors('action');
+    }
 }
