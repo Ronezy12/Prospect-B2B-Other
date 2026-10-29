@@ -11,6 +11,7 @@
     <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=8">
     <script src="{{ asset('js/theme.js') }}?v=8"></script>
     <script src="{{ asset('js/pm.js') }}?v=8" defer></script>
+    <script src="{{ asset('js/tour.js') }}?v=8" defer></script>
     @stack('head')
 </head>
 <body>
@@ -21,6 +22,8 @@
 @php($sections = \App\Support\Navigation::sections($u))
 @php($currentSection = \App\Support\Navigation::current($sections))
 @php($counts = ['taches' => $overdueTasks, 'social' => $unreadSocial])
+@php($tour = \App\Support\Tours::for(request()->route()?->getName(), $u))
+@php($tourSeen = $tour ? \Illuminate\Support\Facades\DB::table('pm_tour_progress')->where('user_id', $u->id)->whereIn('tour_key', [request()->route()->getName(), \App\Http\Controllers\TourController::OFF])->exists() : true)
 @php($countTitles = ['taches' => 'Tâches en retard', 'social' => 'Messages non lus'])
 <div class="app">
     <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
@@ -70,5 +73,9 @@
         </main>
     </div>
 </div>
+@if ($tour)
+    <script type="application/json" id="pm-tour" data-key="{{ request()->route()->getName() }}" data-autostart="{{ $tourSeen ? '0' : '1' }}" data-endpoint="{{ route('pm.tours.done') }}">@json($tour)</script>
+    <button type="button" class="tour-launcher" data-tour-start aria-label="Lancer la visite guidée de cet écran"><x-icon name="circle-help" /> <span>Visite guidée</span></button>
+@endif
 </body>
 </html>

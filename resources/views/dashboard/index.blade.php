@@ -75,7 +75,7 @@
 </ol>
 
 <div class="grid grid-2 section-gap">
-    <section class="card flush">
+    <section class="card flush" data-tour="today">
         <div class="card-head">
             <h2><x-icon name="alarm-clock" /> À faire aujourd'hui</h2>
             <a class="btn btn-sm" href="{{ route('pm.tasks.index') }}">Toutes mes tâches</a>

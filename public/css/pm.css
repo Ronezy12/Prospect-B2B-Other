@@ -691,3 +691,30 @@ details.faq p { margin: .5rem 0 0; color: var(--text-2); font-size: .92rem; }
 .section-help a { font-weight: 650; color: var(--primary-text); }
 .welcome-banner { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; padding: .9rem 1.1rem; border-radius: 14px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); margin-bottom: 1.2rem; box-shadow: var(--shadow-sm); }
 .welcome-banner .grow { flex: 1; min-width: 200px; }
+
+/* Visite guidée interactive */
+.tour-launcher { position: fixed; right: 20px; bottom: 20px; z-index: 40; display: inline-flex; align-items: center; gap: .45rem; padding: .6rem 1rem; border-radius: 999px; border: 0; background: var(--primary); color: #fff; font: inherit; font-size: .86rem; font-weight: 650; cursor: pointer; box-shadow: 0 10px 24px -10px rgba(10, 63, 148, .7); }
+.tour-launcher:hover { background: var(--primary-hover); }
+.tour-launcher .icon { color: var(--accent); }
+.tour-active .tour-launcher { display: none; }
+.tour-spot { position: fixed; z-index: 70; border-radius: 12px; box-shadow: 0 0 0 4px var(--accent), 0 0 0 9999px rgba(8, 18, 40, .55); pointer-events: none; transition: top .25s ease, left .25s ease, width .25s ease, height .25s ease; }
+.tour-spot-full { top: 0; left: 0; width: 0; height: 0; box-shadow: 0 0 0 9999px rgba(8, 18, 40, .55); }
+.tour-bubble { position: fixed; z-index: 71; width: min(360px, calc(100vw - 24px)); padding: 1rem 1.1rem; border-radius: 16px; background: var(--surface); color: var(--text); border: 1px solid var(--border); border-top: 4px solid var(--accent); box-shadow: var(--shadow-lg); outline: none; }
+.tour-bubble.tour-center { top: 50%; left: 50%; transform: translate(-50%, -50%); width: min(440px, calc(100vw - 24px)); }
+.tour-bubble.tour-sheet { left: 12px; right: 12px; bottom: 12px; width: auto; }
+.tour-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: .35rem; }
+.tour-count { font-size: .74rem; font-weight: 700; color: var(--primary-text); background: var(--primary-soft); padding: .1rem .5rem; border-radius: 999px; }
+.tour-close { border: 0; background: none; font-size: 1.3rem; line-height: 1; color: var(--muted); cursor: pointer; padding: .1rem .3rem; }
+.tour-close:hover { color: var(--text); }
+.tour-title { margin: 0 0 .35rem; font-size: 1rem; }
+.tour-text { margin: 0 0 .9rem; font-size: .9rem; line-height: 1.55; color: var(--text-2); }
+.tour-next { display: grid; gap: .45rem; padding: .7rem; margin-bottom: .8rem; border-radius: 12px; background: var(--accent-soft); }
+.tour-next-label { font-size: .74rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; color: var(--accent-text); }
+.tour-next .btn { justify-self: start; }
+.tour-actions { display: flex; align-items: center; gap: .45rem; }
+.tour-dots { display: flex; gap: 4px; margin-right: auto; }
+.tour-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--border-strong); }
+.tour-dots span.on { background: var(--primary); width: 16px; border-radius: 3px; }
+@media (prefers-reduced-motion: reduce) { .tour-spot { transition: none; } }
+@media (max-width: 640px) { .tour-launcher span { display: none; } .tour-launcher { padding: .7rem; } }
+@media print { .tour-launcher, .tour-spot, .tour-bubble { display: none !important; } }

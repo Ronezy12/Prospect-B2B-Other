@@ -46,7 +46,7 @@
             </dl>
         </section>
 
-        <section class="card flush">
+        <section class="card flush" data-tour="contacts">
             <div class="card-head">
                 <h2>Interlocuteurs <span class="muted">· {{ $company->contacts->count() }}</span></h2>
                 @can('update', $company)

@@ -129,7 +129,7 @@
     <div class="stack">
         @if ($campaign->isEditable())
             @can('campaigns.manage')
-                <section class="card">
+                <section class="card" data-tour="test">
                     <h2><x-icon name="mail" /> 1. Envoyer un test</h2>
                     <form method="POST" action="{{ route('pm.campaigns.test', $campaign) }}">
                         @csrf
@@ -141,7 +141,7 @@
             @endcan
 
             @if ($preflight)
-                <section class="card">
+                <section class="card" data-tour="verif">
                     <h2><x-icon name="shield-check" /> 2. Vérification avant envoi</h2>
                     <ul class="checklist">
                         @foreach ($preflight['errors'] as $e)<li><span class="ko"><x-icon name="circle-alert" /></span> {{ $e }}</li>@endforeach
@@ -155,7 +155,7 @@
                 </section>
 
                 @unless ($preflight['errors'])
-                    <form method="POST" action="{{ route('pm.campaigns.schedule', $campaign) }}" class="card">
+                    <form method="POST" action="{{ route('pm.campaigns.schedule', $campaign) }}" class="card" data-tour="envoi">
                         @csrf
                         <h2><x-icon name="calendar-clock" /> 3. Programmer l'envoi</h2>
                         <div class="choice-list">

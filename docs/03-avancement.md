@@ -335,4 +335,11 @@ Deuxième passe, après les premiers retours de l'utilisateur :
   - le déclencheur devient « Quand… ».
 
   Le code et la base de données gardent leurs noms techniques.
+- **Visites guidées interactives** sur une vingtaine d'écrans (`App\Support\Tours`, `public/js/tour.js`) :
+  - l'élément expliqué est mis en surbrillance et une bulle donne l'explication, avec Précédent / Suivant ;
+  - une suggestion d'action suivante apparaît en fin de visite, seulement si le rôle le permet ;
+  - la visite se lance d'elle-même la première fois qu'on ouvre un écran ; le bouton « Visite guidée » la relance ;
+  - depuis le guide, on peut tout revoir ou désactiver le lancement automatique ;
+  - les étapes dont l'élément est absent sont sautées ;
+  - sans dépendance externe et compatible avec la politique de sécurité ; sur mobile, la bulle s'affiche en bas de l'écran.
 

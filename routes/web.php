@@ -33,6 +33,7 @@ use App\Http\Controllers\SocialTemplateController;
 use App\Http\Controllers\SuppressionController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\TourController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\UnsubscribeController;
 use Illuminate\Support\Facades\Route;
@@ -63,6 +64,8 @@ Route::middleware('auth')->group(function () {
     Route::prefix('prospection')->name('pm.')->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::get('guide', GuideController::class)->name('guide');
+        Route::post('visites/vue', [TourController::class, 'done'])->middleware('throttle:60,1')->name('tours.done');
+        Route::post('visites/preference', [TourController::class, 'preference'])->name('tours.preference');
 
         Route::post('prospects/actions-groupees', CompanyBulkController::class)->name('companies.bulk');
         Route::get('prospects/export', CompanyExportController::class)->middleware('throttle:10,1')->name('companies.export');

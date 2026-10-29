@@ -10,6 +10,13 @@
     </div>
 </div>
 
+<div class="welcome-banner">
+    <x-icon name="sparkles" />
+    <div class="grow"><strong>Visites guidées</strong> <span class="muted">Sur chaque écran, une visite pas à pas se lance la première fois. Le bouton « Visite guidée » en bas à droite la relance quand vous voulez.</span></div>
+    <form method="POST" action="{{ route('pm.tours.preference') }}">@csrf<input type="hidden" name="enabled" value="1"><button type="submit" class="btn btn-sm">Revoir toutes les visites</button></form>
+    <form method="POST" action="{{ route('pm.tours.preference') }}">@csrf<input type="hidden" name="enabled" value="0"><button type="submit" class="btn btn-sm btn-ghost">Ne plus les lancer automatiquement</button></form>
+</div>
+
 <nav class="guide-toc" aria-label="Sommaire du guide">
     <a href="#principe">Le principe</a>
     <a href="#mots">Les mots à connaître</a>
