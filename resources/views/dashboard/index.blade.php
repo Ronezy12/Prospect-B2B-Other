@@ -32,7 +32,22 @@
     <div class="stat"><span class="stat-icon green"><x-icon name="trending-up" /></span><div><div class="value">{{ number_format($totals['clients'], 0, ',', ' ') }}</div><div class="label">Convertis en clients</div></div></div>
 </div>
 
-<div class="grid grid-2">
+<section class="card flush">
+    <div class="card-head">
+        <h2><x-icon name="alarm-clock" /> Mes tâches du jour et en retard</h2>
+        <div class="actions">
+            <span class="badge badge-primary plain">{{ $openOpportunities }} opportunité(s) en cours</span>
+            <a class="btn btn-sm" href="{{ route('pm.tasks.index') }}">Toutes mes tâches</a>
+        </div>
+    </div>
+    @forelse ($myTasks as $task)
+        @include('tasks.row', ['task' => $task])
+    @empty
+        <div class="empty-state"><x-icon name="circle-check" /><strong>Rien d'urgent</strong>Aucune tâche prévue aujourd'hui ni en retard.</div>
+    @endforelse
+</section>
+
+<div class="grid grid-2 section-gap">
     <section class="card">
         <h2>Prospects par statut</h2>
         @if ($totals['prospects'] === 0)

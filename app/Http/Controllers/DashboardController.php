@@ -6,6 +6,8 @@ use App\Models\Activity;
 use App\Models\Company;
 use App\Models\Contact;
 use App\Models\Import;
+use App\Models\Opportunity;
+use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -43,6 +45,11 @@ class DashboardController extends Controller
                 ->where('subject_type', (new Company)->getMorphClass())
                 ->whereIn('subject_id', $visibleIds)
                 ->latest('occurred_at')->latest('id')->limit(10)->get(),
+            'myTasks' => Task::where('assignee_id', $user->id)->where('status', 'a_faire')
+                ->where('due_at', '<=', today()->endOfDay())
+                ->with(['company:id,name', 'opportunity:id,title', 'assignee:id,name'])
+                ->orderBy('due_at')->limit(8)->get(),
+            'openOpportunities' => Opportunity::visibleTo($user)->active()->whereNull('closed_at')->count(),
             'recentImports' => $user->can('prospects.import')
                 ? Import::where('user_id', $user->id)->latest('id')->limit(5)->get()
                 : collect(),

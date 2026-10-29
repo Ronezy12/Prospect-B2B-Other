@@ -117,6 +117,51 @@
             @endforelse
         </section>
 
+        <section class="card flush" id="opportunites">
+            <div class="card-head">
+                <h2>Opportunités <span class="muted">· {{ $opportunities->count() }}</span></h2>
+                @if (! $company->isClient())
+                    @can('create', \App\Models\Opportunity::class)
+                        @can('update', $company)
+                            <a class="btn btn-sm" href="{{ route('pm.opportunities.create', ['company_id' => $company->id]) }}"><x-icon name="plus" /> Nouvelle opportunité</a>
+                        @endcan
+                    @endcan
+                @endif
+            </div>
+            @forelse ($opportunities as $o)
+                <div class="task-row">
+                    <div class="grow">
+                        <a class="t-title" href="{{ route('pm.opportunities.show', $o) }}">{{ $o->title }}</a>
+                        <div class="t-meta">
+                            <span>{{ $o->pipeline->name }}</span>
+                            <span @class(['badge', 'badge-success' => $o->stage->type === 'won', 'badge-danger' => $o->stage->type === 'lost', 'badge-primary' => $o->stage->type === 'open'])>{{ $o->stage->name }}</span>
+                            @if ($o->follow_up_at)<span @class(['late' => $o->isOverdue()])><x-icon name="alarm-clock" /> relance {{ $o->follow_up_at->format('d/m/Y') }}</span>@endif
+                            @if ($o->amount)<span>{{ number_format((float) $o->amount, 0, ',', ' ') }} €</span>@endif
+                        </div>
+                    </div>
+                    @include('partials.priority', ['priority' => $o->priority])
+                </div>
+            @empty
+                <div class="empty-state"><x-icon name="briefcase" /><strong>Aucune opportunité</strong>Créez une opportunité pour suivre ce prospect dans la pipeline de son secteur.</div>
+            @endforelse
+        </section>
+
+        <section class="card flush" id="taches">
+            <div class="card-head">
+                <h2>Tâches à faire <span class="muted">· {{ $tasks->count() }}</span></h2>
+                @can('create', \App\Models\Task::class)
+                    @can('update', $company)
+                        <a class="btn btn-sm" href="{{ route('pm.tasks.create', ['company_id' => $company->id]) }}"><x-icon name="alarm-clock" /> Planifier une relance</a>
+                    @endcan
+                @endcan
+            </div>
+            @forelse ($tasks as $task)
+                @include('tasks.row', ['task' => $task, 'showContext' => false])
+            @empty
+                <div class="empty-state"><x-icon name="list-checks" /><strong>Aucune tâche en cours</strong>Planifiez un appel ou une relance pour ce prospect.</div>
+            @endforelse
+        </section>
+
         <section class="card" id="historique">
             <h2><x-icon name="history" /> Historique</h2>
             @can('update', $company)

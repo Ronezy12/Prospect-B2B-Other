@@ -65,4 +65,46 @@ return [
         'reseau_social' => 'Réseau social',
         'systeme' => 'Événement système',
     ],
+
+    'priorities' => [
+        'basse' => 'Basse',
+        'normale' => 'Normale',
+        'haute' => 'Haute',
+        'urgente' => 'Urgente',
+    ],
+
+    // Étapes créées pour chaque nouvelle pipeline : [nom, type, probabilité %].
+    'default_stages' => [
+        ['Nouveau', 'open', 5],
+        ['À contacter', 'open', 10],
+        ['Contact effectué', 'open', 20],
+        ['Relance', 'open', 25],
+        ['Intéressé', 'open', 40],
+        ['Rendez-vous', 'open', 55],
+        ['Proposition envoyée', 'open', 70],
+        ['Gagné', 'won', 100],
+        ['Perdu', 'lost', 0],
+        ['À recontacter', 'open', 15],
+    ],
+
+    'stage_types' => [
+        'open' => 'En cours',
+        'won' => 'Gagné (clôture)',
+        'lost' => 'Perdu (clôture)',
+    ],
+
+    'task_types' => [
+        'relance' => 'Relance',
+        'appel' => 'Appel',
+        'email' => 'E-mail',
+        'rendez_vous' => 'Rendez-vous',
+        'devis' => 'Devis / proposition',
+        'autre' => 'Autre',
+    ],
+
+    'task_statuses' => [
+        'a_faire' => 'À faire',
+        'fait' => 'Fait',
+        'annule' => 'Annulé',
+    ],
 ];

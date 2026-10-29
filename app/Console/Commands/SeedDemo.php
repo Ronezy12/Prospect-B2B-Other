@@ -4,12 +4,15 @@ namespace App\Console\Commands;
 
 use App\Models\Company;
 use App\Models\Contact;
+use App\Models\Opportunity;
 use App\Models\Sector;
 use App\Models\Source;
 use App\Models\Tag;
+use App\Models\Task;
 use App\Models\Team;
 use App\Models\User;
 use App\Services\ActivityRecorder;
+use App\Services\PipelineService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +58,7 @@ class SeedDemo extends Command
         ['Hôtel du Lac Bleu', 'autres', '74400', 'Chamonix', 'a_qualifier', 'François', 'Bonnet', 'Directeur'],
     ];
 
-    public function handle(ActivityRecorder $activities): int
+    public function handle(ActivityRecorder $activities, PipelineService $pipelines): int
     {
         if (! app()->environment(['local', 'testing', 'demo']) && ! $this->option('force')) {
             $this->error('Refusé : les données de démonstration ne doivent pas être créées en production (utilisez --force en connaissance de cause).');
@@ -65,7 +68,7 @@ class SeedDemo extends Command
 
         $this->call('db:seed', ['--class' => DatabaseSeeder::class, '--force' => true]);
 
-        DB::transaction(function () use ($activities) {
+        DB::transaction(function () use ($activities, $pipelines) {
             $team = Team::firstOrCreate(['name' => 'Équipe Rhône-Alpes']);
             $users = [
                 'admin' => $this->user('admin@demo.test', 'Alexandre Martin', 'administrateur', null),
@@ -121,6 +124,46 @@ class SeedDemo extends Command
                 $activities->record($company, 'systeme', 'Fiche créée (données de démonstration).', [], $users['admin']->id);
                 if ($i % 3 === 0) {
                     $activities->record($company, 'appel', "Premier appel avec {$first} {$last} : intéressé(e) par une présentation, rappeler la semaine prochaine.", [], $company->owner_id ?? $users['manager']->id);
+                }
+            }
+
+            // Opportunités et tâches de démonstration, réparties sur les étapes.
+            if (! Opportunity::exists()) {
+                $steps = ['Nouveau', 'À contacter', 'Contact effectué', 'Intéressé', 'Rendez-vous', 'Proposition envoyée', 'Relance', 'Gagné', 'Perdu', 'À recontacter'];
+                $actions = ['Appeler pour qualifier le besoin', 'Envoyer la plaquette', 'Confirmer le rendez-vous', 'Relancer sur la proposition', 'Préparer le devis'];
+                $priorities = ['normale', 'haute', 'normale', 'urgente', 'basse'];
+                foreach (Company::with(['sector.pipeline.stages', 'contacts'])->get() as $i => $company) {
+                    $pipeline = $company->sector?->pipeline;
+                    if (! $pipeline) {
+                        continue;
+                    }
+                    $stage = $pipeline->stages->firstWhere('name', $steps[$i % count($steps)]) ?? $pipeline->stages->first();
+                    $opportunity = new Opportunity([
+                        'title' => 'Contrat de prestation — '.$company->name,
+                        'contact_id' => $company->contacts->first()?->id,
+                        'priority' => $priorities[$i % count($priorities)],
+                        'amount' => 1500 + ($i * 750) % 12000,
+                        'next_action' => $stage->isClosing() ? null : $actions[$i % count($actions)],
+                        'follow_up_at' => $stage->isClosing() ? null : today()->addDays(($i % 9) - 3)->toDateString(),
+                        'lost_reason' => $stage->type === 'lost' ? 'Budget reporté à l\'an prochain' : null,
+                    ]);
+                    $opportunity->company_id = $company->id;
+                    $opportunity->owner_id = $company->owner_id;
+                    $pipelines->create($opportunity, $pipeline, $stage, $users['admin']);
+
+                    if (! $stage->isClosing()) {
+                        $task = new Task([
+                            'title' => $actions[$i % count($actions)],
+                            'type' => $i % 2 ? 'appel' : 'relance',
+                            'priority' => $opportunity->priority,
+                            'due_at' => now()->startOfDay()->addDays(($i % 7) - 2)->setTime(9 + $i % 8, 0),
+                        ]);
+                        $task->company_id = $company->id;
+                        $task->opportunity_id = $opportunity->id;
+                        $task->assignee_id = $company->owner_id ?? $users['manager']->id;
+                        $task->created_by = $users['admin']->id;
+                        $task->save();
+                    }
                 }
             }
         });

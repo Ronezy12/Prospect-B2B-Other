@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Sector extends Model
 {
@@ -26,6 +27,11 @@ class Sector extends Model
     public function children(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')->orderBy('position');
+    }
+
+    public function pipeline(): HasOne
+    {
+        return $this->hasOne(Pipeline::class);
     }
 
     public function scopeRoots(Builder $query): Builder

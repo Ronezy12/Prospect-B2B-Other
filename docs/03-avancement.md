@@ -7,7 +7,7 @@
 | 3 — Validation | Terminé (décisions consignées dans le cahier) |
 | 4 — Socle et gestion des prospects | **Terminé** (détail ci-dessous) |
 | 4 bis — Refonte du design et environnement de test | **Terminé** (détail ci-dessous) |
-| 5 — Pipelines, tâches, permissions avancées | À faire (après la recette utilisateur) |
+| 5 — Pipelines, tâches, permissions avancées | **Terminé** (détail ci-dessous) |
 | 6 — E-mails, modèles, programmation | À faire |
 | 7 — Statistiques, webhooks, automatisations | À faire |
 | 8 — Réseaux sociaux | À faire |
@@ -38,7 +38,7 @@
 
 **Opposition** : liste centrale `pm_suppressions` stockant uniquement une empreinte HMAC-SHA256 de l'adresse normalisée, par périmètre (toutes communications, prospection, newsletters). Vérifiée à la saisie manuelle et à l'import : une adresse opposée ne peut pas être réintroduite. L'empreinte survit à la suppression de la fiche.
 
-**Tests** : 46 tests automatisés (connexion, limitation, périmètres et droits, validation, doublons, conversion, export, imports CSV/XLSX, encodages, stratégies de doublons, opposition, idempotence, purge).
+**Tests** : 68 tests automatisés au total (dont 46 pour les phases 4 et 4 bis) (connexion, limitation, périmètres et droits, validation, doublons, conversion, export, imports CSV/XLSX, encodages, stratégies de doublons, opposition, idempotence, purge).
 
 ## Règles de conformité implémentées — validation humaine requise
 
@@ -63,3 +63,35 @@
 - **Aperçu cliquable** publié à partir des écrans réellement rendus : https://claude.ai/artifact/UX9eoxccjdTrMgRy7XvDTD
 
 Limite : l'environnement de développement bloque l'accès aux dépôts Debian et limite Docker Hub. L'image Docker n'a donc pas pu être construite jusqu'au bout ici. Le démarrage de l'application, les migrations, la commande de démonstration et le worker ont été validés hors conteneur. La première construction de l'image se fera sur votre poste ou votre VPS.
+
+## Phase 5 — pipelines, tâches et paramétrage
+
+**Modèle de données** (migrations réversibles) : `pm_pipelines` (une par secteur principal, unicité sur le secteur), `pm_pipeline_stages` (nom unique par pipeline, ordre, type en cours / gagné / perdu, probabilité), `pm_opportunities` (entreprise, interlocuteur, pipeline, étape, priorité, montant, prochaine action, date de relance, position dans la colonne, clôture, motif de perte, responsable, suppression logique), `pm_stage_history` (ancienne et nouvelle étape, noms figés, auteur, date), `pm_tasks` (rattachement à une entreprise et/ou une opportunité, type, priorité, échéance, statut, réalisation, responsable).
+
+**Pipelines** :
+- Une pipeline par secteur, avec les 10 étapes par défaut. Un nouveau secteur créé dans l'interface reçoit automatiquement sa pipeline.
+- Kanban par secteur avec glisser-déposer : le déplacement est enregistré côté serveur et l'ordre des cartes est conservé. Sur mobile ou sans JavaScript, chaque carte propose un menu « Déplacer vers ».
+- Vue liste : filtres combinés (recherche, pipeline, étape, état en cours / relance en retard / clôturées, responsable, priorité) et pagination.
+- Vue globale consolidée : effectifs et montants par étape pour chaque pipeline, opportunités en cours, gagnées et perdues, relances en retard, montant pondéré par la probabilité de chaque étape.
+- Fiche opportunité : frise des étapes, détails, changement d'étape, historique complet, tâches liées.
+- Règles : une opportunité ne change d'étape qu'à l'intérieur de sa pipeline (refus 422 sinon). Une étape gagnée ou perdue renseigne la date de clôture, et rouvrir l'opportunité l'efface. Chaque changement est historisé, ajouté à l'historique de l'entreprise et au journal d'audit. Aucune opportunité ne peut être créée sur une entreprise déjà cliente. Le passage en « Gagné » ne convertit pas l'entreprise en client : la conversion reste une action explicite.
+- Les étapes commerciales sont distinctes du statut de la fiche entreprise, des événements e-mail (phase 7) et des statuts de conformité.
+
+**Tâches et relances** :
+- Création depuis une fiche entreprise, une opportunité ou la page Tâches.
+- Vues « en retard », « aujourd'hui », « à venir » et « terminées », avec compteur des tâches en retard dans la navigation et liste du jour sur le tableau de bord.
+- Une tâche se marque faite, s'annule ou se rouvre ; une tâche faite est ajoutée à l'historique de l'entreprise.
+- Sans droit d'assignation, une tâche est toujours attribuée à son créateur.
+- Périmètre : chacun voit ses tâches ; un responsable voit celles de son équipe.
+
+**Paramétrage** (nouvelle permission `pipelines.manage`, attribuée à l'administrateur) :
+- Secteurs et sous-secteurs : ajout, renommage, activation.
+- Sources : ajout, renommage, activation.
+- Pipelines : nom, activation.
+- Étapes : ajout, renommage, type, probabilité, ordre. Une étape qui contient des opportunités ne peut être ni supprimée ni changer de type, et une pipeline garde toujours au moins une étape en cours.
+
+**Tests ajoutés** (22) : étapes par défaut, création historisée, déplacement et clôture, réordonnancement, refus inter-pipeline, périmètres (commercial, équipe, lecture seule), entreprise hors périmètre ou cliente, filtre des relances en retard, opportunités d'une entreprise archivée, tâches (assignation forcée, périmètre, équipe, réalisation, réouverture, compteur), paramétrage (droits, création de secteur, règles des étapes, ordre, sources).
+
+Limites :
+- Il n'y a pas de notification par e-mail des tâches : elle arrivera avec le moteur d'automatisation (phase 7).
+- Le Kanban charge 60 cartes par colonne ; au-delà, un lien mène à la vue liste filtrée.

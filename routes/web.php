@@ -8,8 +8,12 @@ use App\Http\Controllers\CompanyExportController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
+use App\Http\Controllers\OpportunityController;
+use App\Http\Controllers\PipelineBoardController;
+use App\Http\Controllers\Settings\PipelineSettingsController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\SuppressionController;
+use App\Http\Controllers\TaskController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/prospection');
@@ -43,7 +47,28 @@ Route::middleware('auth')->group(function () {
         Route::post('imports/{import}/annuler', [ImportController::class, 'cancel'])->name('imports.cancel');
         Route::get('imports/{import}/rapport', [ImportController::class, 'report'])->name('imports.report');
 
+        Route::get('pipelines/vue-globale', [PipelineBoardController::class, 'overview'])->name('pipelines.overview');
+        Route::get('pipelines/{pipeline?}', [PipelineBoardController::class, 'show'])->name('pipelines.show');
+
+        Route::post('opportunites/{opportunity}/deplacer', [OpportunityController::class, 'move'])->middleware('throttle:120,1')->name('opportunities.move');
+        Route::resource('opportunites', OpportunityController::class)->parameters(['opportunites' => 'opportunity'])->names('opportunities');
+
+        Route::post('taches/{task}/statut', [TaskController::class, 'complete'])->name('tasks.complete');
+        Route::resource('taches', TaskController::class)->except('show')->parameters(['taches' => 'task'])->names('tasks');
+
         Route::prefix('parametres')->name('settings.')->group(function () {
+            Route::get('pipelines', [PipelineSettingsController::class, 'index'])->name('pipelines.index');
+            Route::get('pipelines/{pipeline}', [PipelineSettingsController::class, 'edit'])->name('pipelines.edit');
+            Route::put('pipelines/{pipeline}', [PipelineSettingsController::class, 'update'])->name('pipelines.update');
+            Route::post('pipelines/{pipeline}/etapes', [PipelineSettingsController::class, 'storeStage'])->name('stages.store');
+            Route::put('etapes/{stage}', [PipelineSettingsController::class, 'updateStage'])->name('stages.update');
+            Route::post('etapes/{stage}/deplacer', [PipelineSettingsController::class, 'moveStage'])->name('stages.move');
+            Route::delete('etapes/{stage}', [PipelineSettingsController::class, 'destroyStage'])->name('stages.destroy');
+            Route::post('secteurs', [PipelineSettingsController::class, 'storeSector'])->name('sectors.store');
+            Route::put('secteurs/{sector}', [PipelineSettingsController::class, 'updateSector'])->name('sectors.update');
+            Route::post('sources', [PipelineSettingsController::class, 'storeSource'])->name('sources.store');
+            Route::put('sources/{source}', [PipelineSettingsController::class, 'updateSource'])->name('sources.update');
+
             Route::resource('utilisateurs', UserController::class)->except(['show', 'destroy'])
                 ->parameters(['utilisateurs' => 'user'])->names('users');
         });

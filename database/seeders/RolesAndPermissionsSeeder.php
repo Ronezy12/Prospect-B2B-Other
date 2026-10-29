@@ -26,6 +26,7 @@ class RolesAndPermissionsSeeder extends Seeder
         'audit.view' => 'Consulter le journal d\'audit',
         'users.manage' => 'Gérer les utilisateurs et les rôles',
         'settings.manage' => 'Gérer les paramètres et intégrations',
+        'pipelines.manage' => 'Configurer pipelines, étapes, secteurs et sources',
     ];
 
     public const ROLES = [

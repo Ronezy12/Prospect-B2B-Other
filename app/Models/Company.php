@@ -74,6 +74,16 @@ class Company extends Model
         return $this->morphMany(Activity::class, 'subject')->latest('occurred_at')->latest('id');
     }
 
+    public function opportunities(): HasMany
+    {
+        return $this->hasMany(Opportunity::class);
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class);
+    }
+
     public function scopeProspects(Builder $query): Builder
     {
         return $query->where('lifecycle', 'prospect');

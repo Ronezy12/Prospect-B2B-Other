@@ -39,4 +39,7 @@ Ce mode de démonstration (SQLite, `APP_ENV=demo`) sert au test. Pour la product
 4. Enregistrer une opposition sur un contact, puis tenter de le réimporter → ligne « Contact exclu (opposition) ».
 5. En responsable : sélectionner plusieurs fiches, changer le statut en masse ; exporter la liste filtrée.
 6. En administrateur : convertir un prospect en client, vérifier qu'il disparaît de la base de prospects et apparaît dans le filtre « Convertis en clients ».
-7. Basculer le thème clair / sombre (icône lune en bas de la barre latérale) et tester sur mobile.
+7. Ouvrir « Pipelines », glisser une carte vers une autre colonne, recharger la page : la carte est restée à sa place. Ouvrir la fiche de l'opportunité pour voir l'historique des étapes.
+8. Depuis une fiche prospect, créer une opportunité puis « Planifier une relance » ; la retrouver dans « Tâches et relances » et la marquer comme faite.
+9. En administrateur, « Secteurs et pipelines » : ajouter un secteur (sa pipeline est créée), renommer une étape, tenter de supprimer une étape non vide (refusé).
+10. Basculer le thème clair / sombre (icône lune en bas de la barre latérale) et tester sur mobile.

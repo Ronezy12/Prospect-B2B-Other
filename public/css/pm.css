@@ -109,6 +109,7 @@
 }
 
 * { box-sizing: border-box; }
+[hidden] { display: none !important; }
 html, body { margin: 0; padding: 0; }
 body {
   font-family: var(--font);
@@ -280,7 +281,7 @@ button:disabled, .btn[aria-disabled="true"] { opacity: .5; cursor: not-allowed; 
 .field label { display: block; font-weight: 600; font-size: .84rem; margin-bottom: .35rem; color: var(--text-2); }
 .field .hint { font-size: .78rem; color: var(--muted); margin-top: .3rem; }
 .field .error { font-size: .8rem; color: var(--danger); margin-top: .3rem; }
-input[type=text], input[type=email], input[type=password], input[type=date], input[type=url], input[type=tel],
+input[type=text], input[type=email], input[type=password], input[type=date], input[type=datetime-local], input[type=url], input[type=tel],
 input[type=search], input[type=number], input[type=file], select, textarea {
   width: 100%; padding: .6rem .8rem; border: 1px solid var(--border-strong); border-radius: 11px;
   background: var(--surface); font: inherit; font-size: .9rem; color: var(--text);
@@ -457,4 +458,85 @@ details.inline-form .field { margin-bottom: .6rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition: none !important; }
+}
+
+/* ---------- Phase 5 : pipelines, Kanban, tâches ---------- */
+.nav-count { margin-left: auto; min-width: 20px; height: 20px; padding: 0 .35rem; border-radius: 999px; background: var(--gradient); color: #fff; font-size: .7rem; font-weight: 700; display: inline-grid; place-items: center; }
+.tabs { display: flex; gap: .35rem; flex-wrap: wrap; padding: .3rem; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; box-shadow: var(--shadow-sm); margin-bottom: 1.1rem; overflow-x: auto; }
+.tab { display: inline-flex; align-items: center; gap: .45rem; padding: .45rem .85rem; border-radius: 10px; font-size: .86rem; font-weight: 560; color: var(--text-2); white-space: nowrap; }
+.tab:hover { background: var(--surface-hover); color: var(--text); }
+.tab.active { background: var(--gradient-soft); color: var(--text); font-weight: 650; }
+.tab .count { font-size: .72rem; background: var(--surface-2); border: 1px solid var(--border); border-radius: 999px; padding: 0 .45rem; color: var(--muted); }
+.tab.active .count { background: var(--gradient); color: #fff; border-color: transparent; }
+.toolbar { display: flex; gap: .6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
+.toolbar .searchbox { flex: 1 1 240px; }
+.toolbar select { width: auto; min-width: 170px; }
+
+.board { display: flex; gap: .9rem; overflow-x: auto; padding-bottom: 1rem; align-items: flex-start; scroll-snap-type: x proximity; }
+.column { flex: 0 0 286px; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); display: flex; flex-direction: column; max-height: calc(100vh - 230px); scroll-snap-align: start; }
+.column-head { padding: .8rem .9rem .65rem; border-bottom: 1px solid var(--border); }
+.column-head .title { display: flex; align-items: center; gap: .45rem; font-weight: 680; font-size: .88rem; }
+.column-head .title .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--primary); }
+.column.won .dot { background: var(--success); }
+.column.lost .dot { background: var(--danger); }
+.column-head .title .n { margin-left: auto; font-size: .74rem; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: 999px; padding: 0 .5rem; }
+.column-head .meta { font-size: .74rem; color: var(--muted); margin-top: .15rem; font-variant-numeric: tabular-nums; }
+.column-body { padding: .6rem; display: grid; gap: .55rem; overflow-y: auto; min-height: 80px; align-content: start; flex: 1; transition: background .15s ease; }
+.column-body.drop-target { background: var(--primary-soft); }
+.column-more { font-size: .76rem; color: var(--muted); text-align: center; padding: .4rem; }
+.deal { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: .7rem .75rem; box-shadow: var(--shadow-sm); cursor: grab; transition: box-shadow .15s ease, transform .15s ease, opacity .15s ease; }
+.deal:hover { box-shadow: var(--shadow); }
+.deal.dragging { opacity: .45; transform: rotate(1.5deg); }
+.deal.saving { opacity: .6; }
+.deal[draggable="false"] { cursor: default; }
+.deal .deal-title { font-weight: 640; font-size: .88rem; color: var(--text); display: block; line-height: 1.3; }
+.deal .deal-company { font-size: .78rem; color: var(--muted); margin-top: .1rem; }
+.deal .deal-foot { display: flex; align-items: center; gap: .4rem; margin-top: .55rem; flex-wrap: wrap; font-size: .74rem; }
+.deal .deal-foot .grow { flex: 1; }
+.deal .amount { font-weight: 650; font-variant-numeric: tabular-nums; color: var(--text-2); }
+.deal .follow { display: inline-flex; align-items: center; gap: .25rem; color: var(--muted); }
+.deal .follow.late { color: var(--danger); font-weight: 620; }
+.deal .follow .icon { width: 13px; height: 13px; }
+.deal .next { font-size: .76rem; color: var(--text-2); margin-top: .4rem; padding: .35rem .5rem; background: var(--surface-2); border-radius: 8px; }
+.deal-move { margin-top: .5rem; display: flex; gap: .35rem; }
+.deal-move select { padding: .3rem 1.8rem .3rem .5rem; font-size: .76rem; }
+.js .deal-move { display: none; }
+.prio { display: inline-flex; align-items: center; font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: .05rem .4rem; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
+.prio-haute { background: var(--warning-soft); color: var(--warning); }
+.prio-urgente { background: var(--danger-soft); color: var(--danger); }
+.prio-basse { background: var(--info-soft); color: var(--info); }
+
+.stage-track { display: flex; gap: 4px; margin: .75rem 0 1.1rem; flex-wrap: wrap; }
+.stage-track span { flex: 1 1 70px; text-align: center; font-size: .7rem; font-weight: 600; padding: .4rem .25rem; border-radius: 7px; background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
+.stage-track span.passed { background: var(--primary-soft); color: var(--primary-text); border-color: transparent; }
+.stage-track span.current { background: var(--gradient); color: #fff; border-color: transparent; }
+.stage-track span.current.lost { background: var(--danger); }
+
+.task-row { display: flex; gap: .85rem; align-items: flex-start; padding: .9rem 1.2rem; border-bottom: 1px solid var(--border); }
+.task-row:last-child { border-bottom: 0; }
+.task-row .grow { flex: 1; min-width: 0; }
+.task-row .t-title { font-weight: 620; }
+.task-row.done .t-title { text-decoration: line-through; color: var(--muted); }
+.task-row .t-meta { font-size: .8rem; color: var(--muted); display: flex; gap: .3rem .9rem; flex-wrap: wrap; margin-top: .15rem; }
+.task-row .t-meta span { display: inline-flex; align-items: center; gap: .3rem; }
+.task-row .t-meta .icon { width: 14px; height: 14px; }
+.task-row .t-meta .late { color: var(--danger); font-weight: 620; }
+.check-btn { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--border-strong); background: var(--surface); display: grid; place-items: center; cursor: pointer; color: transparent; flex-shrink: 0; margin-top: 1px; }
+.check-btn:hover { border-color: var(--success); color: var(--success); }
+.check-btn.on { background: var(--success); border-color: var(--success); color: #fff; }
+.check-btn .icon { width: 14px; height: 14px; }
+
+.settings-list { display: grid; gap: 0; }
+.settings-row { display: flex; gap: .75rem; align-items: center; padding: .75rem 1.2rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+.settings-row:last-child { border-bottom: 0; }
+.settings-row .grow { flex: 1; min-width: 180px; }
+.settings-row form.inline { display: flex; gap: .45rem; align-items: center; flex-wrap: wrap; }
+.settings-row input[type=text], .settings-row input[type=number], .settings-row select { width: auto; padding: .4rem .6rem; }
+.settings-row input[type=number] { width: 80px; }
+.inline-add { display: flex; gap: .5rem; flex-wrap: wrap; padding: 1rem 1.2rem; background: var(--surface-2); border-top: 1px solid var(--border); }
+.inline-add input, .inline-add select { width: auto; flex: 1 1 160px; }
+
+@media (max-width: 860px) {
+  .column { flex-basis: 84vw; max-height: none; }
+  .js .deal-move { display: flex; }
 }

@@ -127,6 +127,8 @@ class CompanyController extends Controller
             'activities' => $company->activities()->with('user:id,name')->paginate(20, ['*'], 'activites'),
             'suppressed' => $suppressed,
             'audit' => $audit,
+            'opportunities' => $company->opportunities()->visibleTo($request->user())->with(['stage:id,name,type', 'pipeline:id,name', 'owner:id,name'])->latest('id')->get(),
+            'tasks' => $company->tasks()->visibleTo($request->user())->where('status', 'a_faire')->with(['assignee:id,name', 'opportunity:id,title'])->orderBy('due_at')->limit(20)->get(),
         ]);
     }
 

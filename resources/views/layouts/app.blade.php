@@ -4,14 +4,16 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="robots" content="noindex, nofollow">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Prospection') — {{ config('app.name') }}</title>
     <link rel="preload" href="{{ asset('fonts/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=2">
-    <script src="{{ asset('js/theme.js') }}?v=2"></script>
-    <script src="{{ asset('js/pm.js') }}?v=2" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=4">
+    <script src="{{ asset('js/theme.js') }}?v=4"></script>
+    <script src="{{ asset('js/pm.js') }}?v=4" defer></script>
 </head>
 <body>
 @php($u = auth()->user())
+@php($overdueTasks = \App\Models\Task::where('assignee_id', $u->id)->where('status', 'a_faire')->where('due_at', '<', now())->count())
 <div class="app">
     <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
         <div class="brand">
@@ -27,17 +29,22 @@
             @can('prospects.import')
                 <a href="{{ route('pm.imports.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.imports.*')])><x-icon name="upload" /> Imports</a>
             @endcan
-            <span class="nav-link disabled" aria-disabled="true"><x-icon name="kanban" /> Pipelines <span class="nav-soon">Phase 5</span></span>
-            <span class="nav-link disabled" aria-disabled="true"><x-icon name="list-checks" /> Tâches et relances <span class="nav-soon">Phase 5</span></span>
+            <a href="{{ route('pm.pipelines.show') }}" @class(['nav-link', 'active' => request()->routeIs('pm.pipelines.*', 'pm.opportunities.*')])><x-icon name="kanban" /> Pipelines</a>
+            <a href="{{ route('pm.tasks.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.tasks.*')])><x-icon name="list-checks" /> Tâches et relances @if ($overdueTasks)<span class="nav-count" title="Tâches en retard">{{ $overdueTasks }}</span>@endif</a>
 
             <div class="nav-section">Marketing</div>
             <span class="nav-link disabled" aria-disabled="true"><x-icon name="mail" /> Campagnes <span class="nav-soon">Phase 6</span></span>
             <span class="nav-link disabled" aria-disabled="true"><x-icon name="chart-column" /> Statistiques <span class="nav-soon">Phase 7</span></span>
 
-            @can('users.manage')
+            @canany(['users.manage', 'pipelines.manage'])
                 <div class="nav-section">Administration</div>
-                <a href="{{ route('pm.settings.users.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.users.*')])><x-icon name="users" /> Utilisateurs et rôles</a>
-            @endcan
+                @can('pipelines.manage')
+                    <a href="{{ route('pm.settings.pipelines.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.pipelines.*')])><x-icon name="settings" /> Secteurs et pipelines</a>
+                @endcan
+                @can('users.manage')
+                    <a href="{{ route('pm.settings.users.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.users.*')])><x-icon name="users" /> Utilisateurs et rôles</a>
+                @endcan
+            @endcanany
         </nav>
         <div class="sidebar-user">
             <x-avatar :user="$u" />
