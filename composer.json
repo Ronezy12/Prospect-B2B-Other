@@ -48,7 +48,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "php artisan serve & php artisan queue:work --queue=imports,default"
+            "php artisan serve & php artisan queue:work --queue=emails,imports,default"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",

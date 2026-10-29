@@ -7,6 +7,7 @@ use App\Support\Normalizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -53,6 +54,11 @@ class Contact extends Model
     public function activities(): MorphMany
     {
         return $this->morphMany(Activity::class, 'subject')->latest('occurred_at')->latest('id');
+    }
+
+    public function subscriptions(): HasMany
+    {
+        return $this->hasMany(Subscription::class);
     }
 
     public function fullName(): string

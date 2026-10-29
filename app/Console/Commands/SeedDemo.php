@@ -2,16 +2,24 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Campaign;
 use App\Models\Company;
 use App\Models\Contact;
+use App\Models\MailAccount;
+use App\Models\NewsletterList;
 use App\Models\Opportunity;
 use App\Models\Sector;
+use App\Models\Segment;
 use App\Models\Source;
+use App\Models\Subscription;
 use App\Models\Tag;
 use App\Models\Task;
 use App\Models\Team;
+use App\Models\Template;
 use App\Models\User;
 use App\Services\ActivityRecorder;
+use App\Services\Mail\CampaignSender;
+use App\Services\Mail\CampaignService;
 use App\Services\PipelineService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Console\Command;
@@ -168,6 +176,8 @@ class SeedDemo extends Command
             }
         });
 
+        $this->seedEmailing();
+
         $this->newLine();
         $this->info('Données de démonstration prêtes. Comptes (mot de passe : '.self::PASSWORD.') :');
         $this->table(['Rôle', 'E-mail'], [
@@ -176,6 +186,7 @@ class SeedDemo extends Command
             ['Commercial', 'commercial@demo.test'],
             ['Commercial (hors équipe)', 'commercial2@demo.test'],
             ['Conformité / DPO', 'conformite@demo.test'],
+            ['Marketing', 'marketing@demo.test'],
         ]);
 
         return self::SUCCESS;
@@ -192,5 +203,49 @@ class SeedDemo extends Command
         $user->syncRoles([$role]);
 
         return $user;
+    }
+
+    /** Marketing de démonstration : compte « journal local » (aucun envoi réel). */
+    private function seedEmailing(): void
+    {
+        if (MailAccount::exists()) {
+            return;
+        }
+        $admin = User::where('email', 'admin@demo.test')->firstOrFail();
+        $marketer = $this->user('marketing@demo.test', 'Inès Robert', 'marketing', null);
+
+        $account = MailAccount::create([
+            'name' => 'Démo — journal local', 'driver' => 'log', 'from_email' => 'contact@entreprise-ar.test',
+            'from_name' => 'Entreprise AR', 'reply_to' => 'commercial@entreprise-ar.test', 'hourly_limit' => 500, 'daily_limit' => 2000, 'is_active' => true,
+        ]);
+        $account->forceFill(['last_tested_at' => now(), 'last_test_result' => 'ok'])->save();
+
+        $prospection = Template::create(['name' => 'Prospection — présentation des services', 'category' => 'prospection']);
+        $prospection->addVersion(['subject' => '{{prenom}}, une proposition pour {{entreprise}}', 'preheader' => 'Un échange de 15 minutes ?', 'html' => file_get_contents(resource_path('email-starters/prospection.html'))], $marketer->id);
+        $newsletter = Template::create(['name' => 'Lettre mensuelle', 'category' => 'newsletter']);
+        $newsletter->addVersion(['subject' => 'Les actualités d\'Entreprise AR — novembre', 'html' => file_get_contents(resource_path('email-starters/newsletter.html'))], $marketer->id);
+
+        $immo = Segment::create(['name' => 'Agences immobilières (prospects)', 'filters' => ['lifecycle' => 'prospect', 'sector_id' => Sector::where('slug', 'agences-immobilieres')->value('id')]]);
+        Segment::create(['name' => 'Syndics de copropriété', 'filters' => ['lifecycle' => 'prospect', 'sector_id' => Sector::where('slug', 'syndics-de-copropriete')->value('id')]]);
+
+        $list = NewsletterList::create(['name' => 'Lettre mensuelle', 'description' => 'Actualités et conseils, un envoi par mois']);
+        Contact::orderBy('id')->limit(8)->get()->each(fn (Contact $c) => Subscription::create([
+            'list_id' => $list->id, 'contact_id' => $c->id, 'consent_source' => 'Démo — case cochée sur le formulaire du site',
+            'consented_at' => now()->subDays(20), 'created_by' => $admin->id,
+        ]));
+
+        $sent = new Campaign(['name' => 'Présentation agences — octobre', 'type' => 'prospection', 'template_id' => $prospection->id, 'mail_account_id' => $account->id, 'segment_id' => $immo->id]);
+        $sent->created_by = $marketer->id;
+        $sent->last_test_at = now();
+        $sent->save();
+        app(CampaignService::class)->schedule($sent, $marketer, null);
+        $sender = app(CampaignSender::class);
+        while ($sender->processBatch($sent) === 0) {
+            // envoi complet de la campagne de démonstration (journal local)
+        }
+
+        $draft = new Campaign(['name' => 'Newsletter de novembre', 'type' => 'newsletter', 'template_id' => $newsletter->id, 'mail_account_id' => $account->id, 'list_id' => $list->id]);
+        $draft->created_by = $marketer->id;
+        $draft->save();
     }
 }

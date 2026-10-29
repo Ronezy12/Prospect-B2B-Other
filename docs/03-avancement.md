@@ -8,7 +8,7 @@
 | 4 — Socle et gestion des prospects | **Terminé** (détail ci-dessous) |
 | 4 bis — Refonte du design et environnement de test | **Terminé** (détail ci-dessous) |
 | 5 — Pipelines, tâches, permissions avancées | **Terminé** (détail ci-dessous) |
-| 6 — E-mails, modèles, programmation | À faire |
+| 6 — E-mails, modèles, programmation | **Terminé** (détail ci-dessous) |
 | 7 — Statistiques, webhooks, automatisations | À faire |
 | 8 — Réseaux sociaux | À faire |
 | 9 — Conformité, sécurité, tests, documentation finale | À faire (fondations posées dès la phase 4) |
@@ -38,7 +38,7 @@
 
 **Opposition** : liste centrale `pm_suppressions` stockant uniquement une empreinte HMAC-SHA256 de l'adresse normalisée, par périmètre (toutes communications, prospection, newsletters). Vérifiée à la saisie manuelle et à l'import : une adresse opposée ne peut pas être réintroduite. L'empreinte survit à la suppression de la fiche.
 
-**Tests** : 68 tests automatisés au total (dont 46 pour les phases 4 et 4 bis) (connexion, limitation, périmètres et droits, validation, doublons, conversion, export, imports CSV/XLSX, encodages, stratégies de doublons, opposition, idempotence, purge).
+**Tests** : 97 tests automatisés au total (connexion, limitation, périmètres et droits, validation, doublons, conversion, export, imports CSV/XLSX, encodages, stratégies de doublons, opposition, idempotence, purge).
 
 ## Règles de conformité implémentées — validation humaine requise
 
@@ -95,3 +95,84 @@ Limite : l'environnement de développement bloque l'accès aux dépôts Debian e
 Limites :
 - Il n'y a pas de notification par e-mail des tâches : elle arrivera avec le moteur d'automatisation (phase 7).
 - Le Kanban charge 60 cartes par colonne ; au-delà, un lien mène à la vue liste filtrée.
+
+## Phase 6 — e-mails, modèles et programmation
+
+**Architecture d'envoi hybride** : une interface commune `MailProvider` (`app/Services/Mail`) et trois implémentations :
+- **SMTP** (Symfony Mailer). Les codes 4xx et les erreurs réseau sont traités comme temporaires, les codes 5xx comme définitifs.
+- **API Brevo** : emplacement prêt, à activer en saisissant une clé. Les codes 429 et 5xx sont temporaires, les autres 4xx définitifs.
+- **Journal local** : pour les tests, aucun envoi réel ; indisponible en production.
+
+Les identifiants (mot de passe SMTP, clé API) sont chiffrés en base avec la clé applicative. Ils ne sont jamais réaffichés, ni renvoyés en JSON, ni écrits dans le journal d'audit ou dans les messages d'erreur. Toute modification d'un compte impose un nouveau test d'envoi réel avant de pouvoir l'utiliser.
+
+**Modèles d'e-mails** :
+- Éditeur visuel GrapesJS 0.23.6 avec le preset newsletter 1.0.2 (BSD-3), en français, servi localement, télémétrie désactivée.
+- Blocs « Variables » : prénom, nom, civilité, fonction, entreprise, ville, expéditeur, lien de désinscription. Les valeurs sont échappées au rendu.
+- Chaque enregistrement crée une version immuable. Une campagne fige sa version au moment de la programmation.
+- Contenu nettoyé à l'enregistrement : scripts, formulaires, attributs `on*` et liens `javascript:` sont retirés.
+- Aperçu ordinateur et mobile dans un cadre isolé (sans script, CSP `sandbox`).
+- E-mails de test (5 adresses au plus, objet préfixé [TEST], données d'exemple).
+- Version texte générée automatiquement.
+
+**Segments** : critères sur l'entreprise (cycle prospect/client, secteur, statut, source, ville, département, tag, responsable) et sur le contact (B2B/B2C, base légale). Le segment affiche une estimation du nombre de contacts autorisés et exclus, par motif. Il est appliqué dans le périmètre de la personne qui lance la campagne.
+
+**Newsletters** : listes d'abonnés. Un abonnement exige la source et la date du consentement. Une adresse opposée aux newsletters ne peut pas être réabonnée depuis le CRM. Un désabonnement conserve la preuve.
+
+**Campagnes** (prospection, newsletter, opérationnelle, e-mail individuel) :
+- Brouillon : modèle, compte d'envoi, segment ou liste, expéditeur et réponse, exclusions par tag et par délai depuis le dernier envoi.
+- Avant tout lancement : e-mail de test, puis une vérification qui bloque en cas de compte non testé ou en échec, de modèle sans objet, de segment ou liste manquant, ou d'aucun destinataire autorisé. Elle avertit aussi : mode journal, absence de test, contenu promotionnel dans un message opérationnel.
+- Une case de confirmation de la finalité et de l'information des personnes est obligatoire.
+- Envoi immédiat ou programmé ; pause, reprise et arrêt (les destinataires restants sont annulés) ; duplication en brouillon ; historique dans le journal d'audit.
+- Destinataires figés au démarrage, chacun avec son statut : en attente, accepté, échec, exclu (et motif), annulé, à vérifier.
+
+**File d'envoi** :
+- Tâche `SendCampaignBatch` (file `emails`) par lots de 50, relancée chaque minute par `pm:campaigns-run`. Les envois programmés reprennent donc seuls après un redémarrage.
+- Réservation atomique de chaque destinataire, clé d'idempotence unique par campagne et adresse, `Message-ID` dérivé de cette clé, dédoublonnage des adresses.
+- Quotas horaire et journalier par compte, avec reprise automatique une fois la fenêtre écoulée.
+- Erreurs temporaires retentées 3 fois (après 5, 30 puis 120 minutes) ; erreurs définitives non retentées.
+- Un envoi interrompu en plein appel passe « à vérifier » au bout de 15 minutes, sans renvoi automatique.
+- Événements enregistrés : demande, acceptation, échec temporaire, échec, désabonnement.
+
+**Conformité** (`ComplianceGate`, appliquée à la constitution de l'audience puis de nouveau juste avant chaque envoi) :
+- Adresse invalide (rebond définitif) : exclue de tout envoi.
+- Opposition ou désabonnement : exclusion des envois marketing de son périmètre (prospection ou newsletter).
+- Prospection et e-mails individuels : un particulier (B2C) sans consentement est exclu.
+- Newsletter : abonnement actif exigé.
+- Messages opérationnels : non bloqués par une désinscription marketing, sans lien de désinscription.
+- Chaque e-mail marketing contient un lien de désinscription (ajouté en pied de page s'il manque dans le modèle) et les en-têtes `List-Unsubscribe` et `List-Unsubscribe-Post` (désinscription en un clic, RFC 8058).
+- Désinscription publique par lien signé (impossible à falsifier), avec page de confirmation et clic unique. Elle crée une opposition persistante et un événement, et met à jour l'abonnement.
+
+**E-mails individuels** : depuis la fiche d'un contact (permission `emails.individual`, attribuée aux commerciaux et aux responsables). Ils passent par la même chaîne de contrôle et d'envoi, avec signature, lien d'opposition et trace dans l'historique de l'entreprise.
+
+**Statistiques disponibles** : destinataires figés, acceptés par le serveur d'envoi, en attente, exclus par motif, échecs, à vérifier, désinscriptions. « Accepté » n'est jamais présenté comme « livré ». Livraisons, rebonds, ouvertures et clics sont affichés comme indisponibles avec SMTP et le journal local ; ils arriveront en phase 7 avec les webhooks d'un fournisseur API.
+
+**Rôles** :
+- Marketing : campagnes, modèles, segments et newsletters.
+- Responsable commercial : consultation des campagnes, e-mails individuels.
+- Commercial : e-mails individuels.
+- Conformité : consultation.
+- Comptes d'envoi : administrateur (`settings.manage`).
+
+**Tests ajoutés** (29), couvrant :
+- les règles de conformité de bout en bout ;
+- l'échappement des variables ;
+- la vérification avant envoi et la confirmation obligatoire ;
+- la programmation et le planificateur, et la version de modèle figée ;
+- la pause, la reprise et l'arrêt, y compris pendant l'envoi ;
+- les erreurs temporaires et définitives, les quotas horaires ;
+- l'opposition enregistrée entre la constitution de l'audience et l'envoi ;
+- les envois interrompus ;
+- les newsletters et les messages opérationnels ;
+- les droits ;
+- la désinscription : lien signé, falsification, clic unique, périmètre ;
+- le consentement des abonnements ;
+- les versions et le nettoyage des modèles, l'isolation de l'aperçu, les e-mails de test ;
+- le chiffrement des secrets et le test des comptes ;
+- l'API Brevo (réponses simulées) ;
+- les e-mails individuels et les estimations de segment.
+
+Limites :
+- L'API Brevo est testée avec des réponses simulées : la vraie connexion se validera en saisissant votre clé.
+- Le suivi des ouvertures et des clics n'est pas activé (recommandation CNIL 2026 : consentement préalable) ; il sera configurable en phase 7.
+- Pas encore de formulaire public d'inscription à la newsletter (double opt-in) : prévu en phase 9.
+- Les images des modèles se référencent par URL ; il n'y a pas encore de téléversement d'images dans l'éditeur.

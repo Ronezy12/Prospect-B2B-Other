@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=4">
     <script src="{{ asset('js/theme.js') }}?v=4"></script>
     <script src="{{ asset('js/pm.js') }}?v=4" defer></script>
+    @stack('head')
 </head>
 <body>
 @php($u = auth()->user())
@@ -33,13 +34,21 @@
             <a href="{{ route('pm.tasks.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.tasks.*')])><x-icon name="list-checks" /> Tâches et relances @if ($overdueTasks)<span class="nav-count" title="Tâches en retard">{{ $overdueTasks }}</span>@endif</a>
 
             <div class="nav-section">Marketing</div>
-            <span class="nav-link disabled" aria-disabled="true"><x-icon name="mail" /> Campagnes <span class="nav-soon">Phase 6</span></span>
+            @can('campaigns.view')
+                <a href="{{ route('pm.campaigns.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.campaigns.*')])><x-icon name="mail" /> Campagnes</a>
+                <a href="{{ route('pm.newsletters.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.newsletters.*')])><x-icon name="newspaper" /> Newsletters</a>
+                <a href="{{ route('pm.templates.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.templates.*')])><x-icon name="layers" /> Modèles d'e-mails</a>
+                <a href="{{ route('pm.segments.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.segments.*')])><x-icon name="filter" /> Segments</a>
+            @endcan
             <span class="nav-link disabled" aria-disabled="true"><x-icon name="chart-column" /> Statistiques <span class="nav-soon">Phase 7</span></span>
 
-            @canany(['users.manage', 'pipelines.manage'])
+            @canany(['users.manage', 'pipelines.manage', 'settings.manage'])
                 <div class="nav-section">Administration</div>
                 @can('pipelines.manage')
                     <a href="{{ route('pm.settings.pipelines.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.pipelines.*')])><x-icon name="settings" /> Secteurs et pipelines</a>
+                @endcan
+                @can('settings.manage')
+                    <a href="{{ route('pm.settings.mail.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.mail.*')])><x-icon name="inbox" /> Comptes d'envoi</a>
                 @endcan
                 @can('users.manage')
                     <a href="{{ route('pm.settings.users.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.users.*')])><x-icon name="users" /> Utilisateurs et rôles</a>

@@ -540,3 +540,18 @@ details.inline-form .field { margin-bottom: .6rem; }
   .column { flex-basis: 84vw; max-height: none; }
   .js .deal-move { display: flex; }
 }
+
+/* ---------- Phase 6 : e-mails ---------- */
+.gjs-host { min-height: 560px; border: 1px solid var(--border); border-radius: 12px; overflow: hidden; margin-top: 1rem; background: #fff; }
+.preview-pair { display: flex; gap: 1rem; align-items: flex-start; overflow-x: auto; }
+.preview-pair iframe { border: 1px solid var(--border); border-radius: 12px; background: #fff; height: 620px; flex-shrink: 0; }
+.preview-desktop { width: 640px; }
+.preview-mobile { width: 375px; }
+.grow { flex: 1; }
+.meter { display: grid; gap: .5rem; }
+.checklist { list-style: none; padding: 0; margin: 0; display: grid; gap: .45rem; }
+.checklist li { display: flex; gap: .5rem; align-items: flex-start; font-size: .88rem; }
+.checklist .icon { margin-top: 2px; }
+.checklist .ok { color: var(--success); }
+.checklist .warn { color: var(--warning); }
+.checklist .ko { color: var(--danger); }

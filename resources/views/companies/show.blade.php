@@ -101,6 +101,11 @@
                         @endcan
                     </div>
                     <div class="actions">
+                        @if ($contact->email && ! isset($suppressed[$contact->email]))
+                            @can('emails.individual')
+                                <a class="btn btn-sm" href="{{ route('pm.contacts.email.create', $contact) }}"><x-icon name="mail" /> E-mail</a>
+                            @endcan
+                        @endif
                         @can('update', $contact)
                             <a class="btn btn-sm" href="{{ route('pm.contacts.edit', $contact) }}"><x-icon name="pencil" /> Modifier</a>
                         @endcan

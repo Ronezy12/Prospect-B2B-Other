@@ -24,7 +24,7 @@ fi
 php artisan optimize
 
 # File d'attente (imports) et planificateur en arrière-plan.
-su -s /bin/sh www-data -c "php artisan queue:work --queue=imports,default --sleep=2 --tries=3 >> storage/logs/worker.log 2>&1 &"
+su -s /bin/sh www-data -c "php artisan queue:work --queue=emails,imports,default --sleep=2 --tries=3 >> storage/logs/worker.log 2>&1 &"
 su -s /bin/sh www-data -c "php artisan schedule:work >> storage/logs/scheduler.log 2>&1 &"
 
 exec "$@"

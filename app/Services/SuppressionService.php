@@ -77,4 +77,38 @@ class SuppressionService
 
         return $suppression;
     }
+
+    /**
+     * Motifs bloquants par adresse pour un envoi de finalité donnée.
+     * Une adresse invalide (rebond définitif) bloque tout envoi ; une opposition
+     * bloque les envois marketing de son périmètre, jamais les messages opérationnels.
+     *
+     * @param  array<int, string>  $emails
+     * @return array<string, string> adresse normalisée → adresse_invalide | opposition
+     */
+    public function blockingReasons(array $emails, string $purpose): array
+    {
+        $byHash = [];
+        foreach ($emails as $email) {
+            if ($normalized = Normalizer::email($email)) {
+                $byHash[$this->hash($normalized)] = $normalized;
+            }
+        }
+
+        $reasons = [];
+        foreach (array_chunk(array_keys($byHash), 500) as $chunk) {
+            foreach (Suppression::whereIn('email_hash', $chunk)->get(['email_hash', 'scope', 'reason']) as $row) {
+                $email = $byHash[$row->email_hash];
+                if (in_array($row->reason, self::INVALID_REASONS, true)) {
+                    $reasons[$email] = 'adresse_invalide';
+                } elseif ($purpose !== 'operationnel' && in_array($row->scope, ['all', $purpose], true)) {
+                    $reasons[$email] ??= 'opposition';
+                }
+            }
+        }
+
+        return $reasons;
+    }
+
+    public const INVALID_REASONS = ['rebond_definitif', 'adresse_invalide'];
 }

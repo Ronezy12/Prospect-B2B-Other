@@ -107,4 +107,70 @@ return [
         'fait' => 'Fait',
         'annule' => 'Annulé',
     ],
+
+    'mail' => [
+        // Envois par lot et reprise des erreurs temporaires.
+        'batch_size' => (int) env('PM_MAIL_BATCH_SIZE', 50),
+        'max_attempts' => 3,
+        'retry_minutes' => [5, 30, 120],
+        // Un envoi resté « en cours » au-delà de ce délai est mis « à vérifier » (pas de renvoi automatique).
+        'stale_minutes' => 15,
+        'test_max_recipients' => 5,
+    ],
+
+    'mail_drivers' => [
+        'smtp' => 'Serveur SMTP',
+        'brevo' => 'API Brevo (à activer avec une clé API)',
+        'log' => 'Journal local (test, aucun envoi réel)',
+    ],
+
+    'campaign_types' => [
+        'prospection' => 'Prospection commerciale',
+        'newsletter' => 'Newsletter',
+        'operationnel' => 'Communication opérationnelle',
+        'individuel' => 'E-mail individuel',
+    ],
+
+    'campaign_statuses' => [
+        'brouillon' => 'Brouillon',
+        'programmee' => 'Programmée',
+        'en_cours' => 'Envoi en cours',
+        'en_pause' => 'En pause',
+        'terminee' => 'Terminée',
+        'annulee' => 'Annulée',
+    ],
+
+    'recipient_statuses' => [
+        'en_attente' => 'En attente',
+        'envoi' => 'Envoi en cours',
+        'accepte' => 'Accepté par le serveur d\'envoi',
+        'echec' => 'Échec',
+        'exclu' => 'Exclu (contrôle de conformité)',
+        'annule' => 'Annulé',
+        'a_verifier' => 'À vérifier (envoi interrompu)',
+    ],
+
+    'exclusion_reasons' => [
+        'opposition' => 'Opposition ou désabonnement enregistré',
+        'adresse_invalide' => 'Adresse invalide (rebond définitif)',
+        'sans_email' => 'Pas d\'adresse e-mail',
+        'b2c_sans_consentement' => 'Particulier sans consentement',
+        'non_abonne' => 'Non abonné à la liste',
+        'fiche_supprimee' => 'Fiche supprimée',
+        'doublon_adresse' => 'Adresse déjà présente dans la campagne',
+        'exclusion_tag' => 'Exclu par un tag',
+        'contacte_recemment' => 'Déjà contacté récemment',
+    ],
+
+    // Variables utilisables dans les modèles : {{prenom}}, {{entreprise}}…
+    'template_variables' => [
+        'prenom' => 'Prénom du contact',
+        'nom' => 'Nom du contact',
+        'civilite' => 'Civilité',
+        'fonction' => 'Fonction',
+        'entreprise' => 'Nom de l\'entreprise',
+        'ville' => 'Ville de l\'entreprise',
+        'expediteur' => 'Nom de l\'expéditeur',
+        'lien_desinscription' => 'Lien de désinscription',
+    ],
 ];

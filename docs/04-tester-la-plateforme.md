@@ -26,6 +26,7 @@ Comptes de démonstration (mot de passe commun : `Demo-Prospection-2026`) :
 | Commercial | commercial@demo.test | uniquement ses fiches |
 | Commercial hors équipe | commercial2@demo.test | ne voit pas les fiches de l'équipe |
 | Conformité / DPO | conformite@demo.test | lecture, oppositions, audit |
+| Marketing | marketing@demo.test | campagnes, modèles, segments, newsletters |
 
 Les 24 entreprises de démonstration sont fictives (domaines `.test`, tag « Exemple démo »). Les données sont conservées dans le volume Docker `prospection-data` ; pour repartir de zéro : `docker compose down -v`.
 
@@ -42,4 +43,7 @@ Ce mode de démonstration (SQLite, `APP_ENV=demo`) sert au test. Pour la product
 7. Ouvrir « Pipelines », glisser une carte vers une autre colonne, recharger la page : la carte est restée à sa place. Ouvrir la fiche de l'opportunité pour voir l'historique des étapes.
 8. Depuis une fiche prospect, créer une opportunité puis « Planifier une relance » ; la retrouver dans « Tâches et relances » et la marquer comme faite.
 9. En administrateur, « Secteurs et pipelines » : ajouter un secteur (sa pipeline est créée), renommer une étape, tenter de supprimer une étape non vide (refusé).
-10. Basculer le thème clair / sombre (icône lune en bas de la barre latérale) et tester sur mobile.
+10. En marketing : ouvrir « Modèles d'e-mails », éditer le modèle de prospection (glisser un bloc « Prénom »), enregistrer : une version 2 apparaît. Envoyer un test.
+11. Ouvrir la campagne « Newsletter de novembre » : envoyer un test, lire la vérification, puis « Envoyer maintenant ». Les e-mails sont écrits dans le journal (`storage/logs`), aucun n'est réellement envoyé avec le compte de démonstration.
+12. Pour un vrai test d'envoi : Paramètres › Comptes d'envoi › Nouveau compte SMTP avec vos identifiants, puis « Envoyer un test » vers votre adresse.
+13. Basculer le thème clair / sombre (icône lune en bas de la barre latérale) et tester sur mobile.
