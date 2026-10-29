@@ -589,3 +589,25 @@ a.task-row:hover { background: var(--surface-hover); }
 .funnel-row.na .figure { color: var(--muted); font-weight: 500; }
 @media (max-width: 860px) { .funnel-row { grid-template-columns: 1fr 110px; } .funnel-row .funnel-bar { grid-column: 1 / -1; grid-row: 2; } }
 .toolbar input[type=number] { width: 90px; }
+
+/* Phase 8 — réseaux sociaux */
+.platform { display: inline-flex; align-items: center; padding: .12rem .55rem; border-radius: 999px; font-size: .74rem; font-weight: 620; border: 1px solid var(--border); background: var(--surface-2); color: var(--text-2); }
+.platform-linkedin { color: #0a66c2; border-color: color-mix(in srgb, #0a66c2 35%, transparent); background: color-mix(in srgb, #0a66c2 10%, transparent); }
+.platform-facebook { color: #1877f2; border-color: color-mix(in srgb, #1877f2 35%, transparent); background: color-mix(in srgb, #1877f2 10%, transparent); }
+.platform-instagram { color: #c13584; border-color: color-mix(in srgb, #c13584 35%, transparent); background: color-mix(in srgb, #c13584 10%, transparent); }
+.platform-x { color: var(--text); }
+.break { overflow-wrap: anywhere; word-break: break-word; }
+details.inline-form.pad { padding: .75rem 1.1rem 1rem; }
+.copy-block { border: 1px solid var(--border); border-radius: 12px; padding: .75rem; margin-top: .75rem; background: var(--surface-2); }
+.copy-head { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; margin-bottom: .5rem; }
+.copy-head .btn { margin-left: auto; }
+.copy-text { width: 100%; font: inherit; resize: vertical; }
+.over-limit { color: var(--danger); font-weight: 620; }
+.chat { list-style: none; margin: 0 0 1rem; padding: 0; display: grid; gap: .65rem; }
+.chat-msg { max-width: 80%; justify-self: start; }
+.chat-msg.out { justify-self: end; text-align: right; }
+.chat-msg .bubble { padding: .6rem .85rem; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); text-align: left; }
+.chat-msg.out .bubble { background: var(--primary-soft); color: var(--primary-text); border-color: transparent; }
+.chat-msg .meta { font-size: .74rem; color: var(--muted); margin-top: .2rem; }
+.chat-msg .meta .danger { color: var(--danger); }
+@media (max-width: 640px) { .chat-msg { max-width: 100%; } }

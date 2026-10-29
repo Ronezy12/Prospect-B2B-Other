@@ -6,6 +6,7 @@ use App\Models\AutomationRun;
 use App\Models\CampaignRecipient;
 use App\Models\Company;
 use App\Models\Opportunity;
+use App\Models\SocialInteraction;
 use App\Services\SuppressionService;
 
 class ConditionEvaluator
@@ -36,8 +37,10 @@ class ConditionEvaluator
             'company.sector_id' => $company?->sector_id,
             'company.has_owner' => (bool) $company?->owner_id,
             'company.has_open_opportunity' => $company ? $company->opportunities()->whereNull('closed_at')->exists() : false,
-            'company.replied_since_start' => CampaignRecipient::whereIn('contact_id', $contactIds)->where('replied_at', '>=', $run->started_at)->exists(),
+            'company.replied_since_start' => CampaignRecipient::whereIn('contact_id', $contactIds)->where('replied_at', '>=', $run->started_at)->exists()
+                || ($company && SocialInteraction::where('company_id', $company->id)->where('type', 'message_recu')->where('occurred_at', '>=', $run->started_at)->exists()),
             'company.opposed' => $company ? (bool) $this->suppressions->blockingReasons($company->contacts()->pluck('email')->filter()->all(), 'prospection') : false,
+            'company.social_opposed' => $company ? $company->socialProfiles()->where('status', 'ne_plus_contacter')->exists() : false,
             'opportunity.stage_type' => $opportunity?->stage?->type,
             default => null,
         };

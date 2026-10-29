@@ -10,6 +10,7 @@ use App\Models\Source;
 use App\Services\ActivityRecorder;
 use App\Services\AuditLogger;
 use App\Services\DuplicateFinder;
+use App\Services\Social\SocialProfileService;
 use App\Services\SuppressionService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -72,6 +73,9 @@ class ContactController extends Controller
         if ($error = $this->emailProblem($data['email'] ?? null, null, $duplicates)) {
             return back()->withInput()->withErrors(['email' => $error]);
         }
+        if ($this->socialOpposed($data['linkedin_url'] ?? null)) {
+            return back()->withInput()->withErrors(['linkedin_url' => self::SOCIAL_OPPOSED]);
+        }
 
         $contact = DB::transaction(function () use ($request, $data, $company) {
             $contact = new Contact($data);
@@ -85,6 +89,7 @@ class ContactController extends Controller
 
             return $contact;
         });
+        app(SocialProfileService::class)->syncFromContact($contact, $request->user());
 
         return redirect()->route('pm.companies.show', $contact->company_id)->with('success', 'Contact ajouté.');
     }
@@ -110,6 +115,9 @@ class ContactController extends Controller
         if ($error = $this->emailProblem($data['email'] ?? null, $contact, $duplicates)) {
             return back()->withInput()->withErrors(['email' => $error]);
         }
+        if ($this->socialOpposed($data['linkedin_url'] ?? null)) {
+            return back()->withInput()->withErrors(['linkedin_url' => self::SOCIAL_OPPOSED]);
+        }
 
         DB::transaction(function () use ($contact, $data) {
             $contact->fill($data);
@@ -120,8 +128,19 @@ class ContactController extends Controller
                 $this->audit->log('contact.updated', $contact, $changes);
             }
         });
+        app(SocialProfileService::class)->syncFromContact($contact->refresh(), $request->user());
 
         return redirect()->route('pm.companies.show', $company)->with('success', 'Contact enregistré.');
+    }
+
+    private const SOCIAL_OPPOSED = 'Ce profil LinkedIn a demandé à ne plus être contacté : il ne peut pas être enregistré de nouveau.';
+
+    private function socialOpposed(?string $url): bool
+    {
+        $social = app(SocialProfileService::class);
+        $canonical = $url ? $social->normalizeUrl('linkedin', $url) : null;
+
+        return $canonical !== null && $social->isOpposed($canonical);
     }
 
     public function destroy(Contact $contact): RedirectResponse

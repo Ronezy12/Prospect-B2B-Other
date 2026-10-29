@@ -10,7 +10,7 @@
 | 5 — Pipelines, tâches, permissions avancées | **Terminé** (détail ci-dessous) |
 | 6 — E-mails, modèles, programmation | **Terminé** (détail ci-dessous) |
 | 7 — Statistiques, webhooks, automatisations | **Terminé** (détail ci-dessous) |
-| 8 — Réseaux sociaux | À faire |
+| 8 — Réseaux sociaux | **Terminé** (détail ci-dessous) |
 | 9 — Conformité, sécurité, tests, documentation finale | À faire (fondations posées dès la phase 4) |
 
 ## Phase 4 — livré
@@ -247,3 +247,66 @@ Limites :
 - La réception réelle des webhooks Brevo et la connexion IMAP réelle n'ont pas pu être testées depuis l'environnement de développement (réseau filtré) : elles sont couvertes par des réponses simulées et se valideront à l'installation.
 - Les notifications restent dans l'application : pas d'envoi par e-mail pour l'instant.
 - Les statistiques e-mail portent sur toutes les campagnes, sans filtre par équipe.
+
+## Phase 8 — réseaux sociaux
+
+Principe : **suivi manuel / assisté**. Le commercial agit lui-même sur la plateforme, puis consigne l'action dans le module. Aucun compte personnel n'est connecté, aucun profil n'est collecté automatiquement (pas de scraping) et aucune action n'est automatisée sur LinkedIn, Facebook, Instagram ou X. Seule l'API officielle de Meta est branchée, pour les messages reçus par la Page.
+
+Règles revérifiées en octobre 2026 :
+- **LinkedIn** : l'API de messagerie reste réservée aux partenaires approuvés, et chaque message doit correspondre à une action d'un membre (pas d'envoi automatisé ou programmé). Le suivi LinkedIn reste donc entièrement manuel.
+- **Meta** : on ne peut écrire qu'à une personne qui a contacté la Page, dans les 24 h qui suivent son dernier message. L'étiquette « agent humain » (7 jours) demande un examen de l'application par Meta : elle n'est pas activée.
+- Les webhooks Meta sont signés (`X-Hub-Signature-256`) et renvoyés en cas d'échec : ils sont traités de manière idempotente.
+
+**Profils suivis** (rubrique « Réseaux sociaux » de la fiche prospect, file de travail « Réseaux sociaux ») :
+- LinkedIn, Facebook, Instagram, X et autre réseau ; profil d'un interlocuteur ou page de l'entreprise.
+- Adresse validée et normalisée : https obligatoire, domaine vérifié pour le réseau choisi (un faux domaine du type `linkedin.com.exemple.test` est refusé), paramètres de suivi retirés. Un même profil n'est jamais suivi deux fois pour une entreprise.
+- Statuts : à contacter, invitation envoyée, connecté, message envoyé, en discussion, rendez-vous obtenu, pas intéressé, ne plus contacter.
+- Actions consignées (invitation envoyée ou acceptée, message envoyé, réponse reçue, commentaire, rendez-vous, autre) : statut proposé automatiquement, date de prochaine action, tâche de relance facultative (type « Réseau social », attribuée au responsable de la fiche). Chaque action alimente l'historique de l'entreprise.
+- File de travail en 4 vues (à traiter aujourd'hui, en cours, clos, tous), avec filtres par réseau, statut et responsable. Le périmètre suit celui des fiches (tout, équipe, mes fiches).
+- Le profil LinkedIn saisi sur une fiche contact est ajouté au suivi automatiquement.
+
+**Opposition** :
+- « Ne plus contacter » s'enregistre par une action dédiée (confirmation obligatoire). Le profil sort de la file de travail et les relances sociales ouvertes sont annulées. L'opposition ne peut être levée ni par une saisie, ni par un changement de statut.
+- Elle est conservée sous forme d'empreinte HMAC de l'adresse normalisée, même si le profil ou la fiche est supprimé. Le profil ne peut plus être réintroduit : saisie, fiche contact et import vérifient tous cette liste, et chaque refus est signalé dans le rapport d'import.
+
+**Modèles de messages** : textes courts (note d'invitation, premier message, relance, réponse) avec variables (`{{prenom}}`, `{{entreprise}}`, `{{ville}}`, `{{expediteur}}`…). Une variable inconnue est refusée. Chaque fiche de suivi propose les modèles déjà personnalisés, avec un bouton « Copier » et un compteur de caractères (limite indicative de 300 caractères pour une note d'invitation LinkedIn). Rien n'est envoyé automatiquement.
+
+**Intégration officielle Meta** (Paramètres › Connexion Meta, Messages de la Page) :
+- Identifiants (secret de l'application, jeton de Page, jeton de vérification) chiffrés en base, jamais réaffichés ni journalisés. Un champ laissé vide conserve la valeur enregistrée.
+- Webhook `GET/POST /webhooks/meta/{jeton}` : vérification de l'abonnement, signature HMAC du corps brut contrôlée avant tout traitement, chaque message enregistré une seule fois (identifiant `mid` unique). Les accusés de lecture et de livraison sont ignorés, et les messages envoyés depuis les outils Meta sont repris comme « envoyés hors du module ».
+- Messagerie partagée : une conversation non rattachée est visible de tous les utilisateurs habilités ; une fois rattachée à un prospect, elle suit le périmètre de sa fiche. Le rattachement est manuel (aucun rapprochement automatique d'identité).
+- Réponse via l'API (type `RESPONSE`) seulement dans la fenêtre de 24 h et si aucune opposition n'est enregistrée, avec un débit limité. Un message accepté est affiché « accepté par Meta », jamais « lu ».
+- Test de connexion à la Page ; les erreurs Meta sont affichées sans le jeton.
+
+**Automatisations** : nouveau déclencheur « Réponse reçue sur un réseau social » (saisie manuelle ou message reçu par la Page rattachée), nouvelle condition « opposition enregistrée sur un réseau social ». La condition « un contact a répondu » tient désormais compte des réponses sur les réseaux. Nouveau modèle de scénario : « Réponse sur un réseau social : tâche de suivi ».
+
+**Import** : nouvelles colonnes « page LinkedIn », « page Facebook » et « compte Instagram » de l'entreprise. Le profil LinkedIn du contact est normalisé et ajouté au suivi. Les adresses invalides et les profils opposés sont écartés, avec un message dans le rapport.
+
+**Statistiques** : invitations, messages, réponses, rendez-vous, taux de réponse déclaré et répartition des profils par réseau et par statut. Ces chiffres sont présentés comme issus des saisies de l'équipe, pas comme des mesures des plateformes.
+
+**Rôles** :
+- `social.use` : administrateur, responsable commercial, commercial, marketing.
+- `social.templates` : administrateur, responsable commercial, marketing.
+- `social.inbox` : administrateur, responsable commercial, commercial, marketing.
+- La connexion Meta relève de `settings.manage`.
+
+**Tests ajoutés** (13), couvrant :
+- la validation et la normalisation des adresses (dont un faux domaine et `javascript:`) ;
+- l'absence de doublons et la mise à jour du statut ;
+- les tâches de relance ;
+- l'opposition durable, refusée par la saisie, la fiche contact et l'import ;
+- les modèles et leurs variables, et les droits ;
+- le déclencheur d'automatisation ;
+- le chiffrement des secrets Meta et leur non-affichage ;
+- la vérification du webhook et la signature ;
+- l'idempotence des messages reçus et le rattachement ;
+- la fenêtre de 24 h et l'appel à l'API (avec réponse simulée) ;
+- les erreurs Meta sans fuite du jeton.
+
+Limites :
+- La connexion réelle à Meta n'a pas pu être testée ici (pas d'application Meta, réseau filtré). L'appel est vérifié avec une réponse simulée et se validera avec vos identifiants.
+- Pour passer en production, l'application Meta doit obtenir les autorisations `pages_messaging` (et `instagram_manage_messages` pour Instagram) via l'examen de Meta.
+- Les pièces jointes reçues ne sont pas téléchargées : elles sont signalées « à consulter sur la plateforme ».
+- Le nom de la personne n'est pas récupéré automatiquement auprès de Meta : il se saisit lors du rattachement.
+- La levée d'une opposition sociale (par la conformité) sera traitée en phase 9 avec les droits des personnes.
+

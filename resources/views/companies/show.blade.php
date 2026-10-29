@@ -122,6 +122,53 @@
             @endforelse
         </section>
 
+        @can('social.use')
+            <section class="card flush" id="reseaux">
+                <div class="card-head">
+                    <h2>Réseaux sociaux <span class="muted">· {{ $company->socialProfiles->count() }}</span></h2>
+                    <a class="btn btn-sm" href="{{ route('pm.social.index') }}"><x-icon name="share-2" /> File de travail</a>
+                </div>
+                @foreach ($company->socialProfiles as $profile)
+                    <div class="task-row">
+                        <div class="grow">
+                            <a class="t-title" href="{{ route('pm.social.show', $profile) }}">{{ $profile->contact?->fullName() ?? 'Profil de l\'entreprise' }}</a>
+                            <div class="t-meta">
+                                @include('social.partials.platform', ['platform' => $profile->platform])
+                                @include('social.partials.status', ['status' => $profile->status])
+                                @if ($profile->next_action_at && ! $profile->isClosed())<span @class(['late' => $profile->next_action_at->lt(today())])><x-icon name="alarm-clock" /> {{ $profile->next_action_at->format('d/m/Y') }}</span>@endif
+                            </div>
+                        </div>
+                        @unless ($profile->isOpposed())
+                            <a class="btn btn-sm" href="{{ $profile->url }}" target="_blank" rel="noopener noreferrer nofollow"><x-icon name="external-link" /> Ouvrir</a>
+                        @endunless
+                    </div>
+                @endforeach
+                <details class="inline-form pad" @if ($errors->has('url') || $company->socialProfiles->isEmpty()) open @endif>
+                    <summary>Ajouter un profil ou une page</summary>
+                    <form method="POST" action="{{ route('pm.social.store', $company) }}">
+                        @csrf
+                        <div class="form-grid">
+                            <div class="field">
+                                <label for="sp-platform">Réseau</label>
+                                <select id="sp-platform" name="platform">@foreach (config('prospection.social.platforms') as $key => $p)<option value="{{ $key }}" @selected(old('platform') === $key)>{{ $p['label'] }}</option>@endforeach</select>
+                            </div>
+                            <div class="field">
+                                <label for="sp-contact">Interlocuteur</label>
+                                <select id="sp-contact" name="contact_id"><option value="">— Page de l'entreprise —</option>@foreach ($company->contacts as $contact)<option value="{{ $contact->id }}" @selected((string) old('contact_id') === (string) $contact->id)>{{ $contact->fullName() }}</option>@endforeach</select>
+                            </div>
+                            <div class="field full">
+                                <label for="sp-url">Adresse du profil *</label>
+                                <input type="url" id="sp-url" name="url" value="{{ old('url') }}" required maxlength="255" placeholder="https://www.linkedin.com/in/…">
+                                <div class="hint">Copiez l'adresse affichée par le navigateur sur la page publique du profil. Aucune donnée n'est récupérée automatiquement.</div>
+                                @error('url')<div class="error">{{ $message }}</div>@enderror
+                            </div>
+                        </div>
+                        <div class="form-actions"><button type="submit" class="btn btn-sm btn-primary"><x-icon name="plus" /> Ajouter au suivi</button></div>
+                    </form>
+                </details>
+            </section>
+        @endcan
+
         <section class="card flush" id="opportunites">
             <div class="card-head">
                 <h2>Opportunités <span class="muted">· {{ $opportunities->count() }}</span></h2>

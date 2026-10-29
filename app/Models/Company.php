@@ -84,6 +84,11 @@ class Company extends Model
         return $this->hasMany(Task::class);
     }
 
+    public function socialProfiles(): HasMany
+    {
+        return $this->hasMany(SocialProfile::class)->orderBy('platform')->orderBy('id');
+    }
+
     public function scopeProspects(Builder $query): Builder
     {
         return $query->where('lifecycle', 'prospect');

@@ -99,6 +99,7 @@ return [
         'email' => 'E-mail',
         'rendez_vous' => 'Rendez-vous',
         'devis' => 'Devis / proposition',
+        'reseau_social' => 'Réseau social',
         'autre' => 'Autre',
     ],
 
@@ -186,6 +187,71 @@ return [
     ],
     'delivery_precedence' => ['differe' => 1, 'rebond_temporaire' => 2, 'livre' => 3, 'bloque' => 4, 'rebond_definitif' => 5, 'plainte' => 6],
 
+    /*
+    | Réseaux sociaux : suivi manuel / assisté. Aucune collecte automatique de profils
+    | et aucune action automatisée sur les plateformes (conditions d'utilisation).
+    | Seule l'API officielle de Meta (Page Facebook / Instagram professionnel) est
+    | branchée, pour recevoir les messages entrants et y répondre dans la fenêtre autorisée.
+    */
+    'social' => [
+        'platforms' => [
+            'linkedin' => ['label' => 'LinkedIn', 'hosts' => ['linkedin.com']],
+            'facebook' => ['label' => 'Facebook', 'hosts' => ['facebook.com', 'fb.com']],
+            'instagram' => ['label' => 'Instagram', 'hosts' => ['instagram.com']],
+            'x' => ['label' => 'X (Twitter)', 'hosts' => ['x.com', 'twitter.com']],
+            'autre' => ['label' => 'Autre réseau', 'hosts' => []],
+        ],
+        'statuses' => [
+            'a_contacter' => 'À contacter',
+            'invitation_envoyee' => 'Invitation envoyée',
+            'connecte' => 'Connecté / abonné',
+            'message_envoye' => 'Message envoyé',
+            'en_discussion' => 'En discussion',
+            'rdv_obtenu' => 'Rendez-vous obtenu',
+            'pas_interesse' => 'Pas intéressé',
+            'ne_plus_contacter' => 'Ne plus contacter (opposition)',
+        ],
+        // Statuts « fermés » : la fiche sort de la file de travail.
+        'closed_statuses' => ['rdv_obtenu', 'pas_interesse', 'ne_plus_contacter'],
+        'interaction_types' => [
+            'invitation_envoyee' => 'Invitation envoyée',
+            'invitation_acceptee' => 'Invitation acceptée',
+            'message_envoye' => 'Message envoyé',
+            'message_recu' => 'Réponse reçue',
+            'commentaire' => 'Commentaire / réaction sur une publication',
+            'rdv' => 'Rendez-vous fixé',
+            'autre' => 'Autre action',
+        ],
+        // Statut proposé après chaque type d'action (modifiable lors de la saisie).
+        'status_after' => [
+            'invitation_envoyee' => 'invitation_envoyee',
+            'invitation_acceptee' => 'connecte',
+            'message_envoye' => 'message_envoye',
+            'message_recu' => 'en_discussion',
+            'rdv' => 'rdv_obtenu',
+        ],
+        'outbound_types' => ['invitation_envoyee', 'message_envoye'],
+        'template_kinds' => [
+            'invitation' => 'Note d\'invitation',
+            'message' => 'Premier message',
+            'relance' => 'Relance',
+            'reponse' => 'Réponse',
+        ],
+        // Limites de longueur indicatives (vérifiez-les sur la plateforme, elles évoluent).
+        'length_limits' => ['invitation' => 300],
+        'template_variables' => ['prenom', 'nom', 'civilite', 'fonction', 'entreprise', 'ville', 'expediteur'],
+        'meta' => [
+            'graph_url' => env('PM_META_GRAPH_URL', 'https://graph.facebook.com'),
+            'graph_version' => env('PM_META_GRAPH_VERSION', 'v25.0'),
+            // Fenêtre standard de réponse après le dernier message de la personne.
+            'reply_window_hours' => 24,
+        ],
+        'channels' => [
+            'messenger' => 'Messenger (Page Facebook)',
+            'instagram' => 'Instagram (messages directs)',
+        ],
+    ],
+
     'automation' => [
         'max_steps_per_execution' => 50,
         'max_attempts' => 3,
@@ -197,6 +263,7 @@ return [
             'email.replied' => 'Réponse reçue à un e-mail',
             'email.unsubscribed' => 'Désinscription d\'un contact',
             'email.bounced' => 'Adresse invalide (rebond définitif)',
+            'social.reply_received' => 'Réponse reçue sur un réseau social',
         ],
         'step_types' => [
             'action' => 'Action',
@@ -219,8 +286,9 @@ return [
             'company.sector_id' => 'Secteur',
             'company.has_owner' => 'A un responsable',
             'company.has_open_opportunity' => 'A une opportunité en cours',
-            'company.replied_since_start' => 'Un contact a répondu depuis le début du scénario',
+            'company.replied_since_start' => 'Un contact a répondu (e-mail ou réseau social) depuis le début du scénario',
             'company.opposed' => 'Un contact s\'est opposé ou désinscrit',
+            'company.social_opposed' => 'Opposition enregistrée sur un réseau social',
             'opportunity.stage_type' => 'Type d\'étape de l\'opportunité (en cours / gagné / perdu)',
         ],
         'operators' => [

@@ -14,6 +14,7 @@ use App\Services\ActivityRecorder;
 use App\Services\AuditLogger;
 use App\Services\Automation\AutomationEngine;
 use App\Services\DuplicateFinder;
+use App\Services\Social\SocialProfileService;
 use App\Services\SuppressionService;
 use App\Support\Normalizer;
 use Carbon\Carbon;
@@ -55,6 +56,7 @@ class ImportProcessor
         private readonly SuppressionService $suppressions,
         private readonly ActivityRecorder $activities,
         private readonly AuditLogger $audit,
+        private readonly SocialProfileService $social,
     ) {}
 
     public function process(Import $import): void
@@ -123,6 +125,9 @@ class ImportProcessor
                 $messages = $warnings;
                 [$company, $companyResult] = $this->upsertCompany($data, $messages);
                 [$contact, $contactResult] = $company ? $this->upsertContact($company, $data, $messages) : [null, null];
+                if ($company) {
+                    $this->attachSocialProfiles($company, $contact, $data, $messages);
+                }
 
                 $result = $companyResult;
                 if ($contactResult === 'skipped_suppressed') {
@@ -393,6 +398,19 @@ class ImportProcessor
             return [null, 'skipped_suppressed'];
         }
 
+        if (filled($data['linkedin_url'] ?? null)) {
+            $canonical = $this->social->normalizeUrl('linkedin', $data['linkedin_url']);
+            if (! $canonical) {
+                $messages[] = 'Profil LinkedIn du contact invalide : ignoré.';
+                $data['linkedin_url'] = null;
+            } elseif ($this->social->isOpposed($canonical)) {
+                $messages[] = 'Profil LinkedIn du contact non importé : la personne a demandé à ne plus être contactée sur ce réseau.';
+                $data['linkedin_url'] = null;
+            } else {
+                $data['linkedin_url'] = $canonical;
+            }
+        }
+
         $options = (array) $this->import->options;
         $attributes = array_filter([
             'civility' => $data['civility'] ?? null,
@@ -450,6 +468,36 @@ class ImportProcessor
         $contact->save();
 
         return [$contact, 'created'];
+    }
+
+    /**
+     * Profils sociaux importés : mêmes contrôles qu'une saisie (adresse valide, opposition).
+     *
+     * @param  array<string, string|null>  $data
+     * @param  array<int, string>  $messages
+     */
+    private function attachSocialProfiles(Company $company, ?Contact $contact, array $data, array &$messages): void
+    {
+        $origin = "import #{$this->import->id}";
+        $candidates = [
+            ['linkedin', $data['company_linkedin'] ?? null, null, 'Page LinkedIn de l\'entreprise'],
+            ['facebook', $data['company_facebook'] ?? null, null, 'Page Facebook'],
+            ['instagram', $data['company_instagram'] ?? null, null, 'Compte Instagram'],
+        ];
+        if ($contact && $contact->linkedin_url && $contact->company_id === $company->id) {
+            $candidates[] = ['linkedin', $contact->linkedin_url, $contact, 'Profil LinkedIn du contact'];
+        }
+        foreach ($candidates as [$platform, $url, $person, $label]) {
+            if (blank($url)) {
+                continue;
+            }
+            [, $result] = $this->social->attach($company, $platform, $url, $person, $this->user, $origin);
+            if ($result === 'invalid') {
+                $messages[] = "{$label} : adresse invalide, ignorée.";
+            } elseif ($result === 'opposed') {
+                $messages[] = "{$label} non importé(e) : opposition enregistrée sur ce réseau.";
+            }
+        }
     }
 
     /** @param array<string, string|null> $data */

@@ -41,6 +41,15 @@ final class Presets
                     ['id' => 's2', 'type' => 'action', 'action' => 'notify_owner', 'title' => 'Réponse reçue', 'message' => 'Un contact a répondu : les relances automatiques sont suspendues.'],
                 ],
             ],
+            'reponse_sociale' => [
+                'name' => 'Réponse sur un réseau social : tâche de suivi',
+                'trigger' => 'social.reply_received',
+                'steps' => [
+                    ['id' => 's1', 'type' => 'condition', 'field' => 'company.social_opposed', 'operator' => 'is_false', 'then' => 's2', 'else' => 'end'],
+                    ['id' => 's2', 'type' => 'action', 'action' => 'create_task', 'title' => 'Répondre au message reçu sur le réseau social', 'task_type' => 'reseau_social', 'due_days' => 0],
+                    ['id' => 's3', 'type' => 'action', 'action' => 'notify_owner', 'title' => 'Réponse sur un réseau social', 'message' => 'Un prospect a répondu sur un réseau social : consultez sa fiche.'],
+                ],
+            ],
             'desabonnement' => [
                 'name' => 'Désinscription : arrêter toute sollicitation',
                 'trigger' => 'email.unsubscribed',

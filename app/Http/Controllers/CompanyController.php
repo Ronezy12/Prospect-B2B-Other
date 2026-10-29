@@ -117,7 +117,7 @@ class CompanyController extends Controller
     {
         Gate::authorize('view', $company);
 
-        $company->load(['sector', 'subsector', 'source', 'owner', 'tags', 'contacts' => fn ($q) => $q->orderByDesc('is_primary')->orderBy('last_name')]);
+        $company->load(['sector', 'subsector', 'source', 'owner', 'tags', 'contacts' => fn ($q) => $q->orderByDesc('is_primary')->orderBy('last_name'), 'socialProfiles.contact']);
         $suppressed = app(SuppressionService::class)->suppressedAmong($company->contacts->pluck('email')->filter()->all());
 
         $audit = $request->user()->can('audit.view')

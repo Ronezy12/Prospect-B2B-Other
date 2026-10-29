@@ -27,6 +27,39 @@
     }
 
     // Confirmation des actions sensibles
+    // Réseaux sociaux : copier un message type, compteur de caractères.
+    document.querySelectorAll('[data-copy]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        var field = document.getElementById(button.getAttribute('data-copy'));
+        if (!field) { return; }
+        var done = function () {
+          var label = button.lastChild;
+          var previous = label.textContent;
+          label.textContent = ' Copié';
+          setTimeout(function () { label.textContent = previous; }, 1800);
+        };
+        if (navigator.clipboard && window.isSecureContext) {
+          navigator.clipboard.writeText(field.value).then(done, function () { field.select(); document.execCommand('copy'); done(); });
+        } else {
+          field.select(); document.execCommand('copy'); done();
+        }
+      });
+    });
+    var updateCount = function (field, output, limit) {
+      var n = Array.from(field.value).length;
+      output.textContent = output.hasAttribute('data-count-for') ? n + ' caractères' : n;
+      output.classList.toggle('over-limit', !!limit && n > limit);
+    };
+    document.querySelectorAll('[data-count-for]').forEach(function (output) {
+      var field = document.getElementById(output.getAttribute('data-count-for'));
+      var limit = parseInt(output.getAttribute('data-limit') || '0', 10);
+      if (field) { field.addEventListener('input', function () { updateCount(field, output, limit); }); updateCount(field, output, limit); }
+    });
+    document.querySelectorAll('textarea[data-count]').forEach(function (field) {
+      var output = document.getElementById(field.getAttribute('data-count'));
+      if (output) { field.addEventListener('input', function () { updateCount(field, output, 0); }); }
+    });
+
     document.querySelectorAll('form[data-confirm]').forEach(function (form) {
       form.addEventListener('submit', function (event) {
         if (!window.confirm(form.getAttribute('data-confirm'))) {

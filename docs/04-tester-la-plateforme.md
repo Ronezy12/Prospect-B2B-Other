@@ -49,4 +49,7 @@ Ce mode de démonstration (SQLite, `APP_ENV=demo`) sert au test. Pour la product
 13. En marketing, « Automatisations » : ouvrir le scénario « Délai écoulé… » (brouillon), le modifier dans le constructeur, puis « Lancer le test » sur une fiche : le déroulé s'affiche sans rien modifier. L'activer.
 14. En administrateur, créer un prospect : le scénario « Nouveau prospect » crée aussitôt une tâche de qualification (visible dans Tâches et relances).
 15. « Statistiques » : entonnoir e-mail et indicateurs commerciaux ; avec le compte de démonstration, les livraisons, ouvertures et réponses sont indiquées comme indisponibles.
-16. Basculer le thème clair / sombre (icône lune en bas de la barre latérale) et tester sur mobile.
+16. En commercial, ouvrir « Réseaux sociaux » : traiter un profil « à contacter » (Ouvrir le profil, copier la note d'invitation, puis « Enregistrer l'action » avec une prochaine action et une tâche de relance). Vérifier la tâche dans « Tâches et relances » et l'historique de la fiche.
+17. Sur un profil, « Enregistrer l'opposition », puis tenter de le rajouter depuis la fiche ou par un import : refusé.
+18. « Messages de la Page » : ouvrir les conversations de démonstration. Celle de plus de 24 h ne propose plus de réponse ; la connexion de démonstration est inactive (aucun échange avec Meta).
+19. Basculer le thème clair / sombre (icône lune en bas de la barre latérale) et tester sur mobile.

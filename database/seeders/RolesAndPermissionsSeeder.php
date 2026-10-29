@@ -34,6 +34,9 @@ class RolesAndPermissionsSeeder extends Seeder
         'emails.individual' => 'Envoyer des e-mails individuels aux prospects',
         'automations.manage' => 'Créer, tester, activer et arrêter les scénarios d\'automatisation',
         'reports.view' => 'Consulter les statistiques et rapports',
+        'social.use' => 'Suivre les prospects sur les réseaux sociaux (profils, actions, relances)',
+        'social.templates' => 'Gérer les modèles de messages pour les réseaux sociaux',
+        'social.inbox' => 'Lire et répondre aux messages reçus sur la Page (API officielle Meta)',
     ];
 
     public const ROLES = [
@@ -42,9 +45,10 @@ class RolesAndPermissionsSeeder extends Seeder
             'prospects.view', 'prospects.view_team', 'prospects.create', 'prospects.update', 'prospects.delete',
             'prospects.bulk_update', 'prospects.assign', 'prospects.import', 'prospects.export', 'prospects.convert',
             'campaigns.view', 'emails.individual', 'automations.manage', 'reports.view',
+            'social.use', 'social.templates', 'social.inbox',
         ],
-        'commercial' => ['prospects.view', 'prospects.create', 'prospects.update', 'prospects.import', 'emails.individual'],
-        'marketing' => ['prospects.view', 'prospects.view_all', 'campaigns.view', 'campaigns.manage', 'campaigns.send', 'templates.manage', 'automations.manage', 'reports.view'],
+        'commercial' => ['prospects.view', 'prospects.create', 'prospects.update', 'prospects.import', 'emails.individual', 'social.use', 'social.inbox'],
+        'marketing' => ['prospects.view', 'prospects.view_all', 'campaigns.view', 'campaigns.manage', 'campaigns.send', 'templates.manage', 'automations.manage', 'reports.view', 'social.use', 'social.templates', 'social.inbox'],
         'conformite' => ['prospects.view', 'prospects.view_all', 'compliance.manage', 'audit.view', 'campaigns.view', 'reports.view'],
         'lecture_seule' => ['prospects.view', 'prospects.view_all'],
     ];

@@ -11,6 +11,11 @@ use App\Models\NewsletterList;
 use App\Models\Opportunity;
 use App\Models\Sector;
 use App\Models\Segment;
+use App\Models\SocialAccount;
+use App\Models\SocialConversation;
+use App\Models\SocialMessage;
+use App\Models\SocialProfile;
+use App\Models\SocialTemplate;
 use App\Models\Source;
 use App\Models\Subscription;
 use App\Models\Tag;
@@ -25,6 +30,7 @@ use App\Services\Automation\Presets;
 use App\Services\Mail\CampaignSender;
 use App\Services\Mail\CampaignService;
 use App\Services\PipelineService;
+use App\Services\Social\SocialProfileService;
 use Database\Seeders\DatabaseSeeder;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -182,6 +188,7 @@ class SeedDemo extends Command
 
         $this->seedEmailing();
         $this->seedAutomations();
+        $this->seedSocial();
 
         $this->newLine();
         $this->info('Données de démonstration prêtes. Comptes (mot de passe : '.self::PASSWORD.') :');
@@ -273,5 +280,88 @@ class SeedDemo extends Command
         $demo = Automation::where('trigger', 'company.created')->where('status', 'brouillon')->first();
         app(AutomationEngine::class)->test($demo, Company::first(), $demo->latestVersion->id);
         UserNotification::notify($marketer->id, 'Bienvenue dans les automatisations', 'Trois scénarios de démonstration sont actifs. Le quatrième est en brouillon : testez-le sur une fiche avant de l\'activer.', '/prospection/automatisations');
+    }
+
+    /** Suivi réseaux sociaux fictif : profils, actions consignées, une opposition et deux conversations de Page. */
+    private function seedSocial(): void
+    {
+        if (SocialProfile::exists()) {
+            return;
+        }
+        $social = app(SocialProfileService::class);
+        $manager = User::where('email', 'responsable@demo.test')->first() ?? User::first();
+
+        foreach ([
+            ['Note d\'invitation — agences', 'invitation', 'linkedin', "Bonjour {{prenom}}, j'accompagne les professionnels de {{ville}} sur leurs travaux d'aménagement. Ravi d'échanger avec {{entreprise}} ! {{expediteur}}"],
+            ['Premier message après connexion', 'message', 'linkedin', "Merci pour la connexion, {{prenom}}. Entreprise AR réalise des rénovations de locaux professionnels. Seriez-vous ouvert(e) à un court échange de 15 minutes ?\n\n{{expediteur}}"],
+            ['Relance douce', 'relance', null, "Bonjour {{prenom}}, je me permets de revenir vers vous au sujet de {{entreprise}}. Si le moment n'est pas idéal, dites-le-moi simplement. {{expediteur}}"],
+        ] as [$name, $kind, $platform, $body]) {
+            $template = new SocialTemplate(['name' => $name, 'kind' => $kind, 'platform' => $platform, 'body' => $body, 'is_active' => true]);
+            $template->created_by = $manager->id;
+            $template->save();
+        }
+
+        $plans = [
+            ['linkedin', 'invitation_envoyee', 1, null],
+            ['linkedin', 'message_envoye', 3, 'message_recu'],
+            ['facebook', null, 0, null],
+            ['linkedin', 'invitation_acceptee', 2, 'message_envoye'],
+            ['instagram', 'commentaire', 5, null],
+            ['linkedin', 'message_envoye', 6, 'rdv'],
+            ['linkedin', null, 0, null],
+            ['facebook', 'message_envoye', 8, null],
+        ];
+        $companies = Company::with('contacts')->orderBy('id')->limit(count($plans) + 1)->get();
+        foreach ($plans as $i => [$platform, $first, $daysAgo, $second]) {
+            $company = $companies[$i];
+            $contact = $company->contacts->first();
+            $slug = Str::slug($platform === 'linkedin' && $contact ? $contact->fullName() : $company->name);
+            $url = match ($platform) {
+                'linkedin' => $contact ? "https://www.linkedin.com/in/{$slug}-demo" : "https://www.linkedin.com/company/{$slug}-demo",
+                'facebook' => "https://www.facebook.com/{$slug}.demo",
+                default => "https://www.instagram.com/{$slug}.demo",
+            };
+            [$profile] = $social->attach($company, $platform, $url, $platform === 'linkedin' ? $contact : null, $company->owner ?? $manager, 'démonstration');
+            if (! $profile) {
+                continue;
+            }
+            $actor = $company->owner ?? $manager;
+            if ($first) {
+                $social->logInteraction($profile, $first, 'Action consignée pour la démonstration.', now()->subDays($daysAgo)->setTime(10, 15), null, $second ? null : now()->addDays(($i % 3))->setTime(9, 0), $actor);
+            }
+            if ($second) {
+                $social->logInteraction($profile, $second, $second === 'message_recu' ? 'Merci pour votre message, rappelez-moi la semaine prochaine.' : 'Suite donnée pour la démonstration.', now()->subDays(max(0, $daysAgo - 1))->setTime(15, 40), null, $second === 'rdv' ? null : now()->addDays(2)->setTime(9, 0), $actor, $second === 'message_recu');
+            }
+        }
+        // Une demande d'arrêt : opposition durable.
+        if ($company = $companies[count($plans)] ?? null) {
+            [$profile] = $social->attach($company, 'linkedin', 'https://www.linkedin.com/company/'.Str::slug($company->name).'-demo', null, $manager, 'démonstration');
+            if ($profile) {
+                $social->logInteraction($profile, 'message_envoye', 'Premier message envoyé.', now()->subDays(12), null, null, $manager);
+                $social->oppose($profile, 'A répondu « merci de ne plus me contacter » (démonstration)', $manager);
+            }
+        }
+
+        // Connexion Meta de démonstration, inactive : aucune donnée n'est échangée avec Meta.
+        $account = new SocialAccount(['name' => 'Page de démonstration (non connectée)', 'is_active' => false]);
+        $account->webhook_token = Str::random(48);
+        $account->settings = ['app_id' => '0', 'page_id' => '0', 'graph_version' => config('prospection.social.meta.graph_version')];
+        $account->save();
+        foreach ([
+            ['10000000001', 'Visiteur de la Page (démo)', 3, 'Bonjour, vous intervenez sur Villeurbanne pour une rénovation de bureaux ?', null],
+            ['10000000002', 'Contact Instagram (démo)', 50, 'Super réalisation ! Vous faites aussi les commerces ?', 'Bonjour, oui, nous intervenons aussi sur les commerces. Je vous laisse nos coordonnées.'],
+        ] as $n => [$psid, $label, $hoursAgo, $in, $out]) {
+            $conversation = SocialConversation::create(['account_id' => $account->id, 'channel' => $n ? 'instagram' : 'messenger', 'participant_id' => $psid, 'participant_label' => $label]);
+            $conversation->forceFill(['last_inbound_at' => now()->subHours($hoursAgo), 'last_message_at' => now()->subHours($out ? $hoursAgo - 1 : $hoursAgo), 'unread' => ! $out, 'company_id' => $n ? null : $companies[2]->id])->save();
+            $message = new SocialMessage(['direction' => 'entrant', 'external_id' => 'demo-'.$psid.'-1', 'body' => $in, 'status' => 'recu', 'sent_at' => now()->subHours($hoursAgo)]);
+            $message->conversation_id = $conversation->id;
+            $message->save();
+            if ($out) {
+                $reply = new SocialMessage(['direction' => 'sortant', 'external_id' => 'demo-'.$psid.'-2', 'body' => $out, 'status' => 'accepte', 'sent_at' => now()->subHours($hoursAgo - 1)]);
+                $reply->conversation_id = $conversation->id;
+                $reply->user_id = $manager->id;
+                $reply->save();
+            }
+        }
     }
 }

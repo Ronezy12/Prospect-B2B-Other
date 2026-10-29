@@ -12,6 +12,7 @@ use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\IndividualEmailController;
+use App\Http\Controllers\MetaWebhookController;
 use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OpportunityController;
@@ -21,8 +22,12 @@ use App\Http\Controllers\SegmentController;
 use App\Http\Controllers\Settings\InboxController;
 use App\Http\Controllers\Settings\MailAccountController;
 use App\Http\Controllers\Settings\PipelineSettingsController;
+use App\Http\Controllers\Settings\SocialAccountController;
 use App\Http\Controllers\Settings\TrackingSettingsController;
 use App\Http\Controllers\Settings\UserController;
+use App\Http\Controllers\SocialInboxController;
+use App\Http\Controllers\SocialProfileController;
+use App\Http\Controllers\SocialTemplateController;
 use App\Http\Controllers\SuppressionController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TemplateController;
@@ -34,6 +39,8 @@ Route::redirect('/', '/prospection');
 
 // Webhooks fournisseurs (authentifiés par jeton) et suivi interne (liens signés).
 Route::post('/webhooks/brevo/{token}', BrevoWebhookController::class)->middleware('throttle:600,1')->name('webhooks.brevo');
+Route::get('/webhooks/meta/{token}', [MetaWebhookController::class, 'verify'])->middleware('throttle:30,1')->name('webhooks.meta.verify');
+Route::post('/webhooks/meta/{token}', [MetaWebhookController::class, 'receive'])->middleware('throttle:600,1')->name('webhooks.meta');
 Route::get('/t/o/{recipient}/{signature}', [TrackingController::class, 'open'])->middleware('throttle:120,1')->name('tracking.open');
 Route::get('/t/c/{recipient}/{signature}', [TrackingController::class, 'click'])->middleware('throttle:120,1')->name('tracking.click');
 
@@ -104,6 +111,20 @@ Route::middleware('auth')->group(function () {
         Route::post('campagnes/{campaign}/dupliquer', [CampaignController::class, 'duplicate'])->name('campaigns.duplicate');
         Route::resource('campagnes', CampaignController::class)->parameters(['campagnes' => 'campaign'])->names('campaigns');
 
+        Route::get('reseaux-sociaux', [SocialProfileController::class, 'index'])->name('social.index');
+        Route::post('prospects/{company}/reseaux-sociaux', [SocialProfileController::class, 'store'])->name('social.store');
+        Route::get('reseaux-sociaux/profils/{profile}', [SocialProfileController::class, 'show'])->name('social.show');
+        Route::put('reseaux-sociaux/profils/{profile}', [SocialProfileController::class, 'update'])->name('social.update');
+        Route::delete('reseaux-sociaux/profils/{profile}', [SocialProfileController::class, 'destroy'])->name('social.destroy');
+        Route::post('reseaux-sociaux/profils/{profile}/actions', [SocialProfileController::class, 'interaction'])->middleware('throttle:120,1')->name('social.interaction');
+        Route::post('reseaux-sociaux/profils/{profile}/opposition', [SocialProfileController::class, 'oppose'])->name('social.oppose');
+        Route::resource('reseaux-sociaux/modeles', SocialTemplateController::class)->except(['show', 'destroy'])->parameters(['modeles' => 'template'])->names('social.templates');
+        Route::get('reseaux-sociaux/messages', [SocialInboxController::class, 'index'])->name('social.inbox.index');
+        Route::get('reseaux-sociaux/messages/{conversation}', [SocialInboxController::class, 'show'])->name('social.inbox.show');
+        Route::put('reseaux-sociaux/messages/{conversation}', [SocialInboxController::class, 'link'])->name('social.inbox.link');
+        Route::post('reseaux-sociaux/messages/{conversation}/repondre', [SocialInboxController::class, 'reply'])->middleware('throttle:30,1')->name('social.inbox.reply');
+        Route::post('reseaux-sociaux/messages/{conversation}/statut', [SocialInboxController::class, 'archive'])->name('social.inbox.archive');
+
         Route::get('statistiques', ReportController::class)->name('reports.index');
 
         Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
@@ -118,6 +139,8 @@ Route::middleware('auth')->group(function () {
         Route::resource('automatisations', AutomationController::class)->except('create')->parameters(['automatisations' => 'automation'])->names('automations');
 
         Route::prefix('parametres')->name('settings.')->group(function () {
+            Route::post('meta/{account}/test', [SocialAccountController::class, 'test'])->middleware('throttle:10,1')->name('social.test');
+            Route::resource('meta', SocialAccountController::class)->except(['show', 'destroy'])->parameters(['meta' => 'account'])->names('social');
             Route::get('suivi', [TrackingSettingsController::class, 'edit'])->name('tracking.edit');
             Route::put('suivi', [TrackingSettingsController::class, 'update'])->name('tracking.update');
             Route::post('boites/{inbox}/verifier', [InboxController::class, 'check'])->middleware('throttle:10,1')->name('inboxes.check');

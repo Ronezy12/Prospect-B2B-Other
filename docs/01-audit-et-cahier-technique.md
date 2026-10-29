@@ -99,7 +99,7 @@ Ces points sont une interprétation technique : **validation par un juriste/DPO 
 | Opérationnel (facture, RDV) | Hors marketing ; ne contient pas de contenu promotionnel ; non bloqué par une désinscription marketing, bloqué par une adresse invalide. |
 Chaque contact porte le type de cible (B2B/B2C), la base légale, la source et la date de collecte. Une campagne **ne peut pas être lancée** si un destinataire ne satisfait pas la règle de sa catégorie (il est exclu et la raison est journalisée).
 
-## 6. Réseaux sociaux (synthèse, à revérifier lors de la phase 8)
+## 6. Réseaux sociaux (revérifié en phase 8, octobre 2026 — voir 03-avancement.md)
 - **LinkedIn** : les API de messagerie et d'accès aux profils sont réservées à des partenaires approuvés ; aucune API ouverte pour la prospection automatisée. → Suivi **manuel/assisté** (URL de profil, statut de prise de contact, lien direct).
 - **Facebook / Instagram (Meta Graph API)** : messagerie autorisée uniquement en réponse à une personne ayant contacté la Page (fenêtre de 24 h). → Suivi manuel ; connexion officielle de Page envisageable plus tard pour importer les conversations entrantes.
 - Aucun scraping, aucune automatisation d'actions non permise.

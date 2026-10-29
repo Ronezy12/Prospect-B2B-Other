@@ -9,6 +9,8 @@ use App\Models\Inbox;
 use App\Models\Opportunity;
 use App\Models\PipelineStage;
 use App\Models\Setting;
+use App\Models\SocialInteraction;
+use App\Models\SocialProfile;
 use App\Models\StageHistory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -73,7 +75,21 @@ class ReportController extends Controller
             ])
             ->latest('started_at')->limit(50)->get();
 
+        // Réseaux sociaux : actions déclarées par l'équipe (saisie manuelle) ou reçues via l'API Meta.
+        $visibleCompanies = Company::visibleTo($request->user())->select('id');
+        $interactions = SocialInteraction::whereIn('company_id', $visibleCompanies)->where('occurred_at', '>=', $since);
+        $contacted = (clone $interactions)->whereIn('type', config('prospection.social.outbound_types'))->distinct('profile_id')->count('profile_id');
+        $repliedProfiles = (clone $interactions)->where('type', 'message_recu')->distinct('profile_id')->count('profile_id');
+        $social = [
+            'par_type' => (clone $interactions)->selectRaw('type, count(*) as total')->groupBy('type')->pluck('total', 'type')->all(),
+            'contactes' => $contacted,
+            'ont_repondu' => $repliedProfiles,
+            'par_plateforme' => SocialProfile::visibleTo($request->user())->selectRaw('platform, status, count(*) as total')->groupBy('platform', 'status')->get()
+                ->groupBy('platform')->map(fn ($rows) => $rows->pluck('total', 'status')->all())->all(),
+        ];
+
         return view('reports.index', [
+            'social' => $social,
             'days' => $days,
             'email' => $email,
             'commercial' => $commercial,

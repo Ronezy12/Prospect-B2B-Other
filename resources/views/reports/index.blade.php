@@ -86,4 +86,29 @@
     </div>
     <p class="small muted card-title">n.d. : non disponible avec ce type de compte d'envoi (SMTP ou journal local ne renvoient pas d'événements de livraison).</p>
 </section>
+<section class="card">
+    <h2><x-icon name="share-2" /> Réseaux sociaux</h2>
+    <p class="small muted">Chiffres issus des actions consignées par l'équipe (et des messages reçus via l'API Meta) : ils reflètent ce qui a été saisi, pas une mesure faite par les plateformes.</p>
+    <div class="stats">
+        <div class="stat"><div><div class="value">{{ $social['par_type']['invitation_envoyee'] ?? 0 }}</div><div class="label">Invitations envoyées</div></div></div>
+        <div class="stat"><div><div class="value">{{ $social['par_type']['message_envoye'] ?? 0 }}</div><div class="label">Messages envoyés</div></div></div>
+        <div class="stat"><div><div class="value">{{ $social['par_type']['message_recu'] ?? 0 }}</div><div class="label">Réponses reçues</div></div></div>
+        <div class="stat"><div><div class="value">{{ $social['par_type']['rdv'] ?? 0 }}</div><div class="label">Rendez-vous fixés</div></div></div>
+        <div class="stat"><div><div class="value">@if ($social['contactes']){{ round(100 * $social['ont_repondu'] / $social['contactes']) }} %@else — @endif</div><div class="label">Taux de réponse déclaré ({{ $social['ont_repondu'] }} / {{ $social['contactes'] }} profils sollicités)</div></div></div>
+    </div>
+    @if ($social['par_plateforme'])
+        <div class="table-wrap">
+            <table class="table">
+                <thead><tr><th>Réseau</th>@foreach (config('prospection.social.statuses') as $label)<th class="num">{{ $label }}</th>@endforeach</tr></thead>
+                <tbody>
+                @foreach ($social['par_plateforme'] as $platform => $byStatus)
+                    <tr><td>@include('social.partials.platform', ['platform' => $platform])</td>@foreach (array_keys(config('prospection.social.statuses')) as $status)<td class="num">{{ $byStatus[$status] ?? 0 }}</td>@endforeach</tr>
+                @endforeach
+                </tbody>
+            </table>
+        </div>
+    @else
+        <p class="muted small">Aucun profil suivi pour l'instant.</p>
+    @endif
+</section>
 @endsection

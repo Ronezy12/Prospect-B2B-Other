@@ -7,14 +7,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Prospection') — {{ config('app.name') }}</title>
     <link rel="preload" href="{{ asset('fonts/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=5">
-    <script src="{{ asset('js/theme.js') }}?v=5"></script>
-    <script src="{{ asset('js/pm.js') }}?v=5" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=6">
+    <script src="{{ asset('js/theme.js') }}?v=6"></script>
+    <script src="{{ asset('js/pm.js') }}?v=6" defer></script>
     @stack('head')
 </head>
 <body>
 @php($u = auth()->user())
 @php($overdueTasks = \App\Models\Task::where('assignee_id', $u->id)->where('status', 'a_faire')->where('due_at', '<', now())->count())
+@php($unreadSocial = $u->can('social.inbox') ? \App\Models\SocialConversation::visibleTo($u)->where('unread', true)->count() : 0)
 @php($unreadNotifications = \App\Models\UserNotification::where('user_id', $u->id)->whereNull('read_at')->count())
 <div class="app">
     <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
@@ -33,9 +34,15 @@
                 <a href="{{ route('pm.imports.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.imports.*')])><x-icon name="upload" /> Imports</a>
             @endcan
             <a href="{{ route('pm.pipelines.show') }}" @class(['nav-link', 'active' => request()->routeIs('pm.pipelines.*', 'pm.opportunities.*')])><x-icon name="kanban" /> Pipelines</a>
+            @can('social.use')
+                <a href="{{ route('pm.social.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.social.index', 'pm.social.show', 'pm.social.templates.*')])><x-icon name="share-2" /> Réseaux sociaux</a>
+            @endcan
+            @can('social.inbox')
+                <a href="{{ route('pm.social.inbox.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.social.inbox.*')])><x-icon name="messages-square" /> Messages de la Page @if ($unreadSocial)<span class="nav-count" title="Conversations non lues">{{ $unreadSocial }}</span>@endif</a>
+            @endcan
             <a href="{{ route('pm.tasks.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.tasks.*')])><x-icon name="list-checks" /> Tâches et relances @if ($overdueTasks)<span class="nav-count" title="Tâches en retard">{{ $overdueTasks }}</span>@endif</a>
 
-            <div class="nav-section">Marketing</div>
+            @canany(['campaigns.view', 'automations.manage', 'reports.view'])<div class="nav-section">Marketing</div>@endcanany
             @can('campaigns.view')
                 <a href="{{ route('pm.campaigns.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.campaigns.*')])><x-icon name="mail" /> Campagnes</a>
                 <a href="{{ route('pm.newsletters.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.newsletters.*')])><x-icon name="newspaper" /> Newsletters</a>
@@ -57,6 +64,7 @@
                 @can('settings.manage')
                     <a href="{{ route('pm.settings.mail.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.mail.*')])><x-icon name="inbox" /> Comptes d'envoi</a>
                     <a href="{{ route('pm.settings.inboxes.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.inboxes.*')])><x-icon name="mail" /> Réponses (IMAP)</a>
+                    <a href="{{ route('pm.settings.social.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.social.*')])><x-icon name="share-2" /> Connexion Meta</a>
                     <a href="{{ route('pm.settings.tracking.edit') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.tracking.*')])><x-icon name="shield-check" /> Suivi des e-mails</a>
                 @endcan
                 @can('users.manage')
