@@ -41,7 +41,8 @@ class BrevoProvider implements MailProvider
             'subject' => $message->subject,
             'htmlContent' => $message->html,
             'textContent' => $message->text,
-            'headers' => $message->headers + ['X-PM-Message-Key' => $message->messageKey],
+            // X-Mailin-custom est renvoyé par Brevo dans ses webhooks : il relie l'événement au destinataire.
+            'headers' => $message->headers + ['X-Mailin-custom' => $message->messageKey],
         ]);
 
         try {

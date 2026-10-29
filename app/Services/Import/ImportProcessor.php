@@ -12,6 +12,7 @@ use App\Models\Tag;
 use App\Models\User;
 use App\Services\ActivityRecorder;
 use App\Services\AuditLogger;
+use App\Services\Automation\AutomationEngine;
 use App\Services\DuplicateFinder;
 use App\Services\SuppressionService;
 use App\Support\Normalizer;
@@ -368,6 +369,7 @@ class ImportProcessor
         $company->save();
         $this->syncTags($company, $data);
         $this->activities->record($company, 'systeme', "Fiche créée par l'import #{$this->import->id} ({$this->import->original_name}).", ['import_id' => $this->import->id], $this->user->id);
+        app(AutomationEngine::class)->fire('company.created', $company, 'created', ['import_id' => $this->import->id]);
 
         return [$company, 'created'];
     }

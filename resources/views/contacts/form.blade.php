@@ -98,6 +98,12 @@
                 <input type="date" id="collected_at" name="collected_at" value="{{ old('collected_at', $contact->collected_at?->format('Y-m-d')) }}">
             </div>
             <div class="field full">
+                <label class="checkbox"><input type="hidden" name="tracking_consent" value="0"><input type="checkbox" name="tracking_consent" value="1" @checked(old('tracking_consent', (bool) $contact->tracking_consent_at))> Consent à la mesure d'audience de nos e-mails (ouvertures et clics)</label>
+                <input type="text" id="tracking_consent_source" name="tracking_consent_source" value="{{ old('tracking_consent_source', $contact->tracking_consent_source) }}" maxlength="255" placeholder="Preuve : ex. case cochée sur le formulaire du salon 2026" aria-label="Source du consentement">
+                @if ($contact->tracking_consent_at)<div class="hint">Consentement enregistré le {{ $contact->tracking_consent_at->format('d/m/Y') }}.</div>@endif
+                @error('tracking_consent_source')<div class="error">{{ $message }}</div>@enderror
+            </div>
+            <div class="field full">
                 <label for="collection_note">Contexte de collecte / information de la personne</label>
                 <input type="text" id="collection_note" name="collection_note" value="{{ old('collection_note', $contact->collection_note) }}" maxlength="255">
             </div>

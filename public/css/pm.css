@@ -555,3 +555,37 @@ details.inline-form .field { margin-bottom: .6rem; }
 .checklist .ok { color: var(--success); }
 .checklist .warn { color: var(--warning); }
 .checklist .ko { color: var(--danger); }
+
+/* ---------- Phase 7 : automatisations, statistiques ---------- */
+.steps-list { display: grid; gap: .9rem; }
+.step-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 1rem 1.2rem; border-left: 4px solid var(--primary); }
+.step-head { display: flex; align-items: center; gap: .6rem; margin-bottom: .85rem; flex-wrap: wrap; }
+.step-head select { width: auto; }
+.step-num { font-weight: 700; font-size: .9rem; min-width: 70px; }
+.preset-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .85rem; }
+.preset { display: grid; gap: .4rem; align-content: start; padding: 1rem; border: 1px solid var(--border); border-radius: 14px; background: var(--surface-2); }
+.preset .btn { justify-self: start; margin-top: .3rem; }
+.flow { list-style: none; margin: 0; padding: 0; display: grid; gap: .5rem; }
+.flow li { display: flex; align-items: center; gap: .55rem; flex-wrap: wrap; padding: .6rem .8rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); font-size: .9rem; }
+.flow li .icon { color: var(--primary); }
+.flow .flow-trigger { background: var(--gradient-soft); font-weight: 620; }
+.flow-num { width: 22px; height: 22px; border-radius: 50%; display: inline-grid; place-items: center; background: var(--surface); border: 1px solid var(--border); font-size: .72rem; font-weight: 700; }
+details.run { border-bottom: 1px solid var(--border); padding: .75rem 1.2rem; }
+details.run summary { cursor: pointer; display: flex; gap: .6rem; align-items: center; flex-wrap: wrap; }
+details.run[open] summary { margin-bottom: .6rem; }
+a.task-row { color: inherit; text-decoration: none; }
+a.task-row:hover { background: var(--surface-hover); }
+.task-row.unread .t-title { font-weight: 720; }
+.dot-state { width: 9px; height: 9px; border-radius: 50%; background: var(--border-strong); margin-top: .45rem; flex-shrink: 0; }
+.dot-state.on { background: var(--primary); }
+.kpi-unavailable { color: var(--muted); font-size: .8rem; }
+.funnel { display: grid; gap: .6rem; }
+.funnel-row { display: grid; grid-template-columns: 210px 1fr 110px; gap: .75rem; align-items: center; font-size: .88rem; }
+.funnel-bar { width: 100%; height: 10px; appearance: none; border: 0; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.funnel-bar::-webkit-progress-bar { background: var(--surface-2); border-radius: 99px; }
+.funnel-bar::-webkit-progress-value { background: var(--gradient); border-radius: 99px; }
+.funnel-bar::-moz-progress-bar { background: var(--gradient); border-radius: 99px; }
+.funnel-row .figure { text-align: right; font-variant-numeric: tabular-nums; font-weight: 650; }
+.funnel-row.na .figure { color: var(--muted); font-weight: 500; }
+@media (max-width: 860px) { .funnel-row { grid-template-columns: 1fr 110px; } .funnel-row .funnel-bar { grid-column: 1 / -1; grid-row: 2; } }
+.toolbar input[type=number] { width: 90px; }

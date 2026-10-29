@@ -12,6 +12,7 @@ use App\Models\Tag;
 use App\Models\User;
 use App\Services\ActivityRecorder;
 use App\Services\AuditLogger;
+use App\Services\Automation\AutomationEngine;
 use App\Services\DuplicateFinder;
 use App\Services\SuppressionService;
 use Illuminate\Http\RedirectResponse;
@@ -107,6 +108,7 @@ class CompanyController extends Controller
 
             return $company;
         });
+        app(AutomationEngine::class)->fire('company.created', $company, 'created');
 
         return redirect()->route('pm.companies.show', $company)->with('success', 'Prospect créé.');
     }
@@ -167,6 +169,9 @@ class CompanyController extends Controller
                     $this->activities->record($company, 'systeme', 'Responsable modifié : '.($company->owner?->name ?? 'aucun').'.');
                 }
                 $this->audit->log('company.updated', $company, $changes);
+            }
+            if (isset($changes['status'])) {
+                app(AutomationEngine::class)->fire('company.status_changed', $company, 'status:'.$changes['status']['avant'].'>'.$changes['status']['après'].':'.now()->timestamp, $changes['status']);
             }
         });
 

@@ -15,7 +15,8 @@
         "laravel/tinker": "^3.0",
         "league/csv": "^9.29",
         "phpoffice/phpspreadsheet": "^5.10",
-        "spatie/laravel-permission": "^8.3"
+        "spatie/laravel-permission": "^8.3",
+        "webklex/php-imap": "^6.2"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",
@@ -48,7 +49,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "php artisan serve & php artisan queue:work --queue=emails,imports,default"
+            "php artisan serve & php artisan queue:work --queue=emails,automations,imports,default"
         ],
         "test": [
             "@php artisan config:clear --ansi @no_additional_args",

@@ -28,6 +28,7 @@ class Contact extends Model
         return [
             'collected_at' => 'date',
             'is_primary' => 'boolean',
+            'tracking_consent_at' => 'datetime',
         ];
     }
 

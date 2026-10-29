@@ -18,6 +18,12 @@ class CampaignRecipient extends Model
             'next_attempt_at' => 'datetime',
             'locked_at' => 'datetime',
             'sent_at' => 'datetime',
+            'delivered_at' => 'datetime',
+            'bounced_at' => 'datetime',
+            'opened_at' => 'datetime',
+            'clicked_at' => 'datetime',
+            'replied_at' => 'datetime',
+            'unsubscribed_at' => 'datetime',
         ];
     }
 

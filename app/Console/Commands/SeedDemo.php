@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Automation;
 use App\Models\Campaign;
 use App\Models\Company;
 use App\Models\Contact;
@@ -17,7 +18,10 @@ use App\Models\Task;
 use App\Models\Team;
 use App\Models\Template;
 use App\Models\User;
+use App\Models\UserNotification;
 use App\Services\ActivityRecorder;
+use App\Services\Automation\AutomationEngine;
+use App\Services\Automation\Presets;
 use App\Services\Mail\CampaignSender;
 use App\Services\Mail\CampaignService;
 use App\Services\PipelineService;
@@ -177,6 +181,7 @@ class SeedDemo extends Command
         });
 
         $this->seedEmailing();
+        $this->seedAutomations();
 
         $this->newLine();
         $this->info('Données de démonstration prêtes. Comptes (mot de passe : '.self::PASSWORD.') :');
@@ -247,5 +252,26 @@ class SeedDemo extends Command
         $draft = new Campaign(['name' => 'Newsletter de novembre', 'type' => 'newsletter', 'template_id' => $newsletter->id, 'mail_account_id' => $account->id, 'list_id' => $list->id]);
         $draft->created_by = $marketer->id;
         $draft->save();
+    }
+
+    /** Scénarios de démonstration activés à partir des modèles prêts à l'emploi. */
+    private function seedAutomations(): void
+    {
+        if (Automation::exists()) {
+            return;
+        }
+        $marketer = User::where('email', 'marketing@demo.test')->firstOrFail();
+        foreach (['nouveau_prospect', 'reponse_recue', 'opportunite_gagnee', 'relance_pertinente'] as $i => $key) {
+            $preset = Presets::all()[$key];
+            $automation = Automation::create(['name' => $preset['name'], 'trigger' => $preset['trigger']]);
+            $automation->forceFill(['created_by' => $marketer->id])->save();
+            $version = $automation->addVersion(['steps' => $preset['steps']], $marketer->id);
+            if ($i < 3) {
+                $automation->forceFill(['status' => 'active', 'active_version_id' => $version->id])->save();
+            }
+        }
+        $demo = Automation::where('trigger', 'company.created')->where('status', 'brouillon')->first();
+        app(AutomationEngine::class)->test($demo, Company::first(), $demo->latestVersion->id);
+        UserNotification::notify($marketer->id, 'Bienvenue dans les automatisations', 'Trois scénarios de démonstration sont actifs. Le quatrième est en brouillon : testez-le sur une fiche avant de l\'activer.', '/prospection/automatisations');
     }
 }

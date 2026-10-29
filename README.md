@@ -27,7 +27,7 @@ touch database/database.sqlite
 php artisan migrate --seed
 php artisan pm:create-admin vous@exemple.fr   # ou : php artisan pm:demo (comptes et données fictives)
 php artisan serve            # puis, dans un autre terminal :
-php artisan queue:work --queue=emails,imports,default
+php artisan queue:work --queue=emails,automations,imports,default
 ```
 
 Tests : `php artisan test`.

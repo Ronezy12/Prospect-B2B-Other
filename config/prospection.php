@@ -173,4 +173,61 @@ return [
         'expediteur' => 'Nom de l\'expéditeur',
         'lien_desinscription' => 'Lien de désinscription',
     ],
+
+    // Résultat de livraison remonté par le fournisseur (webhooks). Un statut plus
+    // « grave » n'est jamais écrasé par un événement arrivé en retard.
+    'delivery_statuses' => [
+        'differe' => 'Livraison différée',
+        'rebond_temporaire' => 'Rebond temporaire',
+        'livre' => 'Livré',
+        'bloque' => 'Bloqué par le fournisseur',
+        'rebond_definitif' => 'Rebond définitif',
+        'plainte' => 'Signalé comme indésirable',
+    ],
+    'delivery_precedence' => ['differe' => 1, 'rebond_temporaire' => 2, 'livre' => 3, 'bloque' => 4, 'rebond_definitif' => 5, 'plainte' => 6],
+
+    'automation' => [
+        'max_steps_per_execution' => 50,
+        'max_attempts' => 3,
+        'triggers' => [
+            'company.created' => 'Nouveau prospect créé',
+            'company.status_changed' => 'Changement de statut d\'un prospect',
+            'opportunity.stage_changed' => 'Changement d\'étape d\'une opportunité',
+            'opportunity.won' => 'Opportunité gagnée',
+            'email.replied' => 'Réponse reçue à un e-mail',
+            'email.unsubscribed' => 'Désinscription d\'un contact',
+            'email.bounced' => 'Adresse invalide (rebond définitif)',
+        ],
+        'step_types' => [
+            'action' => 'Action',
+            'delay' => 'Attendre',
+            'condition' => 'Condition (si… sinon…)',
+        ],
+        'actions' => [
+            'create_task' => 'Créer une tâche pour le responsable',
+            'notify_owner' => 'Notifier le responsable',
+            'set_company_status' => 'Changer le statut du prospect',
+            'add_tag' => 'Ajouter un tag à l\'entreprise',
+            'send_email' => 'Envoyer un e-mail au contact principal (contrôles de conformité appliqués)',
+            'stop_followups' => 'Suspendre les relances (tâches et scénarios en attente)',
+            'convert_to_client' => 'Enregistrer la conversion en client',
+            'stop' => 'Arrêter le scénario',
+        ],
+        'conditions' => [
+            'company.status' => 'Statut du prospect',
+            'company.lifecycle' => 'Cycle (prospect / client)',
+            'company.sector_id' => 'Secteur',
+            'company.has_owner' => 'A un responsable',
+            'company.has_open_opportunity' => 'A une opportunité en cours',
+            'company.replied_since_start' => 'Un contact a répondu depuis le début du scénario',
+            'company.opposed' => 'Un contact s\'est opposé ou désinscrit',
+            'opportunity.stage_type' => 'Type d\'étape de l\'opportunité (en cours / gagné / perdu)',
+        ],
+        'operators' => [
+            'equals' => 'est égal à',
+            'not_equals' => 'est différent de',
+            'is_true' => 'est vrai',
+            'is_false' => 'est faux',
+        ],
+    ],
 ];

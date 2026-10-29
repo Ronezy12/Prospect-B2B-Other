@@ -7,14 +7,15 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Prospection') — {{ config('app.name') }}</title>
     <link rel="preload" href="{{ asset('fonts/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=4">
-    <script src="{{ asset('js/theme.js') }}?v=4"></script>
-    <script src="{{ asset('js/pm.js') }}?v=4" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=5">
+    <script src="{{ asset('js/theme.js') }}?v=5"></script>
+    <script src="{{ asset('js/pm.js') }}?v=5" defer></script>
     @stack('head')
 </head>
 <body>
 @php($u = auth()->user())
 @php($overdueTasks = \App\Models\Task::where('assignee_id', $u->id)->where('status', 'a_faire')->where('due_at', '<', now())->count())
+@php($unreadNotifications = \App\Models\UserNotification::where('user_id', $u->id)->whereNull('read_at')->count())
 <div class="app">
     <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
         <div class="brand">
@@ -23,6 +24,7 @@
         </div>
         <nav>
             <a href="{{ route('pm.dashboard') }}" @class(['nav-link', 'active' => request()->routeIs('pm.dashboard')])><x-icon name="layout-dashboard" /> Tableau de bord</a>
+            <a href="{{ route('pm.notifications.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.notifications.*')])><x-icon name="alarm-clock" /> Notifications @if ($unreadNotifications)<span class="nav-count" title="Non lues">{{ $unreadNotifications }}</span>@endif</a>
 
             <div class="nav-section">Prospection</div>
             <a href="{{ route('pm.companies.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.companies.*')])><x-icon name="building-2" /> Base de prospects</a>
@@ -40,7 +42,12 @@
                 <a href="{{ route('pm.templates.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.templates.*')])><x-icon name="layers" /> Modèles d'e-mails</a>
                 <a href="{{ route('pm.segments.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.segments.*')])><x-icon name="filter" /> Segments</a>
             @endcan
-            <span class="nav-link disabled" aria-disabled="true"><x-icon name="chart-column" /> Statistiques <span class="nav-soon">Phase 7</span></span>
+            @can('automations.manage')
+                <a href="{{ route('pm.automations.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.automations.*')])><x-icon name="sparkles" /> Automatisations</a>
+            @endcan
+            @can('reports.view')
+                <a href="{{ route('pm.reports.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.reports.*')])><x-icon name="chart-column" /> Statistiques</a>
+            @endcan
 
             @canany(['users.manage', 'pipelines.manage', 'settings.manage'])
                 <div class="nav-section">Administration</div>
@@ -49,6 +56,8 @@
                 @endcan
                 @can('settings.manage')
                     <a href="{{ route('pm.settings.mail.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.mail.*')])><x-icon name="inbox" /> Comptes d'envoi</a>
+                    <a href="{{ route('pm.settings.inboxes.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.inboxes.*')])><x-icon name="mail" /> Réponses (IMAP)</a>
+                    <a href="{{ route('pm.settings.tracking.edit') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.tracking.*')])><x-icon name="shield-check" /> Suivi des e-mails</a>
                 @endcan
                 @can('users.manage')
                     <a href="{{ route('pm.settings.users.index') }}" @class(['nav-link', 'active' => request()->routeIs('pm.settings.users.*')])><x-icon name="users" /> Utilisateurs et rôles</a>

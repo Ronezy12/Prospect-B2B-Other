@@ -15,7 +15,7 @@ class Campaign extends Model
 
     protected $attributes = ['status' => 'brouillon'];
 
-    protected $fillable = ['name', 'type', 'template_id', 'mail_account_id', 'segment_id', 'list_id', 'exclusions', 'from_name', 'reply_to', 'scheduled_at'];
+    protected $fillable = ['name', 'type', 'template_id', 'mail_account_id', 'segment_id', 'list_id', 'exclusions', 'from_name', 'reply_to', 'scheduled_at', 'track_opens', 'track_clicks'];
 
     protected function casts(): array
     {
@@ -27,6 +27,8 @@ class Campaign extends Model
             'finished_at' => 'datetime',
             'cancelled_at' => 'datetime',
             'last_test_at' => 'datetime',
+            'track_opens' => 'boolean',
+            'track_clicks' => 'boolean',
         ];
     }
 

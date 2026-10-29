@@ -83,6 +83,21 @@
         </fieldset>
     @endif
 
+    <fieldset class="section-gap">
+        <legend><x-icon name="chart-column" /> Mesure d'audience</legend>
+        @php($trackOpens = \App\Models\Setting::get('tracking.opens', false))
+        @php($trackClicks = \App\Models\Setting::get('tracking.clicks', false))
+        @if (! $trackOpens && ! $trackClicks)
+            <p class="small muted">Le suivi des ouvertures et des clics est désactivé pour toute l'application (Paramètres › Suivi des e-mails).</p>
+        @else
+            <p class="small muted">Appliqué uniquement aux contacts ayant consenti à la mesure d'audience (recommandation CNIL 2026). Une ouverture n'est jamais une preuve de lecture.</p>
+            <div class="choice-list">
+                @if ($trackOpens)<label class="checkbox"><input type="hidden" name="track_opens" value="0"><input type="checkbox" name="track_opens" value="1" @checked(old('track_opens', $campaign->track_opens))> Mesurer les ouvertures (pixel)</label>@endif
+                @if ($trackClicks)<label class="checkbox"><input type="hidden" name="track_clicks" value="0"><input type="checkbox" name="track_clicks" value="1" @checked(old('track_clicks', $campaign->track_clicks))> Mesurer les clics (liens de redirection)</label>@endif
+            </div>
+        @endif
+    </fieldset>
+
     <div class="form-actions">
         <a class="btn" href="{{ $campaign->exists ? route('pm.campaigns.show', $campaign) : route('pm.campaigns.index') }}">Annuler</a>
         <button type="submit" class="btn btn-primary"><x-icon name="check" /> Enregistrer le brouillon</button>

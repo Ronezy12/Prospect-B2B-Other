@@ -207,6 +207,30 @@ class CampaignService
         return $campaign->refresh();
     }
 
+    /** Envoi d'un modèle à un contact (scénarios d'automatisation) : mêmes contrôles qu'une campagne. */
+    public function sendTemplateToContact(Contact $contact, MailAccount $account, Template $template, User $user, string $origin): Campaign
+    {
+        $campaign = new Campaign([
+            'name' => Str::limit($origin.' — '.$contact->fullName(), 150, ''),
+            'type' => 'individuel',
+            'mail_account_id' => $account->id,
+        ]);
+        $campaign->template_id = $template->id;
+        $campaign->template_version_id = $template->latestVersion->id;
+        $campaign->audience = ['contact_ids' => [$contact->id]];
+        $campaign->status = 'programmee';
+        $campaign->scheduled_at = now();
+        $campaign->launched_by = $user->id;
+        $campaign->created_by = $user->id;
+        $campaign->last_test_at = now();
+        $campaign->save();
+        $this->audit->log('email.automation', $campaign, ['contact' => $contact->id, 'origine' => $origin], $user->id);
+
+        $this->start($campaign);
+
+        return $campaign->refresh();
+    }
+
     private function transition(Campaign $campaign, array $from, string $to, string $action): void
     {
         $updated = Campaign::whereKey($campaign->id)->whereIn('status', $from)->update(['status' => $to]);

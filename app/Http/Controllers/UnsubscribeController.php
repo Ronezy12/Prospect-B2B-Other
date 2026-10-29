@@ -3,13 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\CampaignRecipient;
-use App\Models\EmailEvent;
-use App\Models\Subscription;
-use App\Services\ActivityRecorder;
-use App\Services\SuppressionService;
+use App\Services\Mail\DeliveryTracker;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
@@ -23,25 +19,10 @@ class UnsubscribeController extends Controller
         return view('public.unsubscribe', ['recipient' => $recipient, 'done' => false, 'scope' => $this->scopeLabel($recipient)]);
     }
 
-    public function store(Request $request, CampaignRecipient $recipient, SuppressionService $suppressions, ActivityRecorder $activities): View|Response
+    public function store(Request $request, CampaignRecipient $recipient, DeliveryTracker $tracker): View|Response
     {
-        $campaign = $recipient->campaign;
-        $scope = $campaign->type === 'newsletter' ? 'newsletter' : 'prospection';
-
-        DB::transaction(function () use ($recipient, $campaign, $scope, $suppressions, $activities) {
-            $suppressions->suppress($recipient->email, $scope, 'desabonnement', 'lien_email', "Campagne #{$campaign->id}");
-            if ($campaign->type === 'newsletter' && $recipient->contact_id) {
-                Subscription::where('list_id', $campaign->list_id)->where('contact_id', $recipient->contact_id)
-                    ->update(['status' => 'desabonne', 'unsubscribed_at' => now()]);
-            }
-            EmailEvent::firstOrCreate(
-                ['provider' => 'interne', 'provider_event_id' => 'unsub-'.$recipient->id],
-                ['recipient_id' => $recipient->id, 'campaign_id' => $campaign->id, 'type' => 'desabonnement', 'occurred_at' => now()],
-            );
-            if ($company = $recipient->contact?->company) {
-                $activities->record($company, 'systeme', "Désinscription de {$recipient->email} via le lien de la campagne « {$campaign->name} ».", ['campaign_id' => $campaign->id], null);
-            }
-        });
+        // Opposition persistante, mise à jour de l'abonnement, historique et scénarios : DeliveryTracker.
+        $tracker->record($recipient, 'desabonnement', now(), 'interne', 'unsub-'.$recipient->id, ['origin' => 'lien_email']);
 
         // Clic unique (RFC 8058) : réponse minimale attendue par les messageries.
         if ($request->input('List-Unsubscribe') === 'One-Click') {

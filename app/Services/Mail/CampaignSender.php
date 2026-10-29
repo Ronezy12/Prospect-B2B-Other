@@ -2,6 +2,7 @@
 
 namespace App\Services\Mail;
 
+use App\Http\Controllers\TrackingController;
 use App\Models\Campaign;
 use App\Models\CampaignRecipient;
 use App\Models\Contact;
@@ -27,6 +28,7 @@ class CampaignSender
         private readonly TemplateRenderer $renderer,
         private readonly ComplianceGate $gate,
         private readonly ActivityRecorder $activities,
+        private readonly TrackingPolicy $tracking,
     ) {}
 
     /**
@@ -101,6 +103,7 @@ class CampaignSender
             $headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
         }
         $rendered = $this->renderer->render($subject, $html, $preheader, $data, $campaign->isMarketing(), $campaign->from_name ?: $account->from_name);
+        $rendered['html'] = $this->applyTracking($rendered['html'], $campaign, $contact, $recipient, $data['lien_desinscription'] ?? null);
 
         $message = new OutgoingMessage(
             toEmail: $recipient->email,
@@ -145,6 +148,27 @@ class CampaignSender
             ])->save();
             $this->event($recipient, $provider->name(), $retry ? 'echec_temporaire' : 'echec', ['erreur' => $result->error]);
         });
+    }
+
+    /** Pixel et liens de suivi, uniquement si la politique de suivi l'autorise pour ce contact. */
+    private function applyTracking(string $html, Campaign $campaign, Contact $contact, CampaignRecipient $recipient, ?string $unsubscribe): string
+    {
+        if ($this->tracking->allows('clicks', $campaign, $contact)) {
+            $html = preg_replace_callback('/href="(https?:\/\/[^"]+)"/i', function ($m) use ($recipient, $unsubscribe) {
+                $url = html_entity_decode($m[1]);
+                if ($unsubscribe && $url === $unsubscribe) {
+                    return $m[0];
+                }
+
+                return 'href="'.e(route('tracking.click', ['recipient' => $recipient->id, 'signature' => TrackingController::sign($recipient->id, $url), 'u' => $url])).'"';
+            }, $html);
+        }
+        if ($this->tracking->allows('opens', $campaign, $contact)) {
+            $pixel = '<img src="'.e(route('tracking.open', ['recipient' => $recipient->id, 'signature' => TrackingController::sign($recipient->id, 'open')])).'" width="1" height="1" alt="" style="display:block;border:0">';
+            $html = stripos($html, '</body>') !== false ? preg_replace('#</body>#i', $pixel.'</body>', $html, 1) : $html.$pixel;
+        }
+
+        return $html;
     }
 
     /** Termine la campagne quand plus aucun destinataire n'est en attente. */

@@ -9,7 +9,7 @@
 | 4 bis — Refonte du design et environnement de test | **Terminé** (détail ci-dessous) |
 | 5 — Pipelines, tâches, permissions avancées | **Terminé** (détail ci-dessous) |
 | 6 — E-mails, modèles, programmation | **Terminé** (détail ci-dessous) |
-| 7 — Statistiques, webhooks, automatisations | À faire |
+| 7 — Statistiques, webhooks, automatisations | **Terminé** (détail ci-dessous) |
 | 8 — Réseaux sociaux | À faire |
 | 9 — Conformité, sécurité, tests, documentation finale | À faire (fondations posées dès la phase 4) |
 
@@ -38,7 +38,7 @@
 
 **Opposition** : liste centrale `pm_suppressions` stockant uniquement une empreinte HMAC-SHA256 de l'adresse normalisée, par périmètre (toutes communications, prospection, newsletters). Vérifiée à la saisie manuelle et à l'import : une adresse opposée ne peut pas être réintroduite. L'empreinte survit à la suppression de la fiche.
 
-**Tests** : 97 tests automatisés au total (connexion, limitation, périmètres et droits, validation, doublons, conversion, export, imports CSV/XLSX, encodages, stratégies de doublons, opposition, idempotence, purge).
+**Tests** : 119 tests automatisés au total (connexion, limitation, périmètres et droits, validation, doublons, conversion, export, imports CSV/XLSX, encodages, stratégies de doublons, opposition, idempotence, purge).
 
 ## Règles de conformité implémentées — validation humaine requise
 
@@ -176,3 +176,74 @@ Limites :
 - Le suivi des ouvertures et des clics n'est pas activé (recommandation CNIL 2026 : consentement préalable) ; il sera configurable en phase 7.
 - Pas encore de formulaire public d'inscription à la newsletter (double opt-in) : prévu en phase 9.
 - Les images des modèles se référencent par URL ; il n'y a pas encore de téléversement d'images dans l'éditeur.
+
+## Phase 7 — statistiques, webhooks et automatisations
+
+**Événements e-mail** (`DeliveryTracker`) :
+- Idempotent : un événement déjà reçu (même fournisseur, même identifiant) est ignoré, d'où la gestion des webhooks dupliqués.
+- Les événements en retard ne font jamais régresser un statut : un « livré » tardif n'efface pas un rebond. Ordre de gravité : différé < rebond temporaire < livré < bloqué < rebond définitif < plainte.
+- Rebond définitif → opposition « adresse invalide » (bloquée pour toute finalité) ; plainte → opposition totale ; désinscription → opposition du périmètre et désabonnement.
+- Chaque événement est daté par le fournisseur et rattaché au destinataire.
+
+**Webhooks Brevo** (`POST /webhooks/brevo/{jeton}`) :
+- Authentifiés par un jeton secret de 48 caractères généré pour chaque compte Brevo (URL affichée dans la fiche du compte, à déclarer chez Brevo).
+- Envoi groupé accepté.
+- Rattachement par l'en-tête `X-Mailin-custom` (clé d'idempotence), puis par le Message-ID.
+- Événements pris en charge : livré, différé, rebond temporaire et définitif, adresse invalide, bloqué, plainte, désinscription, ouverture, clic.
+
+**Suivi des ouvertures et des clics** :
+- Interne à l'application, il fonctionne aussi en SMTP.
+- **Désactivé par défaut.** Il ne s'applique que si trois conditions sont réunies : activation globale (Paramètres › Suivi des e-mails), option cochée sur la campagne, et **consentement du contact** tracé (date et source, sur la fiche contact), conformément à la recommandation CNIL du 12/03/2026.
+- Les ouvertures et clics remontés par Brevo pour des contacts sans consentement ne sont pas conservés.
+- Liens de clic signés par HMAC (pas de redirection ouverte) ; le lien de désinscription n'est jamais réécrit.
+- Une ouverture est présentée comme « détectée (indicatif) », jamais comme une lecture.
+
+**Détection des réponses (IMAP)** :
+- Boîtes configurables (identifiants chiffrés), consultées toutes les 5 minutes par `pm:replies-fetch`. Seuls les en-têtes sont lus, les messages ne sont pas marqués comme lus.
+- Rapprochement fiable par `In-Reply-To` / `References`, qui contiennent le Message-ID généré à l'envoi ou celui de Brevo. À défaut, rapprochement probable par l'expéditeur ayant reçu un e-mail dans les 60 jours.
+- Une réponse enregistre l'événement, l'historique de l'entreprise et le déclencheur « réponse reçue ».
+- Limite : sans lecture du corps, les réponses automatiques (absence) sont comptées comme réponses.
+
+**Statistiques** (page Statistiques, périodes de 30, 90 et 365 jours) :
+- Entonnoir : demandés → acceptés → livrés → ouvertures → clics → réponses.
+- Qualité de la base : exclus, échecs, rebonds, plaintes, désinscriptions.
+- Indicateurs commerciaux : nouveaux prospects, opportunités créées et gagnées, conversions, montant gagné.
+- Tableau par campagne.
+- Un indicateur que la configuration ne permet pas de mesurer est affiché « indisponible » ou « non mesuré », jamais à zéro.
+
+**Moteur d'automatisation** :
+- 7 déclencheurs : nouveau prospect (saisie ou import), changement de statut (unitaire ou en masse), changement d'étape, opportunité gagnée, réponse reçue, désinscription, rebond définitif.
+- Étapes : actions, attentes (jours et heures), conditions avec branches « si vrai » et « sinon » vers n'importe quelle étape ou la fin.
+- 8 critères de condition, dont « un contact a répondu depuis le début du scénario » et « un contact s'est opposé ».
+- 8 actions : créer une tâche, notifier le responsable, changer le statut, ajouter un tag, envoyer un e-mail (même chaîne de conformité que les campagnes), suspendre les relances (tâches de relance annulées, autres scénarios en attente arrêtés), enregistrer la conversion en client, arrêter.
+- Limite de fréquence par fiche (N exécutions sur X jours) et dédoublonnage : un même événement ne lance jamais deux exécutions (contrainte unique).
+- Exécutions persistantes, file `automations`, reprise chaque minute par `pm:automations-run` :
+  - réservation atomique ;
+  - une action réalisée n'est jamais rejouée après une erreur ou un redémarrage ;
+  - une exécution bloquée plus de 10 minutes est reprise ;
+  - 3 tentatives, puis statut « erreur » et notification au créateur ;
+  - une boucle infinie est interrompue au-delà de 50 étapes.
+- Versionnage : chaque enregistrement crée une version. La version active ne change qu'à la publication, et les exécutions en cours gardent la leur. Le déclencheur d'un scénario actif ne se modifie qu'après une mise en pause.
+- Activation, pause (aucun nouveau déclenchement, les exécutions attendent), reprise, arrêt (toutes les exécutions en attente sont arrêtées).
+- Mode test sur une fiche réelle : conditions évaluées, actions décrites sans être exécutées, délais ignorés.
+- Journal de chaque exécution, étape par étape, avec la valeur évaluée pour chaque condition.
+- 6 modèles prêts à l'emploi, correspondant aux exemples du cahier des charges.
+- Constructeur visuel par étapes (ajout, suppression, réordonnancement, branches).
+
+**Notifications** : centre de notifications avec compteur dans le menu, alimenté par l'action « notifier le responsable » et les échecs de scénario ; seuls les liens internes sont suivis.
+
+**Rôles** :
+- `automations.manage` : administrateur, responsable commercial, marketing.
+- `reports.view` : administrateur, responsable commercial, marketing, conformité.
+
+**Tests ajoutés** (22), couvrant :
+- les webhooks : jeton, idempotence, absence de régression, envoi groupé, plainte, désinscription, ouvertures sans consentement ignorées ;
+- le suivi interne : conditions d'activation, signature, redirection, désactivation par défaut ;
+- les réponses IMAP : par identifiant, par expéditeur, sans double comptage, panne de connexion ;
+- les pages de statistiques et de réglages, et leurs droits ;
+- le moteur d'automatisation : création de tâche, fréquence et dédoublonnage, notification, délai puis condition, pause et arrêt, réponse qui suspend les relances, désinscription, opportunité gagnée, mode test, versions et validation, boucle infinie, envoi d'e-mail soumis à l'opposition, droits.
+
+Limites :
+- La réception réelle des webhooks Brevo et la connexion IMAP réelle n'ont pas pu être testées depuis l'environnement de développement (réseau filtré) : elles sont couvertes par des réponses simulées et se valideront à l'installation.
+- Les notifications restent dans l'application : pas d'envoi par e-mail pour l'instant.
+- Les statistiques e-mail portent sur toutes les campagnes, sans filtre par équipe.

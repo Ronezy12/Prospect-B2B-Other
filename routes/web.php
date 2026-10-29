@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\AutomationController;
+use App\Http\Controllers\BrevoWebhookController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CompanyBulkController;
 use App\Http\Controllers\CompanyController;
@@ -11,19 +13,29 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\IndividualEmailController;
 use App\Http\Controllers\NewsletterController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\PipelineBoardController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SegmentController;
+use App\Http\Controllers\Settings\InboxController;
 use App\Http\Controllers\Settings\MailAccountController;
 use App\Http\Controllers\Settings\PipelineSettingsController;
+use App\Http\Controllers\Settings\TrackingSettingsController;
 use App\Http\Controllers\Settings\UserController;
 use App\Http\Controllers\SuppressionController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TemplateController;
+use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\UnsubscribeController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/prospection');
+
+// Webhooks fournisseurs (authentifiés par jeton) et suivi interne (liens signés).
+Route::post('/webhooks/brevo/{token}', BrevoWebhookController::class)->middleware('throttle:600,1')->name('webhooks.brevo');
+Route::get('/t/o/{recipient}/{signature}', [TrackingController::class, 'open'])->middleware('throttle:120,1')->name('tracking.open');
+Route::get('/t/c/{recipient}/{signature}', [TrackingController::class, 'click'])->middleware('throttle:120,1')->name('tracking.click');
 
 // Désinscription publique : lien signé par destinataire, sans authentification.
 Route::middleware(['signed', 'throttle:30,1'])->group(function () {
@@ -92,7 +104,24 @@ Route::middleware('auth')->group(function () {
         Route::post('campagnes/{campaign}/dupliquer', [CampaignController::class, 'duplicate'])->name('campaigns.duplicate');
         Route::resource('campagnes', CampaignController::class)->parameters(['campagnes' => 'campaign'])->names('campaigns');
 
+        Route::get('statistiques', ReportController::class)->name('reports.index');
+
+        Route::get('notifications', [NotificationController::class, 'index'])->name('notifications.index');
+        Route::get('notifications/{notification}', [NotificationController::class, 'open'])->name('notifications.open');
+        Route::post('notifications/tout-lire', [NotificationController::class, 'readAll'])->name('notifications.read_all');
+
+        Route::post('automatisations/{automation}/activer', [AutomationController::class, 'activate'])->name('automations.activate');
+        Route::post('automatisations/{automation}/pause', [AutomationController::class, 'pause'])->name('automations.pause');
+        Route::post('automatisations/{automation}/reprendre', [AutomationController::class, 'resume'])->name('automations.resume');
+        Route::post('automatisations/{automation}/arreter', [AutomationController::class, 'stop'])->name('automations.stop');
+        Route::post('automatisations/{automation}/tester', [AutomationController::class, 'test'])->middleware('throttle:20,1')->name('automations.test');
+        Route::resource('automatisations', AutomationController::class)->except('create')->parameters(['automatisations' => 'automation'])->names('automations');
+
         Route::prefix('parametres')->name('settings.')->group(function () {
+            Route::get('suivi', [TrackingSettingsController::class, 'edit'])->name('tracking.edit');
+            Route::put('suivi', [TrackingSettingsController::class, 'update'])->name('tracking.update');
+            Route::post('boites/{inbox}/verifier', [InboxController::class, 'check'])->middleware('throttle:10,1')->name('inboxes.check');
+            Route::resource('boites', InboxController::class)->except(['show', 'destroy'])->parameters(['boites' => 'inbox'])->names('inboxes');
             Route::post('envoi/{account}/test', [MailAccountController::class, 'test'])->middleware('throttle:10,1')->name('mail.test');
             Route::resource('envoi', MailAccountController::class)->except(['show', 'destroy'])->parameters(['envoi' => 'account'])->names('mail');
             Route::get('pipelines', [PipelineSettingsController::class, 'index'])->name('pipelines.index');

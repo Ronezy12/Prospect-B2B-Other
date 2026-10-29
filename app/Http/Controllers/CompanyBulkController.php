@@ -6,6 +6,7 @@ use App\Models\Company;
 use App\Models\Tag;
 use App\Services\ActivityRecorder;
 use App\Services\AuditLogger;
+use App\Services\Automation\AutomationEngine;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -51,6 +52,9 @@ class CompanyBulkController extends Controller
                 };
                 if ($data['action'] !== 'delete') {
                     $activities->record($company, 'systeme', 'Modification en masse : '.$this->label($data).'.');
+                }
+                if ($data['action'] === 'status' && $company->wasChanged('status')) {
+                    app(AutomationEngine::class)->fire('company.status_changed', $company, 'status:'.$company->getPrevious()['status'].'>'.$company->status.':'.now()->timestamp);
                 }
             }
         });

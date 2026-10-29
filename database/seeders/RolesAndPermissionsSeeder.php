@@ -32,6 +32,8 @@ class RolesAndPermissionsSeeder extends Seeder
         'campaigns.send' => 'Programmer, lancer, suspendre et annuler des campagnes',
         'templates.manage' => 'Créer et modifier les modèles d\'e-mails',
         'emails.individual' => 'Envoyer des e-mails individuels aux prospects',
+        'automations.manage' => 'Créer, tester, activer et arrêter les scénarios d\'automatisation',
+        'reports.view' => 'Consulter les statistiques et rapports',
     ];
 
     public const ROLES = [
@@ -39,11 +41,11 @@ class RolesAndPermissionsSeeder extends Seeder
         'responsable_commercial' => [
             'prospects.view', 'prospects.view_team', 'prospects.create', 'prospects.update', 'prospects.delete',
             'prospects.bulk_update', 'prospects.assign', 'prospects.import', 'prospects.export', 'prospects.convert',
-            'campaigns.view', 'emails.individual',
+            'campaigns.view', 'emails.individual', 'automations.manage', 'reports.view',
         ],
         'commercial' => ['prospects.view', 'prospects.create', 'prospects.update', 'prospects.import', 'emails.individual'],
-        'marketing' => ['prospects.view', 'prospects.view_all', 'campaigns.view', 'campaigns.manage', 'campaigns.send', 'templates.manage'],
-        'conformite' => ['prospects.view', 'prospects.view_all', 'compliance.manage', 'audit.view', 'campaigns.view'],
+        'marketing' => ['prospects.view', 'prospects.view_all', 'campaigns.view', 'campaigns.manage', 'campaigns.send', 'templates.manage', 'automations.manage', 'reports.view'],
+        'conformite' => ['prospects.view', 'prospects.view_all', 'compliance.manage', 'audit.view', 'campaigns.view', 'reports.view'],
         'lecture_seule' => ['prospects.view', 'prospects.view_all'],
     ];
 

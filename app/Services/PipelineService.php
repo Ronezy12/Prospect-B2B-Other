@@ -8,6 +8,7 @@ use App\Models\PipelineStage;
 use App\Models\Sector;
 use App\Models\StageHistory;
 use App\Models\User;
+use App\Services\Automation\AutomationEngine;
 use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
@@ -83,7 +84,14 @@ class PipelineService
             }
 
             if ($changed) {
-                $this->recordHistory($opportunity, $from, $stage, $user);
+                $history = $this->recordHistory($opportunity, $from, $stage, $user);
+                DB::afterCommit(function () use ($opportunity, $stage, $history) {
+                    $engine = app(AutomationEngine::class);
+                    $engine->fire('opportunity.stage_changed', $opportunity, 'stage:'.$history->id, ['stage' => $stage->name]);
+                    if ($stage->type === 'won') {
+                        $engine->fire('opportunity.won', $opportunity, 'won:'.$history->id);
+                    }
+                });
                 $this->activities->record($opportunity->company, 'systeme', "Opportunité « {$opportunity->title} » : {$from->name} → {$stage->name}.", ['opportunity_id' => $opportunity->id], $user->id);
                 $this->audit->log('opportunity.stage_changed', $opportunity, ['avant' => $from->name, 'après' => $stage->name], $user->id);
             }
@@ -92,9 +100,9 @@ class PipelineService
         });
     }
 
-    private function recordHistory(Opportunity $opportunity, ?PipelineStage $from, PipelineStage $to, User $user): void
+    private function recordHistory(Opportunity $opportunity, ?PipelineStage $from, PipelineStage $to, User $user): StageHistory
     {
-        StageHistory::create([
+        return StageHistory::create([
             'opportunity_id' => $opportunity->id,
             'from_stage_id' => $from?->id,
             'to_stage_id' => $to->id,

@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use App\Models\Campaign;
 use App\Models\CampaignRecipient;
 use App\Models\EmailEvent;
+use App\Models\Inbox;
 use App\Models\MailAccount;
 use App\Models\NewsletterList;
 use App\Models\Segment;
+use App\Models\Setting;
 use App\Models\Tag;
 use App\Models\Template;
 use App\Services\AuditLogger;
@@ -74,12 +76,25 @@ class CampaignController extends Controller
         $exclusions = CampaignRecipient::where('campaign_id', $campaign->id)->where('status', 'exclu')
             ->selectRaw('exclusion_reason, count(*) as n')->groupBy('exclusion_reason')->pluck('n', 'exclusion_reason');
         $events = EmailEvent::where('campaign_id', $campaign->id)->selectRaw('type, count(*) as n')->groupBy('type')->pluck('n', 'type');
+        $base = CampaignRecipient::where('campaign_id', $campaign->id);
+        $engagement = [
+            'livres' => (clone $base)->where('delivery_status', 'livre')->count(),
+            'rebonds' => (clone $base)->whereIn('delivery_status', ['rebond_definitif', 'bloque'])->count(),
+            'rebonds_temporaires' => (clone $base)->where('delivery_status', 'rebond_temporaire')->count(),
+            'plaintes' => (clone $base)->where('delivery_status', 'plainte')->count(),
+            'ouvertures' => (clone $base)->whereNotNull('opened_at')->count(),
+            'clics' => (clone $base)->whereNotNull('clicked_at')->count(),
+            'reponses' => (clone $base)->whereNotNull('replied_at')->count(),
+            'desabonnements' => (clone $base)->whereNotNull('unsubscribed_at')->count(),
+        ];
 
         return view('campaigns.show', [
             'campaign' => $campaign,
             'counts' => $counts,
             'exclusions' => $exclusions,
             'events' => $events,
+            'engagement' => $engagement,
+            'repliesTracked' => Inbox::where('is_active', true)->exists(),
             'preflight' => $campaign->isEditable() && $request->user()->can('campaigns.send') ? $this->campaigns->preflight($campaign, $request->user()) : null,
             'reportsEvents' => $campaign->mailAccount ? $providers->for($campaign->mailAccount)->reportsEvents() : false,
             'recipients' => $campaign->recipients()
@@ -207,10 +222,15 @@ class CampaignController extends Controller
             'exclusions.tag_ids' => ['nullable', 'array'],
             'exclusions.tag_ids.*' => ['integer', 'exists:pm_tags,id'],
             'exclusions.contacted_within_days' => ['nullable', 'integer', 'min:0', 'max:365'],
+            'track_opens' => ['nullable', 'boolean'],
+            'track_clicks' => ['nullable', 'boolean'],
         ], ['template_id.exists' => 'Choisissez un modèle de la même catégorie que la campagne.'], [
             'template_id' => 'modèle', 'mail_account_id' => 'compte d\'envoi', 'segment_id' => 'segment', 'list_id' => 'liste d\'abonnés', 'reply_to' => 'adresse de réponse',
         ]);
         $data['exclusions'] = array_filter($data['exclusions'] ?? [], fn ($v) => filled($v));
+        // Le suivi n'est demandé que s'il est autorisé globalement (consentement exigé en plus, contact par contact).
+        $data['track_opens'] = (bool) ($data['track_opens'] ?? false) && Setting::get('tracking.opens', false);
+        $data['track_clicks'] = (bool) ($data['track_clicks'] ?? false) && Setting::get('tracking.clicks', false);
 
         return $data;
     }

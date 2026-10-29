@@ -31,6 +31,8 @@ class ContactRequest extends FormRequest
             'collection_note' => ['nullable', 'string', 'max:255'],
             'is_primary' => ['nullable', 'boolean'],
             'notes' => ['nullable', 'string', 'max:10000'],
+            'tracking_consent' => ['nullable', 'boolean'],
+            'tracking_consent_source' => ['required_if_accepted:tracking_consent', 'nullable', 'string', 'max:255'],
         ];
     }
 

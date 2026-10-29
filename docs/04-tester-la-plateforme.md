@@ -46,4 +46,7 @@ Ce mode de démonstration (SQLite, `APP_ENV=demo`) sert au test. Pour la product
 10. En marketing : ouvrir « Modèles d'e-mails », éditer le modèle de prospection (glisser un bloc « Prénom »), enregistrer : une version 2 apparaît. Envoyer un test.
 11. Ouvrir la campagne « Newsletter de novembre » : envoyer un test, lire la vérification, puis « Envoyer maintenant ». Les e-mails sont écrits dans le journal (`storage/logs`), aucun n'est réellement envoyé avec le compte de démonstration.
 12. Pour un vrai test d'envoi : Paramètres › Comptes d'envoi › Nouveau compte SMTP avec vos identifiants, puis « Envoyer un test » vers votre adresse.
-13. Basculer le thème clair / sombre (icône lune en bas de la barre latérale) et tester sur mobile.
+13. En marketing, « Automatisations » : ouvrir le scénario « Délai écoulé… » (brouillon), le modifier dans le constructeur, puis « Lancer le test » sur une fiche : le déroulé s'affiche sans rien modifier. L'activer.
+14. En administrateur, créer un prospect : le scénario « Nouveau prospect » crée aussitôt une tâche de qualification (visible dans Tâches et relances).
+15. « Statistiques » : entonnoir e-mail et indicateurs commerciaux ; avec le compte de démonstration, les livraisons, ouvertures et réponses sont indiquées comme indisponibles.
+16. Basculer le thème clair / sombre (icône lune en bas de la barre latérale) et tester sur mobile.

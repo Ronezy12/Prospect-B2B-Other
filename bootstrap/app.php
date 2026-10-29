@@ -20,7 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         // Le « clic unique » des messageries (RFC 8058) ne peut pas porter de jeton CSRF ;
         // la route est protégée par une URL signée.
-        $middleware->validateCsrfTokens(except: ['desinscription/*']);
+        $middleware->validateCsrfTokens(except: ['desinscription/*', 'webhooks/*']);
         $middleware->redirectGuestsTo(fn () => route('login'));
         $middleware->redirectUsersTo(fn () => route('pm.dashboard'));
     })

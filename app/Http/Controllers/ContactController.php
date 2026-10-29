@@ -75,6 +75,7 @@ class ContactController extends Controller
 
         $contact = DB::transaction(function () use ($request, $data, $company) {
             $contact = new Contact($data);
+            $this->applyTrackingConsent($contact, $data);
             $contact->owner_id = $company->owner_id;
             $contact->created_by = $request->user()->id;
             $contact->save();
@@ -111,7 +112,9 @@ class ContactController extends Controller
         }
 
         DB::transaction(function () use ($contact, $data) {
-            $contact->fill($data)->save();
+            $contact->fill($data);
+            $this->applyTrackingConsent($contact, $data);
+            $contact->save();
             $this->syncPrimary($contact);
             if ($changes = $this->audit->diff($contact)) {
                 $this->audit->log('contact.updated', $contact, $changes);
@@ -146,6 +149,19 @@ class ContactController extends Controller
         }
 
         return null;
+    }
+
+    /** Consentement à la mesure d'audience : date et source conservées comme preuve. */
+    private function applyTrackingConsent(Contact $contact, array $data): void
+    {
+        $wanted = (bool) ($data['tracking_consent'] ?? false);
+        if ($wanted && ! $contact->tracking_consent_at) {
+            $contact->tracking_consent_at = now();
+            $contact->tracking_consent_source = $data['tracking_consent_source'] ?? null;
+        } elseif (! $wanted) {
+            $contact->tracking_consent_at = null;
+            $contact->tracking_consent_source = null;
+        }
     }
 
     private function syncPrimary(Contact $contact): void

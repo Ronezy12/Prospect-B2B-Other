@@ -114,6 +114,10 @@ class MailAccountController extends Controller
             }
         }
 
+        // Jeton secret de l'URL de webhook (Brevo) : généré une fois, jamais modifiable par formulaire.
+        if ($data['driver'] === 'brevo' && blank($settings['webhook_token'] ?? null)) {
+            $settings['webhook_token'] = Str::random(48);
+        }
         $account->fill(collect($data)->only(['name', 'driver', 'from_email', 'from_name', 'reply_to', 'hourly_limit', 'daily_limit'])->all());
         $account->is_active = (bool) ($data['is_active'] ?? false);
         $account->settings = $settings;

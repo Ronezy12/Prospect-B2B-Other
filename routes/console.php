@@ -6,3 +6,5 @@ use Illuminate\Support\Facades\Schedule;
 Schedule::command('pm:purge-import-files')->dailyAt('03:15')->withoutOverlapping();
 Schedule::command('queue:prune-failed --hours=720')->daily();
 Schedule::command('pm:campaigns-run')->everyMinute()->withoutOverlapping();
+Schedule::command('pm:automations-run')->everyMinute()->withoutOverlapping();
+Schedule::command('pm:replies-fetch')->everyFiveMinutes()->withoutOverlapping();

@@ -55,8 +55,15 @@
             <div class="field full">
                 <label for="api_key">Clé API</label>
                 <input type="password" id="api_key" name="api_key" autocomplete="new-password" placeholder="{{ $account->hasSecret('api_key') ? '•••••••• (enregistrée)' : 'À renseigner quand vous aurez ouvert un compte' }}">
-                <div class="hint">Emplacement prévu pour plus tard. La clé est stockée chiffrée ; les statistiques de livraison, d'ouverture et de rebond arriveront avec les webhooks (phase 7).</div>
+                <div class="hint">Emplacement prévu pour plus tard. La clé est stockée chiffrée.</div>
             </div>
+            @if ($account->driver === 'brevo' && $account->hasSecret('webhook_token'))
+                <div class="field full">
+                    <label for="webhook_url">URL de webhook à déclarer chez Brevo</label>
+                    <input type="text" id="webhook_url" value="{{ route('webhooks.brevo', ['token' => $account->setting('webhook_token')]) }}" readonly>
+                    <div class="hint">Brevo › Transactionnel › Paramètres › Webhooks : cochez livré, rebond temporaire et définitif, bloqué, plainte, désinscription (et ouverture / clic seulement si vous activez le suivi avec consentement). Cette URL contient un secret : ne la partagez pas.</div>
+                </div>
+            @endif
         </div>
     </fieldset>
 

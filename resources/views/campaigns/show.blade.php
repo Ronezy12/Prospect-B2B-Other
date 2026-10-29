@@ -84,11 +84,18 @@
                     <h3 class="section-gap">Motifs d'exclusion</h3>
                     <ul class="small">@foreach ($exclusions as $reason => $n)<li>{{ config('prospection.exclusion_reasons')[$reason] ?? $reason }} : {{ $n }}</li>@endforeach</ul>
                 @endif
-                <div class="alert alert-info section-gap"><x-icon name="circle-alert" /><span>
-                    « Accepté » signifie que le serveur d'envoi a pris le message en charge, pas qu'il a été livré.
-                    Livraisons, rebonds, ouvertures et clics : @if ($reportsEvents) remontés par le fournisseur via webhooks à partir de la phase 7. @else <strong>indisponibles</strong> avec ce type de compte (SMTP / journal), qui ne renvoie pas ces événements. @endif
-                    Désinscriptions enregistrées : {{ (int) ($events['desabonnement'] ?? 0) }}.
-                </span></div>
+                <h3 class="section-gap">Après l'envoi</h3>
+                <dl class="details">
+                    <dt>Livrés</dt><dd>@if ($reportsEvents){{ $engagement['livres'] }}@else<span class="muted">Indisponible (SMTP / journal : pas de webhook de livraison)</span>@endif</dd>
+                    <dt>Rebonds définitifs</dt><dd>@if ($reportsEvents){{ $engagement['rebonds'] }} <span class="muted small">(adresses ajoutées à la liste d'opposition)</span>@else<span class="muted">Indisponible</span>@endif</dd>
+                    <dt>Rebonds temporaires</dt><dd>@if ($reportsEvents){{ $engagement['rebonds_temporaires'] }}@else<span class="muted">Indisponible</span>@endif</dd>
+                    <dt>Signalés indésirables</dt><dd>@if ($reportsEvents){{ $engagement['plaintes'] }}@else<span class="muted">Indisponible</span>@endif</dd>
+                    <dt>Ouvertures détectées</dt><dd>@if ($campaign->track_opens){{ $engagement['ouvertures'] }} <span class="muted small">indicatif, contacts consentants uniquement</span>@else<span class="muted">Non mesurées pour cette campagne</span>@endif</dd>
+                    <dt>Clics</dt><dd>@if ($campaign->track_clicks){{ $engagement['clics'] }} <span class="muted small">contacts consentants uniquement</span>@else<span class="muted">Non mesurés pour cette campagne</span>@endif</dd>
+                    <dt>Réponses</dt><dd>@if ($repliesTracked){{ $engagement['reponses'] }}@else<span class="muted">Indisponible (aucune boîte IMAP configurée)</span>@endif</dd>
+                    <dt>Désinscriptions</dt><dd>{{ $engagement['desabonnements'] }}</dd>
+                </dl>
+                <div class="alert alert-info section-gap"><x-icon name="circle-alert" /><span>« Accepté » signifie que le serveur d'envoi a pris le message en charge, pas qu'il a été livré. Une ouverture détectée n'est pas une preuve de lecture : images bloquées, préchargement automatique par certaines messageries.</span></div>
             </section>
 
             <section class="card flush">
