@@ -5,7 +5,7 @@
 <div class="page-header">
     <div>
         <h1>Automatisations</h1>
-        <p class="subtitle">Scénarios déclenchés par les événements du CRM. Chaque exécution est tracée et peut être arrêtée.</p>
+        <p class="subtitle">Des règles « Quand… alors… » qui font les tâches répétitives à votre place. Exemple : quand un prospect est créé, alors créer une tâche « Appeler ».</p>
     </div>
     <form method="POST" action="{{ route('pm.automations.store') }}" class="actions">@csrf<button type="submit" class="btn btn-primary"><x-icon name="plus" /> Scénario vierge</button></form>
 </div>

@@ -22,7 +22,12 @@ final class Navigation
                 'tabs' => [],
             ],
             [
-                'key' => 'prospects', 'label' => 'Prospects', 'icon' => 'building-2', 'can' => 'prospects.view',
+                'key' => 'guide', 'label' => 'Guide', 'icon' => 'circle-help', 'can' => 'prospects.view',
+                'active' => ['pm.guide'],
+                'tabs' => [],
+            ],
+            [
+                'key' => 'prospects', 'label' => 'Prospects', 'icon' => 'building-2', 'can' => 'prospects.view', 'help' => 'Les entreprises à démarcher (prospects) et les personnes à joindre (contacts).', 'guide' => 'prospects',
                 'active' => ['pm.companies.*', 'pm.contacts.index', 'pm.contacts.create', 'pm.contacts.edit', 'pm.imports.*'],
                 'tabs' => [
                     ['label' => 'Entreprises', 'route' => 'pm.companies.index', 'active' => ['pm.companies.*']],
@@ -31,7 +36,7 @@ final class Navigation
                 ],
             ],
             [
-                'key' => 'pipeline', 'label' => 'Pipeline', 'icon' => 'kanban', 'can' => 'prospects.view',
+                'key' => 'pipeline', 'label' => 'Pipeline', 'icon' => 'kanban', 'can' => 'prospects.view', 'help' => 'Chaque carte est une affaire : faites-la glisser d\'une colonne à l\'autre quand elle avance.', 'guide' => 'affaires',
                 'active' => ['pm.pipelines.*', 'pm.opportunities.*'],
                 'tabs' => [
                     ['label' => 'Tableau', 'route' => 'pm.pipelines.show', 'active' => ['pm.pipelines.show']],
@@ -40,22 +45,22 @@ final class Navigation
                 ],
             ],
             [
-                'key' => 'taches', 'label' => 'Tâches', 'icon' => 'list-checks', 'can' => 'prospects.view',
+                'key' => 'taches', 'label' => 'Tâches', 'icon' => 'list-checks', 'can' => 'prospects.view', 'help' => 'Vos rappels : appels, relances, rendez-vous. En rouge, ce qui est en retard.', 'guide' => 'affaires',
                 'active' => ['pm.tasks.*'],
                 'tabs' => [],
             ],
             [
-                'key' => 'emails', 'label' => 'E-mails', 'icon' => 'mail', 'can' => 'campaigns.view',
+                'key' => 'emails', 'label' => 'E-mails', 'icon' => 'mail', 'can' => 'campaigns.view', 'help' => 'Pour écrire à plusieurs entreprises : 1. un modèle, 2. une liste de destinataires, 3. un e-mail groupé.', 'guide' => 'emails',
                 'active' => ['pm.campaigns.*', 'pm.newsletters.*', 'pm.templates.*', 'pm.segments.*'],
                 'tabs' => [
-                    ['label' => 'Campagnes', 'route' => 'pm.campaigns.index', 'active' => ['pm.campaigns.*']],
+                    ['label' => 'E-mails groupés', 'route' => 'pm.campaigns.index', 'active' => ['pm.campaigns.*']],
                     ['label' => 'Newsletters', 'route' => 'pm.newsletters.index', 'active' => ['pm.newsletters.*']],
                     ['label' => 'Modèles', 'route' => 'pm.templates.index', 'active' => ['pm.templates.*']],
-                    ['label' => 'Segments', 'route' => 'pm.segments.index', 'active' => ['pm.segments.*']],
+                    ['label' => 'Listes de destinataires', 'route' => 'pm.segments.index', 'active' => ['pm.segments.*']],
                 ],
             ],
             [
-                'key' => 'social', 'label' => 'Réseaux sociaux', 'icon' => 'share-2', 'can' => ['social.use', 'social.inbox'],
+                'key' => 'social', 'label' => 'Réseaux sociaux', 'icon' => 'share-2', 'can' => ['social.use', 'social.inbox'], 'help' => 'Vous contactez la personne sur le réseau, puis vous notez ici ce que vous avez fait.', 'guide' => 'reseaux',
                 'active' => ['pm.social.*'],
                 'tabs' => [
                     ['label' => 'Suivi des profils', 'route' => 'pm.social.index', 'can' => 'social.use', 'active' => ['pm.social.index', 'pm.social.show']],
@@ -64,7 +69,7 @@ final class Navigation
                 ],
             ],
             [
-                'key' => 'automatisations', 'label' => 'Automatisations', 'icon' => 'sparkles', 'can' => 'automations.manage',
+                'key' => 'automatisations', 'label' => 'Automatisations', 'icon' => 'sparkles', 'can' => 'automations.manage', 'help' => 'Des règles « Quand… alors… » qui créent les relances à votre place. Testez avant d\'activer.', 'guide' => 'automatisations',
                 'active' => ['pm.automations.*'],
                 'tabs' => [],
             ],
@@ -97,6 +102,7 @@ final class Navigation
             // La rubrique ouvre son premier onglet accessible.
             $section['route'] = $section['tabs'][0]['route'] ?? match ($section['key']) {
                 'accueil' => 'pm.dashboard',
+                'guide' => 'pm.guide',
                 'taches' => 'pm.tasks.index',
                 'automatisations' => 'pm.automations.index',
                 default => 'pm.reports.index',

@@ -59,7 +59,7 @@ class CampaignService
             $errors[] = 'Choisissez la liste d\'abonnés de la newsletter.';
         }
         if (in_array($campaign->type, ['prospection', 'operationnel'], true) && ! $campaign->segment_id) {
-            $errors[] = 'Choisissez un segment de destinataires.';
+            $errors[] = 'Choisissez une liste de destinataires.';
         }
         if ($campaign->type === 'operationnel' && $version && preg_match('/promo|offre|remise|réduction/i', $version->subject)) {
             $warnings[] = 'Un message opérationnel ne doit pas contenir de contenu promotionnel : sinon il relève de la prospection.';
@@ -70,7 +70,7 @@ class CampaignService
 
         $estimate = $errors ? ['total' => 0, 'eligible' => 0, 'excluded' => []] : $this->audience->estimate($campaign, $user);
         if (! $errors && $estimate['eligible'] === 0) {
-            $errors[] = 'Aucun destinataire autorisé : vérifiez le segment et les exclusions.';
+            $errors[] = 'Aucun destinataire autorisé : vérifiez la liste de destinataires et les exclusions.';
         }
 
         return compact('errors', 'warnings', 'estimate');

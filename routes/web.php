@@ -10,6 +10,7 @@ use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyExportController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\GuideController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\IndividualEmailController;
 use App\Http\Controllers\MetaWebhookController;
@@ -61,6 +62,7 @@ Route::middleware('auth')->group(function () {
 
     Route::prefix('prospection')->name('pm.')->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
+        Route::get('guide', GuideController::class)->name('guide');
 
         Route::post('prospects/actions-groupees', CompanyBulkController::class)->name('companies.bulk');
         Route::get('prospects/export', CompanyExportController::class)->middleware('throttle:10,1')->name('companies.export');

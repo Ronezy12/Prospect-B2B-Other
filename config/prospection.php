@@ -126,8 +126,8 @@ return [
     ],
 
     'campaign_types' => [
-        'prospection' => 'Prospection commerciale',
-        'newsletter' => 'Newsletter',
+        'prospection' => 'Prospection (e-mail à des entreprises)',
+        'newsletter' => 'Newsletter (abonnés)',
         'operationnel' => 'Communication opérationnelle',
         'individuel' => 'E-mail individuel',
     ],
@@ -266,9 +266,9 @@ return [
             'social.reply_received' => 'Réponse reçue sur un réseau social',
         ],
         'step_types' => [
-            'action' => 'Action',
-            'delay' => 'Attendre',
-            'condition' => 'Condition (si… sinon…)',
+            'action' => 'Alors : faire une action',
+            'delay' => 'Attendre un délai',
+            'condition' => 'Vérifier : seulement si…',
         ],
         'actions' => [
             'create_task' => 'Créer une tâche pour le responsable',

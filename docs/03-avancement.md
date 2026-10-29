@@ -11,7 +11,7 @@
 | 6 — E-mails, modèles, programmation | **Terminé** (détail ci-dessous) |
 | 7 — Statistiques, webhooks, automatisations | **Terminé** (détail ci-dessous) |
 | 8 — Réseaux sociaux | **Terminé** (détail ci-dessous) |
-| 8 bis — Simplification de l'interface | **Terminé** (détail ci-dessous) |
+| 8 bis — Simplification de l'interface, guide et charte | **Terminé** (détail ci-dessous) |
 | 9 — Conformité, sécurité, tests, documentation finale | À faire (fondations posées dès la phase 4) |
 
 ## Phase 4 — livré
@@ -319,4 +319,20 @@ Limites :
 - **Accueil guidé** : les 4 étapes du module (constituer la base, suivre les affaires, contacter, mesurer et automatiser), chacune avec son chiffre clé et un lien, puis « À faire aujourd'hui » et les dernières activités.
 - **Paramètres** : une page d'entrée unique, qui présente chaque réglage avec son utilité et son état (configuré, à configurer, facultatif).
 - Les notifications passent sur une cloche en bas de la barre latérale ; les textes d'aide trop longs sont raccourcis.
+
+Deuxième passe, après les premiers retours de l'utilisateur :
+- **Charte Entreprise AR** : couleurs du logo (bleu roi `#0a3f94` et jaune `#f5b400`) en mode clair et sombre. Le logo est affiché dans la barre latérale, sur la page de connexion et comme icône d'onglet (`public/img`, `public/favicon.png`).
+- **Guide de démarrage** (`/prospection/guide`, rubrique « Guide », lien depuis l'accueil) :
+  - le principe en une phrase ;
+  - les mots à connaître, avec un exemple pour chacun ;
+  - des pas-à-pas : ajouter des prospects, suivre une affaire, envoyer un e-mail à plusieurs entreprises (5 étapes), réseaux sociaux, automatisations « Quand… alors… », opposition ;
+  - des questions fréquentes.
+- **Aide contextuelle** : une ligne d'explication en haut de chaque rubrique, avec un lien « Comprendre en 1 minute » vers la bonne section du guide.
+- **Vocabulaire simplifié** à l'écran :
+  - « Campagnes » devient « E-mails groupés » ;
+  - « Segments » devient « Listes de destinataires » ;
+  - les étapes d'automatisation deviennent « Alors : faire une action », « Attendre un délai » et « Vérifier : seulement si… » ;
+  - le déclencheur devient « Quand… ».
+
+  Le code et la base de données gardent leurs noms techniques.
 

@@ -26,6 +26,12 @@
     </div>
 </section>
 
+<div class="welcome-banner">
+    <x-icon name="circle-help" />
+    <div class="grow"><strong>Nouveau sur la plateforme ?</strong> <span class="muted">Le guide explique les mots utilisés et chaque étape, en 5 minutes.</span></div>
+    <a class="btn btn-sm btn-primary" href="{{ route('pm.guide') }}">Ouvrir le guide</a>
+</div>
+
 <h2 class="section-title">Comment fonctionne le module</h2>
 <ol class="journey">
     <li class="journey-step">
@@ -38,16 +44,16 @@
     <li class="journey-step">
         <span class="journey-num">2</span>
         <strong>Suivre les affaires</strong>
-        <span class="muted small">Chaque opportunité avance d'étape en étape, avec des tâches de relance.</span>
+        <span class="muted small">Chaque affaire avance de colonne en colonne, avec des rappels de relance.</span>
         <span class="step-figure">{{ $openOpportunities }} <small>en cours</small></span>
         <a class="btn btn-sm" href="{{ route('pm.pipelines.show') }}">Ouvrir le pipeline <x-icon name="arrow-right" /></a>
     </li>
     <li class="journey-step">
         <span class="journey-num">3</span>
         <strong>Contacter</strong>
-        <span class="muted small">Par e-mail (campagnes, newsletters) ou sur les réseaux sociaux, en respectant les oppositions.</span>
+        <span class="muted small">Par e-mail (à une personne ou à plusieurs entreprises d’un coup) ou sur les réseaux sociaux.</span>
         @canany(['campaigns.view', 'social.use'])
-            <span class="step-figure">@can('campaigns.view'){{ $campaignsThisMonth }} <small>campagne(s) ce mois</small>@else{{ $socialToDo }} <small>profil(s) à contacter</small>@endcan</span>
+            <span class="step-figure">@can('campaigns.view'){{ $campaignsThisMonth }} <small>e-mail(s) groupé(s) ce mois</small>@else{{ $socialToDo }} <small>profil(s) à contacter</small>@endcan</span>
             <span class="step-links">
                 @can('campaigns.view')<a class="btn btn-sm" href="{{ route('pm.campaigns.index') }}">E-mails <x-icon name="arrow-right" /></a>@endcan
                 @can('social.use')<a class="btn btn-sm" href="{{ route('pm.social.index') }}">Réseaux <x-icon name="arrow-right" /></a>@endcan

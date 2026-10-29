@@ -20,14 +20,14 @@
         <div class="form-grid">
             <div class="field full"><label for="name">Nom *</label><input type="text" id="name" name="name" value="{{ old('name', $automation->name) }}" required maxlength="150"></div>
             <div class="field">
-                <label for="trigger">Déclencheur *</label>
+                <label for="trigger">Quand… (déclencheur) *</label>
                 <select id="trigger" name="trigger" required>
                     @foreach (config('prospection.automation.triggers') as $k => $l)<option value="{{ $k }}" @selected(old('trigger', $automation->trigger) === $k)>{{ $l }}</option>@endforeach
                 </select>
                 @error('trigger')<div class="error">{{ $message }}</div>@enderror
             </div>
             <div class="field">
-                <label>Limite de fréquence par fiche</label>
+                <label>Au maximum, pour une même entreprise</label>
                 <div class="toolbar">
                     <input type="number" name="max_runs_per_subject" value="{{ old('max_runs_per_subject', $automation->max_runs_per_subject) }}" min="1" max="50" aria-label="Nombre maximal" required>
                     <span class="small muted">fois au plus sur</span>

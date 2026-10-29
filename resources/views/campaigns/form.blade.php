@@ -55,7 +55,7 @@
             </div>
         @else
             <div class="field">
-                <label for="segment_id">Segment de destinataires *</label>
+                <label for="segment_id">Liste de destinataires *</label>
                 <select id="segment_id" name="segment_id" required><option value="">—</option>@foreach ($segments as $s)<option value="{{ $s->id }}" @selected(old('segment_id', $campaign->segment_id) == $s->id)>{{ $s->name }}</option>@endforeach</select>
                 @if ($segments->isEmpty())<div class="hint"><a href="{{ route('pm.segments.create') }}">Créer un segment</a></div>@endif
             </div>

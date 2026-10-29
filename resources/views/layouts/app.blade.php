@@ -7,9 +7,10 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Prospection') — {{ config('app.name') }}</title>
     <link rel="preload" href="{{ asset('fonts/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
-    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=7">
-    <script src="{{ asset('js/theme.js') }}?v=7"></script>
-    <script src="{{ asset('js/pm.js') }}?v=7" defer></script>
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
+    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=8">
+    <script src="{{ asset('js/theme.js') }}?v=8"></script>
+    <script src="{{ asset('js/pm.js') }}?v=8" defer></script>
     @stack('head')
 </head>
 <body>
@@ -24,7 +25,7 @@
 <div class="app">
     <aside class="sidebar" id="sidebar" aria-label="Navigation principale">
         <div class="brand">
-            <span class="brand-mark">AR</span>
+            <img class="brand-logo" src="{{ asset('img/logo-mark.png') }}" alt="" width="40" height="40">
             <span class="brand-name">Entreprise AR<small>Prospection &amp; Marketing</small></span>
         </div>
         <nav>
@@ -50,7 +51,7 @@
     <div class="main">
         <div class="topbar">
             <button type="button" class="icon-btn" data-sidebar-toggle aria-controls="sidebar" aria-expanded="false" aria-label="Ouvrir le menu"><x-icon name="menu" /></button>
-            <span class="brand-mark">AR</span>
+            <img class="brand-logo" src="{{ asset('img/logo-mark.png') }}" alt="" width="32" height="32">
             <strong>Prospection</strong>
         </div>
         <main class="content" id="contenu">
@@ -60,6 +61,9 @@
                         <a href="{{ route($tab['route']) }}" @class(['tab', 'active' => request()->routeIs(...$tab['active'])])>{{ $tab['label'] }}</a>
                     @endforeach
                 </nav>
+            @endif
+            @if ($currentSection && ! empty($currentSection['help']) && collect($currentSection['tabs'])->pluck('route')->push($currentSection['route'])->contains(request()->route()?->getName()))
+                <p class="section-help"><x-icon name="circle-help" /> <span>{{ $currentSection['help'] }}</span> <a href="{{ route('pm.guide') }}#{{ $currentSection['guide'] }}">Comprendre en 1 minute</a></p>
             @endif
             @include('partials.flash')
             @yield('content')

@@ -26,4 +26,14 @@ class NavigationTest extends TestCase
         $this->actingAs($admin)->get(route('pm.contacts.index'))->assertOk()
             ->assertSee('class="tabs subnav"', false)->assertSee(route('pm.imports.index'));
     }
+
+    public function test_guide_is_available_to_every_role_and_linked_from_sections(): void
+    {
+        foreach (['commercial', 'marketing', 'lecture_seule'] as $role) {
+            $this->actingAs($this->userWithRole($role))->get(route('pm.guide'))->assertOk()
+                ->assertSee('Les mots à connaître')->assertSee('Envoyer un e-mail à plusieurs entreprises');
+        }
+        $this->actingAs($this->userWithRole('marketing'))->get(route('pm.campaigns.index'))->assertOk()
+            ->assertSee(route('pm.guide').'#emails', false)->assertSee('E-mails groupés');
+    }
 }

@@ -54,7 +54,7 @@
         </section>
 
         <section class="card flush">
-            <div class="card-head"><h2>Exécutions</h2></div>
+            <div class="card-head"><h2>Historique des déclenchements</h2></div>
             @forelse ($runs as $run)
                 <details class="run" id="run-{{ $run->id }}" @if (request()->fullUrlIs('*#run-'.$run->id) || $loop->first && $run->is_test) open @endif>
                     <summary>

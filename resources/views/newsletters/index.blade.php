@@ -5,7 +5,7 @@
 <div class="page-header">
     <div>
         <h1>Newsletters</h1>
-        <p class="subtitle">Listes d'abonnés avec preuve de consentement. Les envois se préparent dans Campagnes, type « Newsletter ».</p>
+        <p class="subtitle">Pour envoyer vos actualités aux personnes qui se sont abonnées. L'envoi se prépare ensuite dans « E-mails groupés », type « Newsletter ».</p>
     </div>
     @can('campaigns.manage')<div class="actions"><a class="btn btn-primary" href="{{ route('pm.campaigns.create', ['type' => 'newsletter']) }}"><x-icon name="mail" /> Nouvelle newsletter</a></div>@endcan
 </div>

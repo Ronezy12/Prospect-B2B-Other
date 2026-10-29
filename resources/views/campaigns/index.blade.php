@@ -4,13 +4,13 @@
 @section('content')
 <div class="page-header">
     <div>
-        <h1>Campagnes e-mail</h1>
-        <p class="subtitle">Prospection, newsletters et communications opérationnelles</p>
+        <h1>E-mails groupés</h1>
+        <p class="subtitle">Un même e-mail envoyé à plusieurs entreprises en une fois, personnalisé pour chacune.</p>
     </div>
     @can('campaigns.manage')
         <div class="actions">
             <a class="btn" href="{{ route('pm.campaigns.create', ['type' => 'newsletter']) }}"><x-icon name="newspaper" /> Newsletter</a>
-            <a class="btn btn-primary" href="{{ route('pm.campaigns.create') }}"><x-icon name="plus" /> Nouvelle campagne</a>
+            <a class="btn btn-primary" href="{{ route('pm.campaigns.create') }}"><x-icon name="plus" /> Nouvel e-mail groupé</a>
         </div>
     @endcan
 </div>
@@ -25,7 +25,7 @@
 <div class="card flush">
     <div class="table-wrap">
         <table class="table">
-            <thead><tr><th>Campagne</th><th>Type</th><th>Statut</th><th>Programmation</th><th>Acceptés</th><th>En attente</th><th>Compte</th></tr></thead>
+            <thead><tr><th>Nom</th><th>Type</th><th>Statut</th><th>Programmation</th><th>Acceptés</th><th>En attente</th><th>Compte</th></tr></thead>
             <tbody>
             @forelse ($campaigns as $c)
                 <tr>
@@ -38,7 +38,7 @@
                     <td class="small">{{ $c->mailAccount?->name ?? '—' }}</td>
                 </tr>
             @empty
-                <tr><td colspan="7" class="table-empty"><div class="empty-state"><x-icon name="mail" /><strong>Aucune campagne</strong>Créez un modèle, un segment, puis votre première campagne.</div></td></tr>
+                <tr><td colspan="7" class="table-empty"><div class="empty-state"><x-icon name="mail" /><strong>Aucune campagne</strong>Créez un modèle, une liste de destinataires, puis votre première campagne.</div></td></tr>
             @endforelse
             </tbody>
         </table>

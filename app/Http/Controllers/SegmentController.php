@@ -84,7 +84,7 @@ class SegmentController extends Controller
             'filters.lifecycle' => ['required', Rule::in(['prospect', 'client', 'all'])],
             'filters.audience_type' => ['nullable', Rule::in(array_keys(config('prospection.audience_types')))],
             'filters.legal_basis' => ['nullable', Rule::in(array_keys(config('prospection.legal_bases')))],
-        ], [], ['name' => 'nom du segment']);
+        ], [], ['name' => 'nom de la liste']);
 
         return ['name' => $data['name'], 'filters' => array_filter($data['filters'] ?? [], fn ($v) => filled($v))];
     }

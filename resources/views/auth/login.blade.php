@@ -5,20 +5,21 @@
 @section('content')
 <div class="auth">
     <aside class="auth-aside">
-        <div class="auth-brand"><span class="brand-mark">AR</span> Entreprise AR</div>
+        <div class="auth-brand"><span class="logo-chip"><img src="{{ asset('img/logo-mark.png') }}" alt="" width="32" height="32"></span> Entreprise AR</div>
         <div>
             <h2>Toute votre prospection B2B au même endroit.</h2>
-            <p>Prospects, interlocuteurs, imports et suivi commercial, avec la conformité RGPD intégrée dès la saisie.</p>
+            <p>Vos prospects, vos affaires, vos e-mails et vos réseaux sociaux, au même endroit et dans le respect du RGPD.</p>
             <ul class="auth-points">
                 <li><x-icon name="building-2" /> Base de prospects par secteur</li>
-                <li><x-icon name="file-spreadsheet" /> Import CSV et Excel avec détection des doublons</li>
-                <li><x-icon name="shield-check" /> Liste d'opposition centralisée</li>
+                <li><x-icon name="mail" /> E-mails à plusieurs entreprises en quelques clics</li>
+                <li><x-icon name="list-checks" /> Relances rappelées automatiquement</li>
             </ul>
         </div>
         <span class="small">Accès réservé aux équipes Entreprise AR</span>
     </aside>
     <main class="auth-main">
         <div class="auth-card">
+            <img class="auth-logo" src="{{ asset('img/logo-entreprise-ar.png') }}" alt="Entreprise AR" width="220" height="216">
             <h1>Bon retour</h1>
             <p class="muted">Connectez-vous pour accéder à votre espace.</p>
 

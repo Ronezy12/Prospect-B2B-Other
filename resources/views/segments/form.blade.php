@@ -1,15 +1,15 @@
 @extends('layouts.app')
-@section('title', $segment->exists ? $segment->name : 'Nouveau segment')
+@section('title', $segment->exists ? $segment->name : 'Nouvelle liste de destinataires')
 
 @section('content')
 @php($f = $segment->filters ?? [])
 <div class="page-header">
     <div>
-        <div class="breadcrumb"><a href="{{ route('pm.segments.index') }}">Segments</a></div>
-        <h1>{{ $segment->exists ? $segment->name : 'Nouveau segment' }}</h1>
+        <div class="breadcrumb"><a href="{{ route('pm.segments.index') }}">Listes de destinataires</a></div>
+        <h1>{{ $segment->exists ? $segment->name : 'Nouvelle liste de destinataires' }}</h1>
     </div>
     @if ($segment->exists)
-        <form method="POST" action="{{ route('pm.segments.destroy', $segment) }}" data-confirm="Supprimer ce segment ?">@csrf @method('DELETE')<button type="submit" class="btn btn-danger"><x-icon name="trash-2" /> Supprimer</button></form>
+        <form method="POST" action="{{ route('pm.segments.destroy', $segment) }}" data-confirm="Supprimer cette liste ?">@csrf @method('DELETE')<button type="submit" class="btn btn-danger"><x-icon name="trash-2" /> Supprimer</button></form>
     @endif
 </div>
 
@@ -28,7 +28,7 @@
     @csrf
     @if ($segment->exists) @method('PUT') @endif
     <div class="form-grid">
-        <div class="field full"><label for="name">Nom du segment *</label><input type="text" id="name" name="name" value="{{ old('name', $segment->name) }}" required maxlength="150" placeholder="ex. Agences immobilières du Rhône"></div>
+        <div class="field full"><label for="name">Nom de la liste *</label><input type="text" id="name" name="name" value="{{ old('name', $segment->name) }}" required maxlength="150" placeholder="ex. Agences immobilières du Rhône"></div>
         <div class="field">
             <label for="f-lifecycle">Fiches</label>
             <select id="f-lifecycle" name="filters[lifecycle]">
