@@ -11,6 +11,7 @@
 | 6 — E-mails, modèles, programmation | **Terminé** (détail ci-dessous) |
 | 7 — Statistiques, webhooks, automatisations | **Terminé** (détail ci-dessous) |
 | 8 — Réseaux sociaux | **Terminé** (détail ci-dessous) |
+| 8 bis — Simplification de l'interface | **Terminé** (détail ci-dessous) |
 | 9 — Conformité, sécurité, tests, documentation finale | À faire (fondations posées dès la phase 4) |
 
 ## Phase 4 — livré
@@ -309,4 +310,13 @@ Limites :
 - Les pièces jointes reçues ne sont pas téléchargées : elles sont signalées « à consulter sur la plateforme ».
 - Le nom de la personne n'est pas récupéré automatiquement auprès de Meta : il se saisit lors du rattachement.
 - La levée d'une opposition sociale (par la conformité) sera traitée en phase 9 avec les droits des personnes.
+
+## Phase 8 bis — simplification de l'interface
+
+À la demande de l'utilisateur, la navigation a été allégée pour que le module se comprenne d'un coup d'œil :
+- **9 rubriques** dans le menu au lieu de 20 entrées : Accueil, Prospects, Pipeline, Tâches, E-mails, Réseaux sociaux, Automatisations, Statistiques, Paramètres. Chaque rubrique n'apparaît que si le rôle y a accès.
+- **Onglets en haut de page** pour les écrans d'une même rubrique : Entreprises, Contacts et Imports sous Prospects ; Campagnes, Newsletters, Modèles et Segments sous E-mails, etc. La définition est centralisée dans `App\Support\Navigation`.
+- **Accueil guidé** : les 4 étapes du module (constituer la base, suivre les affaires, contacter, mesurer et automatiser), chacune avec son chiffre clé et un lien, puis « À faire aujourd'hui » et les dernières activités.
+- **Paramètres** : une page d'entrée unique, qui présente chaque réglage avec son utilité et son état (configuré, à configurer, facultatif).
+- Les notifications passent sur une cloche en bas de la barre latérale ; les textes d'aide trop longs sont raccourcis.
 

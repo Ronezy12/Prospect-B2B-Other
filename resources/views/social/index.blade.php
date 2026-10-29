@@ -5,15 +5,11 @@
 <div class="page-header">
     <div>
         <h1>Réseaux sociaux</h1>
-        <p class="subtitle">Suivi des prises de contact réalisées par l'équipe sur LinkedIn, Facebook, Instagram… · {{ $counts['a_traiter'] }} à traiter aujourd'hui</p>
-    </div>
-    <div class="actions">
-        @can('social.inbox')<a class="btn" href="{{ route('pm.social.inbox.index') }}"><x-icon name="messages-square" /> Messages de la Page</a>@endcan
-        @can('social.templates')<a class="btn" href="{{ route('pm.social.templates.index') }}"><x-icon name="copy" /> Modèles de messages</a>@endcan
+        <p class="subtitle">{{ $counts['a_traiter'] }} profil(s) à traiter aujourd'hui</p>
     </div>
 </div>
 
-<div class="alert alert-info"><x-icon name="shield-check" /><span>Les invitations et messages sont envoyés <strong>par vous, depuis la plateforme</strong>, puis consignés ici. Aucune action n'est automatisée sur vos comptes personnels et aucun profil n'est collecté automatiquement, conformément aux conditions d'utilisation des réseaux.</span></div>
+<p class="hint-line"><x-icon name="shield-check" /> Vous agissez sur le réseau, puis vous notez l'action ici. Rien n'est automatisé sur vos comptes.</p>
 
 <nav class="tabs" aria-label="Vues">
     @foreach ($views as $key => $label)

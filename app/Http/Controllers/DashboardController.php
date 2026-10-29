@@ -3,10 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Activity;
+use App\Models\Campaign;
 use App\Models\Company;
 use App\Models\Contact;
 use App\Models\Import;
 use App\Models\Opportunity;
+use App\Models\SocialProfile;
 use App\Models\Task;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -44,12 +46,15 @@ class DashboardController extends Controller
             'recentActivities' => Activity::with(['user:id,name', 'subject'])
                 ->where('subject_type', (new Company)->getMorphClass())
                 ->whereIn('subject_id', $visibleIds)
-                ->latest('occurred_at')->latest('id')->limit(10)->get(),
+                ->latest('occurred_at')->latest('id')->limit(6)->get(),
             'myTasks' => Task::where('assignee_id', $user->id)->where('status', 'a_faire')
                 ->where('due_at', '<=', today()->endOfDay())
                 ->with(['company:id,name', 'opportunity:id,title', 'assignee:id,name'])
                 ->orderBy('due_at')->limit(8)->get(),
             'openOpportunities' => Opportunity::visibleTo($user)->active()->whereNull('closed_at')->count(),
+            'campaignsThisMonth' => $user->can('campaigns.view') ? Campaign::where('type', '!=', 'individuel')->where('started_at', '>=', now()->startOfMonth())->count() : 0,
+            'socialToDo' => $user->can('social.use') ? SocialProfile::visibleTo($user)->whereNotIn('status', config('prospection.social.closed_statuses'))
+                ->where(fn ($q) => $q->where('next_action_at', '<=', now()->endOfDay())->orWhere(fn ($w) => $w->whereNull('next_action_at')->where('status', 'a_contacter')))->count() : 0,
             'recentImports' => $user->can('prospects.import')
                 ? Import::where('user_id', $user->id)->latest('id')->limit(5)->get()
                 : collect(),

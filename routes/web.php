@@ -22,6 +22,7 @@ use App\Http\Controllers\SegmentController;
 use App\Http\Controllers\Settings\InboxController;
 use App\Http\Controllers\Settings\MailAccountController;
 use App\Http\Controllers\Settings\PipelineSettingsController;
+use App\Http\Controllers\Settings\SettingsHomeController;
 use App\Http\Controllers\Settings\SocialAccountController;
 use App\Http\Controllers\Settings\TrackingSettingsController;
 use App\Http\Controllers\Settings\UserController;
@@ -139,6 +140,7 @@ Route::middleware('auth')->group(function () {
         Route::resource('automatisations', AutomationController::class)->except('create')->parameters(['automatisations' => 'automation'])->names('automations');
 
         Route::prefix('parametres')->name('settings.')->group(function () {
+            Route::get('/', SettingsHomeController::class)->name('index');
             Route::post('meta/{account}/test', [SocialAccountController::class, 'test'])->middleware('throttle:10,1')->name('social.test');
             Route::resource('meta', SocialAccountController::class)->except(['show', 'destroy'])->parameters(['meta' => 'account'])->names('social');
             Route::get('suivi', [TrackingSettingsController::class, 'edit'])->name('tracking.edit');
