@@ -119,6 +119,18 @@ return [
         'test_max_recipients' => 5,
     ],
 
+    // Préréglages SMTP proposés dans le formulaire (limites prudentes, sous les plafonds des fournisseurs).
+    'mail_presets' => [
+        'gmail' => ['label' => 'Gmail (adresse @gmail.com)', 'host' => 'smtp.gmail.com', 'port' => 587, 'encryption' => 'tls', 'hourly_limit' => 40, 'daily_limit' => 400,
+            'hint' => 'Utilisez un « mot de passe d\'application » Google (compte Google › Sécurité › Validation en deux étapes › Mots de passe des applications), pas votre mot de passe habituel. L\'adresse d\'expédition doit être celle du compte. Gmail limite à environ 500 destinataires par jour.'],
+        'workspace' => ['label' => 'Google Workspace (Gmail professionnel)', 'host' => 'smtp.gmail.com', 'port' => 587, 'encryption' => 'tls', 'hourly_limit' => 100, 'daily_limit' => 1500,
+            'hint' => 'Mot de passe d\'application Google requis. Google Workspace limite à environ 2 000 messages par jour et par utilisateur.'],
+        'outlook' => ['label' => 'Outlook / Microsoft 365', 'host' => 'smtp.office365.com', 'port' => 587, 'encryption' => 'tls', 'hourly_limit' => 30, 'daily_limit' => 300,
+            'hint' => 'L\'authentification SMTP doit être autorisée sur la boîte par l\'administrateur Microsoft 365.'],
+        'ovh' => ['label' => 'OVH (e-mail Pro / MX Plan)', 'host' => 'ssl0.ovh.net', 'port' => 465, 'encryption' => 'ssl', 'hourly_limit' => 100, 'daily_limit' => 1000,
+            'hint' => 'Identifiant = adresse e-mail complète.'],
+    ],
+
     'mail_drivers' => [
         'smtp' => 'Serveur SMTP',
         'brevo' => 'API Brevo (à activer avec une clé API)',

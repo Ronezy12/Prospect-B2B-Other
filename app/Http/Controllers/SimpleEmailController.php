@@ -96,7 +96,7 @@ class SimpleEmailController extends Controller
         return view('simple-email.message', [
             'subject' => $example['subject'] ?? ($draft['subject'] ?? self::EXAMPLES['presentation']['subject']),
             'body' => $example['body'] ?? ($draft['body'] ?? self::EXAMPLES['presentation']['body']),
-            'accountId' => $draft['mail_account_id'] ?? null,
+            'selectedAccounts' => array_map('intval', $draft['account_ids'] ?? $this->accounts()->pluck('id')->all()),
             'accounts' => $this->accounts(),
             'examples' => self::EXAMPLES,
         ]);
@@ -108,8 +108,12 @@ class SimpleEmailController extends Controller
         $data = $request->validate([
             'subject' => ['required', 'string', 'max:190'],
             'body' => ['required', 'string', 'max:10000'],
-            'mail_account_id' => ['required', Rule::in($this->accounts()->pluck('id')->all())],
-        ], ['mail_account_id.required' => 'Aucun compte d\'envoi n\'est prêt : demandez à un administrateur de le configurer dans Paramètres.'], ['subject' => 'objet', 'body' => 'message', 'mail_account_id' => 'adresse d\'envoi']);
+            'account_ids' => ['required', 'array', 'min:1'],
+            'account_ids.*' => ['integer', Rule::in($this->accounts()->pluck('id')->all())],
+        ], ['account_ids.required' => 'Choisissez au moins une adresse d\'envoi (ou demandez à un administrateur d\'en configurer une dans Paramètres).'], ['subject' => 'objet', 'body' => 'message', 'account_ids' => 'adresses d\'envoi']);
+        // La première adresse cochée est le compte principal ; les autres reçoivent une part de l'envoi.
+        $data['account_ids'] = array_values(array_unique(array_map('intval', $data['account_ids'])));
+        $data['mail_account_id'] = $data['account_ids'][0];
         session([self::SESSION.'.message' => $data]);
 
         return redirect()->route('pm.simple-email.confirm');
@@ -136,6 +140,7 @@ class SimpleEmailController extends Controller
                 'body' => $this->replace($message['body'], $data)."\n".$request->user()->name,
             ],
             'account' => MailAccount::find($message['mail_account_id']),
+            'senders' => MailAccount::whereIn('id', $message['account_ids'] ?? [$message['mail_account_id']])->get(['id', 'from_email', 'daily_limit', 'driver']),
             'canSend' => $request->user()->can('campaigns.send'),
             'tested' => (bool) session(self::SESSION.'.tested'),
         ]);
@@ -181,6 +186,7 @@ class SimpleEmailController extends Controller
                 'type' => 'prospection',
                 'template_id' => $template->id,
                 'mail_account_id' => $message['mail_account_id'],
+                'account_ids' => array_values(array_diff($message['account_ids'] ?? [], [$message['mail_account_id']])) ?: null,
                 'segment_id' => $segment->id,
                 // Par défaut, on n'écrit pas à quelqu'un sollicité il y a moins d'un mois.
                 'exclusions' => empty($filters['include_recent']) ? ['contacted_within_days' => 30] : [],

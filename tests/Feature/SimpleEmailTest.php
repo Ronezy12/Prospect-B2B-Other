@@ -21,7 +21,7 @@ class SimpleEmailTest extends CampaignTestCase
         $this->actingAs($this->marketer)->post(route('pm.simple-email.who'), ['city' => 'Lyon'])->assertRedirect(route('pm.simple-email.message'));
         $this->actingAs($this->marketer)->get(route('pm.simple-email.message', ['exemple' => 'relance']))->assertOk()->assertSee('Suite à mon précédent message');
         $this->actingAs($this->marketer)->post(route('pm.simple-email.message.store'), [
-            'subject' => 'Bonjour {{prenom}}', 'body' => "Bonjour {{prenom}},\n\n<b>Offre</b> pour {{entreprise}}.", 'mail_account_id' => $this->account->id,
+            'subject' => 'Bonjour {{prenom}}', 'body' => "Bonjour {{prenom}},\n\n<b>Offre</b> pour {{entreprise}}.", 'account_ids' => [$this->account->id],
         ])->assertRedirect(route('pm.simple-email.confirm'));
         $this->actingAs($this->marketer)->get(route('pm.simple-email.confirm'))->assertOk()->assertSee('Bonjour Claire')->assertSee('&lt;b&gt;Offre&lt;/b&gt;', false);
 

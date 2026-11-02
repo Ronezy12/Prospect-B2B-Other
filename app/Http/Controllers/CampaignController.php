@@ -215,6 +215,8 @@ class CampaignController extends Controller
             'type' => [$lockedType ? 'prohibited' : 'required', Rule::in(self::TYPES)],
             'template_id' => ['required', Rule::exists('pm_templates', 'id')->whereNull('deleted_at')->where('category', $type)],
             'mail_account_id' => ['required', Rule::exists('pm_mail_accounts', 'id')->where('is_active', true)],
+            'account_ids' => ['nullable', 'array', 'max:50'],
+            'account_ids.*' => ['integer', Rule::exists('pm_mail_accounts', 'id')->where('is_active', true)],
             'segment_id' => [in_array($type, ['prospection', 'operationnel'], true) ? 'required' : 'prohibited', 'nullable', Rule::exists('pm_segments', 'id')->whereNull('deleted_at')],
             'list_id' => [$type === 'newsletter' ? 'required' : 'prohibited', 'nullable', Rule::exists('pm_newsletter_lists', 'id')->where('is_active', true)],
             'from_name' => ['nullable', 'string', 'max:120'],
@@ -228,6 +230,7 @@ class CampaignController extends Controller
             'template_id' => 'modèle', 'mail_account_id' => 'compte d\'envoi', 'segment_id' => 'segment', 'list_id' => 'liste d\'abonnés', 'reply_to' => 'adresse de réponse',
         ]);
         $data['exclusions'] = array_filter($data['exclusions'] ?? [], fn ($v) => filled($v));
+        $data['account_ids'] = array_values(array_diff(array_map('intval', $data['account_ids'] ?? []), [(int) $data['mail_account_id']])) ?: null;
         // Le suivi n'est demandé que s'il est autorisé globalement (consentement exigé en plus, contact par contact).
         $data['track_opens'] = (bool) ($data['track_opens'] ?? false) && Setting::get('tracking.opens', false);
         $data['track_clicks'] = (bool) ($data['track_clicks'] ?? false) && Setting::get('tracking.clicks', false);

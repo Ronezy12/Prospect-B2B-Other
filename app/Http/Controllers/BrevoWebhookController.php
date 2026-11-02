@@ -75,7 +75,8 @@ class BrevoWebhookController extends Controller
 
     private function recipient(array $event, MailAccount $account): ?CampaignRecipient
     {
-        $query = CampaignRecipient::query()->whereHas('campaign', fn ($q) => $q->where('mail_account_id', $account->id));
+        $query = CampaignRecipient::query()->where(fn ($q) => $q->where('mail_account_id', $account->id)
+            ->orWhere(fn ($w) => $w->whereNull('mail_account_id')->whereHas('campaign', fn ($c) => $c->where('mail_account_id', $account->id))));
         if ($key = $event['X-Mailin-custom'] ?? null) {
             if ($found = (clone $query)->where('idempotency_key', $key)->first()) {
                 return $found;

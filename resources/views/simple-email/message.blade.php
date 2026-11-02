@@ -31,18 +31,22 @@
         <div class="hint">Votre nom est ajouté en signature. Un lien « Se désinscrire » est ajouté automatiquement en bas de l'e-mail.</div>
         @error('body')<div class="error">{{ $message }}</div>@enderror
     </div>
-    @if ($accounts->count() > 1)
-        <div class="field">
-            <label for="mail_account_id">Envoyer depuis</label>
-            <select id="mail_account_id" name="mail_account_id">@foreach ($accounts as $a)<option value="{{ $a->id }}" @selected((int) old('mail_account_id', $accountId) === $a->id)>{{ $a->name }} ({{ $a->from_email }})</option>@endforeach</select>
-        </div>
+    @if ($accounts->isEmpty())
+        <div class="alert alert-warning"><x-icon name="circle-alert" /><span>Aucune adresse d'envoi n'est prête. Un administrateur doit la configurer dans Paramètres › Envoi d'e-mails.</span></div>
     @elseif ($accounts->count() === 1)
-        <input type="hidden" name="mail_account_id" value="{{ $accounts->first()->id }}">
+        <input type="hidden" name="account_ids[]" value="{{ $accounts->first()->id }}">
         <p class="small muted">Envoyé depuis {{ $accounts->first()->from_email }}@if ($accounts->first()->driver === 'log') (mode démonstration : rien ne part réellement)@endif.</p>
     @else
-        <div class="alert alert-warning"><x-icon name="circle-alert" /><span>Aucune adresse d'envoi n'est prête. Un administrateur doit la configurer dans Paramètres › Envoi d'e-mails.</span></div>
+        <div class="field">
+            <span class="label">Envoyer depuis (l'envoi est réparti entre les adresses cochées)</span>
+            <div class="check-list">
+                @foreach ($accounts as $a)
+                    <label class="checkbox"><input type="checkbox" name="account_ids[]" value="{{ $a->id }}" @checked(in_array($a->id, array_map('intval', (array) old('account_ids', $selectedAccounts)), true))> {{ $a->from_email }} <span class="muted small">(jusqu'à {{ $a->daily_limit }}/jour)</span></label>
+                @endforeach
+            </div>
+        </div>
     @endif
-    @error('mail_account_id')<div class="error">{{ $message }}</div>@enderror
+    @error('account_ids')<div class="error">{{ $message }}</div>@enderror
     <div class="form-actions">
         <a class="btn" href="{{ route('pm.simple-email.create') }}"><x-icon name="chevron-right" class="flip" /> Retour</a>
         <button type="submit" class="btn btn-primary">Continuer <x-icon name="arrow-right" /></button>

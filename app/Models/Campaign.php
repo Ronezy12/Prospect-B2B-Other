@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 class Campaign extends Model
 {
@@ -15,13 +16,14 @@ class Campaign extends Model
 
     protected $attributes = ['status' => 'brouillon'];
 
-    protected $fillable = ['name', 'type', 'template_id', 'mail_account_id', 'segment_id', 'list_id', 'exclusions', 'from_name', 'reply_to', 'scheduled_at', 'track_opens', 'track_clicks'];
+    protected $fillable = ['name', 'type', 'template_id', 'mail_account_id', 'account_ids', 'segment_id', 'list_id', 'exclusions', 'from_name', 'reply_to', 'scheduled_at', 'track_opens', 'track_clicks'];
 
     protected function casts(): array
     {
         return [
             'audience' => 'array',
             'exclusions' => 'array',
+            'account_ids' => 'array',
             'scheduled_at' => 'datetime',
             'started_at' => 'datetime',
             'finished_at' => 'datetime',
@@ -49,6 +51,23 @@ class Campaign extends Model
     public function mailAccount(): BelongsTo
     {
         return $this->belongsTo(MailAccount::class);
+    }
+
+    /**
+     * Comptes utilisés pour l'envoi : le compte principal puis les comptes supplémentaires
+     * (envoi réparti). Seuls les comptes actifs sont retenus.
+     *
+     * @return Collection<int, MailAccount>
+     */
+    public function sendingAccounts(): Collection
+    {
+        $ids = array_values(array_unique(array_filter(array_merge([$this->mail_account_id], array_map('intval', (array) $this->account_ids)))));
+        if (! $ids) {
+            return collect();
+        }
+        $accounts = MailAccount::whereIn('id', $ids)->where('is_active', true)->get()->keyBy('id');
+
+        return collect($ids)->map(fn ($id) => $accounts[$id] ?? null)->filter()->values();
     }
 
     public function segment(): BelongsTo

@@ -27,6 +27,27 @@
     }
 
     // Confirmation des actions sensibles
+    // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.
+    var preset = document.querySelector('[data-mail-preset]');
+    if (preset) {
+      preset.addEventListener('change', function () {
+        var o = preset.options[preset.selectedIndex];
+        if (!o.value) { return; }
+        var set = function (id, v) { var f = document.getElementById(id); if (f && v) { f.value = v; } };
+        set('driver', 'smtp');
+        set('host', o.getAttribute('data-host'));
+        set('port', o.getAttribute('data-port'));
+        set('encryption', o.getAttribute('data-encryption'));
+        set('hourly_limit', o.getAttribute('data-hourly'));
+        set('daily_limit', o.getAttribute('data-daily'));
+        var from = document.getElementById('from_email');
+        var user = document.getElementById('username');
+        if (from && user && !user.value) { user.value = from.value; }
+        var hint = document.querySelector('[data-preset-hint]');
+        if (hint) { hint.textContent = o.getAttribute('data-hint'); }
+      });
+    }
+
     // Assistant e-mail : insère une variable ({{prenom}}…) à l'emplacement du curseur.
     document.querySelectorAll('[data-insert]').forEach(function (button) {
       button.addEventListener('click', function () {

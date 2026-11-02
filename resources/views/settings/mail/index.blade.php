@@ -5,11 +5,15 @@
 <div class="page-header">
     <div>
         <h1>Comptes d'envoi</h1>
-        <p class="subtitle">Serveurs SMTP et fournisseurs API utilisés pour les campagnes. Les identifiants sont chiffrés et ne sont jamais réaffichés.</p>
+        <p class="subtitle">Les adresses qui envoient vos e-mails (Gmail, Outlook…). Ajoutez-en plusieurs pour répartir les envois. Les mots de passe sont chiffrés et jamais réaffichés.</p>
     </div>
     <div class="actions"><a class="btn btn-primary" href="{{ route('pm.settings.mail.create') }}"><x-icon name="plus" /> Nouveau compte</a></div>
 </div>
 
+@php($ready = $accounts->where('is_active', true)->where('last_test_result', 'ok')->where('driver', '!=', 'log'))
+@if ($ready->count() > 1)
+    <div class="alert alert-info"><x-icon name="mail" /><span><strong>Envoi réparti actif :</strong> {{ $ready->count() }} adresses prêtes, soit jusqu'à {{ number_format($ready->sum('daily_limit'), 0, ',', ' ') }} e-mails par jour. Les envois groupés se répartissent entre elles, et une même personne reçoit toujours nos e-mails de la même adresse.</span></div>
+@endif
 <div class="card flush">
     @forelse ($accounts as $account)
         <div class="settings-row">

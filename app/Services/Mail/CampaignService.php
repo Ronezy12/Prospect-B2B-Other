@@ -51,6 +51,11 @@ class CampaignService
         } elseif ($account->last_test_result !== 'ok') {
             $errors[] = "Le dernier test du compte « {$account->name} » a échoué : corrigez sa configuration.";
         }
+        foreach ($campaign->sendingAccounts()->skip(1) as $extra) {
+            if ($extra->last_test_result !== 'ok') {
+                $warnings[] = "L'adresse supplémentaire {$extra->from_email} n'a pas été testée avec succès : elle sera quand même utilisée.";
+            }
+        }
         if ($account?->driver === 'log') {
             $warnings[] = 'Compte en mode « journal local » : aucun e-mail ne sera réellement envoyé.';
         }

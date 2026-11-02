@@ -31,6 +31,16 @@
 
     <fieldset>
         <legend><x-icon name="settings" /> Connexion SMTP <span class="muted small">si type « Serveur SMTP »</span></legend>
+        <div class="field preset-field">
+            <label for="preset">Remplir automatiquement pour…</label>
+            <select id="preset" data-mail-preset>
+                <option value="">— Choisir votre messagerie —</option>
+                @foreach (config('prospection.mail_presets') as $key => $p)
+                    <option value="{{ $key }}" data-host="{{ $p['host'] }}" data-port="{{ $p['port'] }}" data-encryption="{{ $p['encryption'] }}" data-hourly="{{ $p['hourly_limit'] }}" data-daily="{{ $p['daily_limit'] }}" data-hint="{{ $p['hint'] }}">{{ $p['label'] }}</option>
+                @endforeach
+            </select>
+            <div class="hint" data-preset-hint>Serveur, port, chiffrement et limites sont remplis pour vous.</div>
+        </div>
         <div class="form-grid">
             <div class="field"><label for="host">Serveur</label><input type="text" id="host" name="host" value="{{ old('host', $account->setting('host')) }}" maxlength="190" placeholder="ssl0.ovh.net">@error('host')<div class="error">{{ $message }}</div>@enderror</div>
             <div class="field"><label for="port">Port</label><input type="number" id="port" name="port" value="{{ old('port', $account->setting('port', 587)) }}" min="1" max="65535"></div>

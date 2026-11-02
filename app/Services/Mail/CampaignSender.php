@@ -42,16 +42,18 @@ class CampaignSender
             return null;
         }
 
-        $account = $campaign->mailAccount;
-        if (! $account || ! $account->is_active) {
+        $accounts = $campaign->sendingAccounts();
+        if ($accounts->isEmpty()) {
             $campaign->forceFill(['status' => 'en_pause'])->save();
 
             return null;
         }
 
-        $remaining = $this->quotaRemaining($account);
+        // Envoi réparti : chaque compte garde ses propres quotas (ex. plusieurs adresses Gmail).
+        $capacity = $accounts->mapWithKeys(fn (MailAccount $a) => [$a->id => $this->quotaRemaining($a)])->all();
+        $remaining = array_sum($capacity);
         if ($remaining <= 0) {
-            return 300; // quota atteint : reprise automatique plus tard
+            return 300; // quotas atteints : reprise automatique plus tard
         }
 
         $ids = CampaignRecipient::where('campaign_id', $campaign->id)
@@ -70,6 +72,7 @@ class CampaignSender
         $claimed = CampaignRecipient::whereIn('id', $ids)->where('status', 'envoi')->where('locked_at', $lock)->get();
 
         $version = $campaign->templateVersion;
+        $byId = $accounts->keyBy('id');
         foreach ($claimed as $recipient) {
             if (Campaign::whereKey($campaign->id)->value('status') !== 'en_cours') {
                 // Pause ou annulation pendant le lot : on rend la main proprement.
@@ -77,7 +80,15 @@ class CampaignSender
 
                 continue;
             }
-            $this->sendOne($campaign, $account, $version->subject, $version->html, $version->preheader, $recipient);
+            $accountId = $this->pickAccount($recipient, $accounts->pluck('id')->all(), $capacity);
+            if ($accountId === null) {
+                CampaignRecipient::whereKey($recipient->id)->where('status', 'envoi')->update(['status' => 'en_attente', 'locked_at' => null]);
+
+                continue;
+            }
+            $capacity[$accountId]--;
+            $recipient->forceFill(['mail_account_id' => $accountId])->save();
+            $this->sendOne($campaign, $byId[$accountId], $version->subject, $version->html, $version->preheader, $recipient);
         }
 
         return 0;
@@ -186,12 +197,35 @@ class CampaignSender
         return $next ? (int) max(30, now()->diffInSeconds($next, false)) : 60;
     }
 
+    /**
+     * Compte d'envoi d'un destinataire : toujours le même pour une adresse donnée tant
+     * qu'il a du quota (la personne reçoit nos e-mails de la même boîte et y répond),
+     * sinon celui à qui il reste le plus de quota.
+     *
+     * @param  array<int, int>  $ids
+     * @param  array<int, int>  $capacity
+     */
+    private function pickAccount(CampaignRecipient $recipient, array $ids, array $capacity): ?int
+    {
+        $previous = CampaignRecipient::where('email', $recipient->email)->whereKeyNot($recipient->id)
+            ->whereIn('mail_account_id', $ids)->where('status', 'accepte')->latest('sent_at')->value('mail_account_id');
+        $preferred = $previous ?? $ids[crc32($recipient->email) % count($ids)];
+        if (($capacity[$preferred] ?? 0) > 0) {
+            return $preferred;
+        }
+        arsort($capacity);
+        $best = array_key_first($capacity);
+
+        return $best !== null && $capacity[$best] > 0 ? $best : null;
+    }
+
     /** Envois acceptés restants dans la fenêtre horaire et journalière du compte. */
     public function quotaRemaining(MailAccount $account): int
     {
         $sent = fn ($since) => CampaignRecipient::query()
             ->join('pm_campaigns', 'pm_campaigns.id', '=', 'pm_campaign_recipients.campaign_id')
-            ->where('pm_campaigns.mail_account_id', $account->id)
+            ->where(fn ($q) => $q->where('pm_campaign_recipients.mail_account_id', $account->id)
+                ->orWhere(fn ($w) => $w->whereNull('pm_campaign_recipients.mail_account_id')->where('pm_campaigns.mail_account_id', $account->id)))
             ->where('pm_campaign_recipients.sent_at', '>=', $since)
             ->count();
 

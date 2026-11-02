@@ -25,6 +25,7 @@
         <div class="count-big">{{ $estimate['eligible'] }}</div>
         <div class="count-label">personne(s) vont le recevoir</div>
         @include('simple-email.removed')
+        @if ($senders->count() > 1)<p class="small muted">Réparti sur {{ $senders->count() }} adresses : {{ $senders->pluck('from_email')->implode(', ') }}.</p>@endif
         @if ($account?->driver === 'log')<p class="small muted">Mode démonstration : les e-mails sont simulés, rien ne part réellement.</p>@endif
         @unless ($tested)<p class="small muted">Conseil : envoyez-vous un test avant.</p>@endunless
 

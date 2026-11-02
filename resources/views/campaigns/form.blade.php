@@ -48,6 +48,17 @@
                 @foreach ($accounts as $a)<option value="{{ $a->id }}" @selected(old('mail_account_id', $campaign->mail_account_id) == $a->id)>{{ $a->name }} ({{ $a->from_email }})</option>@endforeach
             </select>
         </div>
+        @if ($accounts->count() > 1)
+            <div class="field full">
+                <span class="label">Répartir aussi l'envoi sur</span>
+                <div class="check-list">
+                    @foreach ($accounts as $a)
+                        <label class="checkbox"><input type="checkbox" name="account_ids[]" value="{{ $a->id }}" @checked(in_array($a->id, array_map('intval', (array) old('account_ids', $campaign->account_ids ?? [])), true))> {{ $a->from_email }} <span class="muted small">({{ $a->daily_limit }}/jour)</span></label>
+                    @endforeach
+                </div>
+                <div class="hint">Chaque adresse garde ses propres limites ; une même personne reçoit toujours nos e-mails de la même adresse.</div>
+            </div>
+        @endif
         @if ($type === 'newsletter')
             <div class="field">
                 <label for="list_id">Liste d'abonnés *</label>
