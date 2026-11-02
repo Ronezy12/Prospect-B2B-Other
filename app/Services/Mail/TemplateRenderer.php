@@ -12,9 +12,17 @@ class TemplateRenderer
      * @param  array<string, string|null>  $data
      * @return array{subject: string, html: string, text: string}
      */
-    public function render(string $subject, string $html, ?string $preheader, array $data, bool $marketing, ?string $senderLine = null): array
+    public function render(string $subject, string $html, ?string $preheader, array $data, bool $marketing, ?string $senderLine = null, ?string $signatureHtml = null): array
     {
         $unsubscribe = $data['lien_desinscription'] ?? null;
+
+        // Signature de l'adresse d'envoi : à l'emplacement {{signature}} s'il existe, sinon en fin de message.
+        // Sans signature configurée, {{signature}} affiche simplement le nom de l'expéditeur.
+        if (preg_match('/\{\{\s*signature\s*\}\}/i', $html)) {
+            $html = preg_replace('/\{\{\s*signature\s*\}\}/i', $signatureHtml ?? '{{expediteur}}', $html);
+        } elseif ($signatureHtml) {
+            $html = stripos($html, '</body>') !== false ? preg_replace('#</body>#i', $signatureHtml.'</body>', $html, 1) : $html.$signatureHtml;
+        }
 
         $subject = $this->replace($subject, $data, false);
         $body = $this->replace($html, $data, true);

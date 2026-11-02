@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 use App\Http\Controllers\AutomationController;
 use App\Http\Controllers\BrevoWebhookController;
 use App\Http\Controllers\CampaignController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\PipelineBoardController;
 use App\Http\Controllers\QuickOutcomeController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SecurityController;
 use App\Http\Controllers\SegmentController;
 use App\Http\Controllers\Settings\InboxController;
 use App\Http\Controllers\Settings\MailAccountController;
@@ -39,6 +41,7 @@ use App\Http\Controllers\TemplateController;
 use App\Http\Controllers\TourController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\UnsubscribeController;
+use App\Http\Middleware\EnsureTwoFactorEnrolled;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/prospection');
@@ -59,14 +62,20 @@ Route::middleware(['signed', 'throttle:30,1'])->group(function () {
 Route::middleware('guest')->group(function () {
     Route::get('/connexion', [LoginController::class, 'create'])->name('login');
     Route::post('/connexion', [LoginController::class, 'store'])->middleware('throttle:20,1');
+    Route::get('/connexion/verification', [TwoFactorChallengeController::class, 'create'])->name('two-factor.challenge');
+    Route::post('/connexion/verification', [TwoFactorChallengeController::class, 'store'])->middleware('throttle:20,1');
 });
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', EnsureTwoFactorEnrolled::class])->group(function () {
     Route::post('/deconnexion', [LoginController::class, 'destroy'])->name('logout');
 
     Route::prefix('prospection')->name('pm.')->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::get('guide', GuideController::class)->name('guide');
+        Route::get('securite', [SecurityController::class, 'show'])->name('security.show');
+        Route::post('securite/activer', [SecurityController::class, 'enable'])->middleware('throttle:10,1')->name('security.enable');
+        Route::post('securite/codes', [SecurityController::class, 'regenerate'])->middleware('throttle:5,1')->name('security.codes');
+        Route::post('securite/desactiver', [SecurityController::class, 'disable'])->middleware('throttle:5,1')->name('security.disable');
         Route::post('visites/vue', [TourController::class, 'done'])->middleware('throttle:60,1')->name('tours.done');
         Route::post('visites/preference', [TourController::class, 'preference'])->name('tours.preference');
 

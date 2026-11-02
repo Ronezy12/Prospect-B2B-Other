@@ -8,6 +8,7 @@ Module de prospection commerciale et marketing B2B (France / UE), application La
 - [Installation, configuration, sauvegardes et maintenance](docs/02-installation-exploitation.md)
 - [Avancement par phase et règles implémentées](docs/03-avancement.md)
 - [Tester la plateforme (aperçu, Docker, comptes de démo)](docs/04-tester-la-plateforme.md)
+- [Conformité RGPD et sécurité](docs/05-conformite-securite.md)
 
 ## Tester en une commande
 

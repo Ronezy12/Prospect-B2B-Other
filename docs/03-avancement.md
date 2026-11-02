@@ -12,7 +12,7 @@
 | 7 — Statistiques, webhooks, automatisations | **Terminé** (détail ci-dessous) |
 | 8 — Réseaux sociaux | **Terminé** (détail ci-dessous) |
 | 8 bis — Simplification de l'interface, guide et charte | **Terminé** (détail ci-dessous) |
-| 9 — Conformité, sécurité, tests, documentation finale | À faire (fondations posées dès la phase 4) |
+| 9 — Conformité, sécurité, tests, documentation finale | **Terminé** — [05-conformite-securite.md](05-conformite-securite.md) |
 
 ## Phase 4 — livré
 
@@ -364,4 +364,23 @@ Les écrans détaillés restent disponibles, mais le parcours par défaut devien
 - **Réseaux sociaux** : boutons *J'ai envoyé une invitation*, *J'ai envoyé un message*, *Il/elle a répondu*, *Rendez-vous obtenu*, *Pas intéressé*, avec le rappel suivant créé automatiquement. Le formulaire complet est replié sous « Plus d'options ».
 - **Menu E-mails** : « Écrire à plusieurs entreprises », « Mes envois », « Avancé » (modèles, listes, newsletters).
 - Visites guidées et guide mis à jour pour ces nouveaux parcours.
+
+## Phase 9 — conformité, sécurité, finitions
+
+- **Espace « Conformité RGPD »** (rôles conformité et administrateur) :
+  - demandes des personnes : recherche, export JSON, effacement, registre avec échéance d'un mois ;
+  - liste d'opposition : vérification d'une adresse, levée justifiée et tracée, y compris sur les réseaux sociaux ;
+  - durées de conservation automatiques (`pm:retention`, chaque nuit) ;
+  - registre des traitements pré-rempli et imprimable.
+- **Double authentification** TOTP, obligatoire pour les administrateurs (hors démonstration), avec codes de secours.
+- **En-têtes renforcés** : HSTS, `no-store` sur les pages connectées, `object-src 'none'`. `composer audit` : aucune vulnérabilité connue.
+- **Envoi Gmail réparti** sur plusieurs adresses, avec préréglages Gmail, Workspace, Outlook et OVH.
+- **Signature par adresse d'envoi** : la signature Gmail n'est pas reprise en SMTP, elle se saisit dans le module.
+- **Tests** : 158 tests automatiques au total, dont droits des personnes, conservation, levée d'opposition, double authentification (vecteur RFC 6238, rejeu, codes de secours, obligation), envoi multi-comptes et signature.
+
+### Ce qui reste hors du code (à faire à l'installation)
+- Valider avec le DPO les bases légales, les durées et le registre, et compléter les champs entre crochets.
+- Configurer les adresses Gmail (mots de passe d'application), puis les tester depuis Paramètres.
+- Mettre en ligne sur le VPS en HTTPS et programmer les sauvegardes (voir `02-installation-exploitation.md`).
+- Remplacer les données de démonstration par les vrais utilisateurs et prospects (`PM_DEMO=false`).
 

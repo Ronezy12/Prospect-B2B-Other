@@ -92,6 +92,7 @@ class MailAccountController extends Controller
             'from_email' => ['required', 'email', 'max:190'],
             'from_name' => ['required', 'string', 'max:120'],
             'reply_to' => ['nullable', 'email', 'max:190'],
+            'signature' => ['nullable', 'string', 'max:2000'],
             'hourly_limit' => ['required', 'integer', 'min:1', 'max:100000'],
             'daily_limit' => ['required', 'integer', 'min:1', 'max:1000000'],
             'is_active' => ['nullable', 'boolean'],
@@ -118,7 +119,7 @@ class MailAccountController extends Controller
         if ($data['driver'] === 'brevo' && blank($settings['webhook_token'] ?? null)) {
             $settings['webhook_token'] = Str::random(48);
         }
-        $account->fill(collect($data)->only(['name', 'driver', 'from_email', 'from_name', 'reply_to', 'hourly_limit', 'daily_limit'])->all());
+        $account->fill(collect($data)->only(['name', 'driver', 'from_email', 'from_name', 'reply_to', 'signature', 'hourly_limit', 'daily_limit'])->all());
         $account->is_active = (bool) ($data['is_active'] ?? false);
         $account->settings = $settings;
         // Toute modification de la configuration impose un nouveau test avant envoi.

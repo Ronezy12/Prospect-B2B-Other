@@ -169,7 +169,7 @@ class CampaignService
     public function sendTest(MailAccount $account, TemplateVersion $version, array $emails, bool $marketing, User $user, ?string $fromName = null): array
     {
         $data = TemplateRenderer::sampleData($fromName ?: $account->from_name);
-        $rendered = $this->renderer->render($version->subject, $version->html, $version->preheader, $data, $marketing, $fromName ?: $account->from_name);
+        $rendered = $this->renderer->render($version->subject, $version->html, $version->preheader, $data, $marketing, $fromName ?: $account->from_name, $account->signatureHtml());
         $results = [];
         foreach ($emails as $email) {
             $result = $this->providers->for($account)->send(new OutgoingMessage(
@@ -187,7 +187,7 @@ class CampaignService
     public function sendIndividual(Contact $contact, MailAccount $account, string $subject, string $body, User $user): Campaign
     {
         $template = Template::firstOrCreate(['name' => 'E-mails individuels', 'category' => 'individuel']);
-        $html = '<div style="font:15px/1.6 Arial,sans-serif;color:#222">'.nl2br(e($body)).'<p>'.e($user->name).'</p></div>';
+        $html = '<div style="font:15px/1.6 Arial,sans-serif;color:#222">'.nl2br(e($body)).'<p>{{signature}}</p></div>';
         $version = $template->addVersion(['subject' => $subject, 'html' => $html], $user->id);
 
         $campaign = new Campaign([

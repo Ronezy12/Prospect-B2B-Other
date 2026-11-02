@@ -113,7 +113,7 @@ class CampaignSender
             $headers['List-Unsubscribe'] = '<'.$url.'>';
             $headers['List-Unsubscribe-Post'] = 'List-Unsubscribe=One-Click';
         }
-        $rendered = $this->renderer->render($subject, $html, $preheader, $data, $campaign->isMarketing(), $campaign->from_name ?: $account->from_name);
+        $rendered = $this->renderer->render($subject, $html, $preheader, $data, $campaign->isMarketing(), $campaign->from_name ?: $account->from_name, $account->signatureHtml());
         $rendered['html'] = $this->applyTracking($rendered['html'], $campaign, $contact, $recipient, $data['lien_desinscription'] ?? null);
 
         $message = new OutgoingMessage(

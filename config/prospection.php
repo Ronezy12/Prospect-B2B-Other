@@ -25,6 +25,14 @@ return [
 
     'per_page' => 25,
 
+    'demo' => (bool) env('PM_DEMO', false),
+
+    'security' => [
+        // Rôles pour lesquels la double authentification (application TOTP) est obligatoire.
+        'require_2fa_roles' => array_filter(explode(',', (string) env('PM_REQUIRE_2FA_ROLES', 'administrateur'))),
+        'two_factor_issuer' => env('APP_NAME', 'Entreprise AR'),
+    ],
+
     /*
     | Durées de conservation (mois), appliquées chaque nuit par pm:retention.
     | Valeurs par défaut inspirées des recommandations CNIL pour la prospection :
@@ -206,6 +214,7 @@ return [
         'entreprise' => 'Nom de l\'entreprise',
         'ville' => 'Ville de l\'entreprise',
         'expediteur' => 'Nom de l\'expéditeur',
+        'signature' => 'Signature de l\'adresse d\'envoi',
         'lien_desinscription' => 'Lien de désinscription',
     ],
 

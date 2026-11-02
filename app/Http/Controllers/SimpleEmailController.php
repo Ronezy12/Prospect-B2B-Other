@@ -137,7 +137,7 @@ class SimpleEmailController extends Controller
             'preview' => [
                 'to' => $first ? trim($first->fullName().' — '.$first->company?->name) : null,
                 'subject' => $this->replace($message['subject'], $data),
-                'body' => $this->replace($message['body'], $data)."\n".$request->user()->name,
+                'body' => $this->replace($message['body'], $data)."\n\n".(trim((string) MailAccount::find($message['mail_account_id'])?->signature) ?: $request->user()->name),
             ],
             'account' => MailAccount::find($message['mail_account_id']),
             'senders' => MailAccount::whereIn('id', $message['account_ids'] ?? [$message['mail_account_id']])->get(['id', 'from_email', 'daily_limit', 'driver']),
@@ -294,7 +294,7 @@ class SimpleEmailController extends Controller
         $paragraphs = collect(preg_split("/\n{2,}/", str_replace("\r", '', trim($message['body']))))
             ->map(fn ($p) => '<p style="margin:0 0 16px">'.nl2br(e($p), false).'</p>')->implode('');
         $html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#1f2937;max-width:600px;margin:0 auto;padding:24px">'
-            .$paragraphs.'<p style="margin:0">{{expediteur}}</p></div>';
+            .$paragraphs.'<div>{{signature}}</div></div>';
 
         $template = Template::create(['name' => Str::limit($name, 150, ''), 'category' => 'prospection']);
         $template->forceFill(['created_by' => $request->user()->id])->save();

@@ -8,10 +8,10 @@
     <title>@yield('title', 'Prospection') — {{ config('app.name') }}</title>
     <link rel="preload" href="{{ asset('fonts/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=9">
-    <script src="{{ asset('js/theme.js') }}?v=9"></script>
-    <script src="{{ asset('js/pm.js') }}?v=9" defer></script>
-    <script src="{{ asset('js/tour.js') }}?v=9" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=10">
+    <script src="{{ asset('js/theme.js') }}?v=10"></script>
+    <script src="{{ asset('js/pm.js') }}?v=10" defer></script>
+    <script src="{{ asset('js/tour.js') }}?v=10" defer></script>
     @stack('head')
 </head>
 <body>
@@ -42,6 +42,7 @@
         <div class="sidebar-user">
             <x-avatar :user="$u" />
             <div class="who"><strong>{{ $u->name }}</strong><span>{{ $u->email }}</span></div>
+            <a href="{{ route('pm.security.show') }}" class="icon-btn" title="Sécurité de mon compte" aria-label="Sécurité de mon compte"><x-icon name="shield-check" /></a>
             <a href="{{ route('pm.notifications.index') }}" class="icon-btn bell" title="Notifications" aria-label="Notifications{{ $unreadNotifications ? ' ('.$unreadNotifications.' non lues)' : '' }}"><x-icon name="bell" />@if ($unreadNotifications)<span class="dot"></span>@endif</a>
             <button type="button" class="icon-btn" data-theme-toggle title="Changer de thème" aria-label="Changer de thème"><x-icon name="moon" /></button>
             <form method="POST" action="{{ route('logout') }}">

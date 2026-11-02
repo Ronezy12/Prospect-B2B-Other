@@ -45,10 +45,18 @@ class LoginController extends Controller
         }
 
         RateLimiter::clear($key);
-        $request->session()->regenerate();
 
         /** @var User $user */
         $user = Auth::user();
+        // Double authentification : le mot de passe ne suffit pas, un code est demandé.
+        if ($user->hasTwoFactor()) {
+            Auth::logout();
+            $request->session()->regenerate();
+            $request->session()->put('login.two_factor', ['id' => $user->id, 'remember' => $request->boolean('remember'), 'expires' => now()->addMinutes(5)->timestamp]);
+
+            return redirect()->route('two-factor.challenge');
+        }
+        $request->session()->regenerate();
         $user->forceFill(['last_login_at' => now()])->save();
         $audit->log('auth.login', $user);
 

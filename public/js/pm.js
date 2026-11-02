@@ -27,6 +27,14 @@
     }
 
     // Confirmation des actions sensibles
+    // Double authentification : QR code généré localement (aucun service externe).
+    document.querySelectorAll('img[data-qr]').forEach(function (img) {
+      if (typeof window.qrcode !== 'function') { return; }
+      var qr = window.qrcode(0, 'M');
+      qr.addData(img.getAttribute('data-qr'));
+      qr.make();
+      img.src = qr.createDataURL(5, 2);
+    });
     document.querySelectorAll('[data-print]').forEach(function (b) { b.addEventListener('click', function () { window.print(); }); });
 
     // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.

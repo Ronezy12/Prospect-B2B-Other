@@ -803,3 +803,11 @@ details.danger-zone summary { color: var(--danger); }
   .main { margin: 0 !important; }
   .card { box-shadow: none !important; border: 0 !important; }
 }
+.qr-box { margin: .7rem 0; padding: .8rem; background: #fff; border-radius: 12px; display: block; width: fit-content; border: 1px solid var(--border); }
+.qr-box img { display: block; width: 200px; height: 200px; image-rendering: pixelated; }
+.code-input { font-size: 1.3rem; letter-spacing: .2em; max-width: 220px; text-align: center; }
+.recovery-codes { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .4rem; list-style: none; padding: 0; }
+.recovery-codes code { display: block; padding: .45rem .6rem; background: var(--surface-2); border-radius: 8px; text-align: center; font-size: .95rem; }
+.auth-single { grid-template-columns: 1fr; }
+.sidebar-user .who { display: none; }
+.block { display: block; }
