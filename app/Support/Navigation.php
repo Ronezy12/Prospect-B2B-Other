@@ -81,6 +81,17 @@ final class Navigation
                 'tabs' => [],
             ],
             [
+                'key' => 'conformite', 'label' => 'Conformité RGPD', 'icon' => 'shield-check', 'can' => 'compliance.manage',
+                'help' => 'Les demandes des personnes (accès, effacement…), la liste d\'opposition et les durées de conservation.', 'guide' => 'refus',
+                'active' => ['pm.compliance.*'],
+                'tabs' => [
+                    ['label' => 'Demandes des personnes', 'route' => 'pm.compliance.requests', 'active' => ['pm.compliance.requests']],
+                    ['label' => 'Liste d\'opposition', 'route' => 'pm.compliance.suppressions', 'active' => ['pm.compliance.suppressions']],
+                    ['label' => 'Conservation', 'route' => 'pm.compliance.retention', 'active' => ['pm.compliance.retention']],
+                    ['label' => 'Registre des traitements', 'route' => 'pm.compliance.register', 'active' => ['pm.compliance.register']],
+                ],
+            ],
+            [
                 'key' => 'parametres', 'label' => 'Paramètres', 'icon' => 'settings', 'can' => ['users.manage', 'pipelines.manage', 'settings.manage'],
                 'active' => ['pm.settings.*'],
                 'tabs' => [

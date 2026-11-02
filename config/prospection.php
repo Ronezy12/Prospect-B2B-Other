@@ -25,6 +25,19 @@ return [
 
     'per_page' => 25,
 
+    /*
+    | Durées de conservation (mois), appliquées chaque nuit par pm:retention.
+    | Valeurs par défaut inspirées des recommandations CNIL pour la prospection :
+    | 3 ans après le dernier échange. À valider par votre DPO.
+    */
+    'retention' => [
+        'inactive_prospect_months' => (int) env('PM_RETENTION_PROSPECT_MONTHS', 36),
+        'tracking_months' => (int) env('PM_RETENTION_TRACKING_MONTHS', 13),
+        'notifications_months' => 6,
+        'audit_months' => (int) env('PM_RETENTION_AUDIT_MONTHS', 60),
+        'privacy_request_days' => 30,
+    ],
+
     'company_statuses' => [
         'nouveau' => 'Nouveau',
         'a_qualifier' => 'À qualifier',
@@ -49,6 +62,15 @@ return [
         'contrat' => 'Exécution d\'un contrat',
         'obligation_legale' => 'Obligation légale',
         'a_determiner' => 'À déterminer',
+    ],
+
+    'suppression_reasons' => [
+        'opposition' => 'Opposition exprimée',
+        'desabonnement' => 'Désinscription',
+        'plainte' => 'Signalé comme indésirable',
+        'rebond_definitif' => 'Adresse invalide (rebond définitif)',
+        'adresse_invalide' => 'Adresse invalide',
+        'effacement' => 'Effacement des données demandé',
     ],
 
     'suppression_scopes' => [

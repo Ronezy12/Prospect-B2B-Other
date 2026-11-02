@@ -789,3 +789,17 @@ details.more-options[open] > summary { margin-bottom: .8rem; }
 .check-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: .35rem .9rem; margin-top: .3rem; }
 span.label { display: block; font-size: .84rem; font-weight: 600; color: var(--text-2); margin-bottom: .35rem; }
 .preset-field { max-width: 520px; margin-bottom: 1rem; }
+
+/* Conformité */
+.privacy-summary { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: .6rem; margin: 1rem 0; }
+.privacy-summary > div { padding: .7rem .85rem; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--border); display: grid; gap: .1rem; }
+.privacy-summary strong { font-size: 1.3rem; }
+.privacy-summary span { font-size: .78rem; color: var(--muted); }
+details.danger-zone summary { color: var(--danger); }
+.rule-list.plain { list-style: disc; padding-left: 1.2rem; display: grid; gap: .55rem; }
+.register dd { line-height: 1.6; }
+@media print {
+  .sidebar, .topbar, .subnav, .section-help, .page-header .actions, .tour-launcher, .alert { display: none !important; }
+  .main { margin: 0 !important; }
+  .card { box-shadow: none !important; border: 0 !important; }
+}

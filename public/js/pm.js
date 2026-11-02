@@ -27,6 +27,8 @@
     }
 
     // Confirmation des actions sensibles
+    document.querySelectorAll('[data-print]').forEach(function (b) { b.addEventListener('click', function () { window.print(); }); });
+
     // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.
     var preset = document.querySelector('[data-mail-preset]');
     if (preset) {

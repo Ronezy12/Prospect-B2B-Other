@@ -8,6 +8,7 @@ use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CompanyBulkController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyExportController;
+use App\Http\Controllers\ComplianceController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\GuideController;
@@ -143,6 +144,20 @@ Route::middleware('auth')->group(function () {
         Route::put('reseaux-sociaux/messages/{conversation}', [SocialInboxController::class, 'link'])->name('social.inbox.link');
         Route::post('reseaux-sociaux/messages/{conversation}/repondre', [SocialInboxController::class, 'reply'])->middleware('throttle:30,1')->name('social.inbox.reply');
         Route::post('reseaux-sociaux/messages/{conversation}/statut', [SocialInboxController::class, 'archive'])->name('social.inbox.archive');
+
+        Route::prefix('conformite')->name('compliance.')->group(function () {
+            Route::get('demandes', [ComplianceController::class, 'requests'])->middleware('throttle:60,1')->name('requests');
+            Route::post('demandes', [ComplianceController::class, 'storeRequest'])->name('requests.store');
+            Route::put('demandes/{privacyRequest}', [ComplianceController::class, 'updateRequest'])->name('requests.update');
+            Route::post('export', [ComplianceController::class, 'export'])->middleware('throttle:20,1')->name('export');
+            Route::post('effacement', [ComplianceController::class, 'erase'])->middleware('throttle:10,1')->name('erase');
+            Route::get('oppositions', [ComplianceController::class, 'suppressions'])->middleware('throttle:60,1')->name('suppressions');
+            Route::post('oppositions/{suppression}/lever', [ComplianceController::class, 'lift'])->name('suppressions.lift');
+            Route::post('oppositions-reseaux/lever', [ComplianceController::class, 'liftSocial'])->name('social.lift');
+            Route::get('conservation', [ComplianceController::class, 'retention'])->name('retention');
+            Route::post('conservation', [ComplianceController::class, 'applyRetention'])->name('retention.apply');
+            Route::get('registre', [ComplianceController::class, 'register'])->name('register');
+        });
 
         Route::get('statistiques', ReportController::class)->name('reports.index');
 

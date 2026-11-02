@@ -8,3 +8,4 @@ Schedule::command('queue:prune-failed --hours=720')->daily();
 Schedule::command('pm:campaigns-run')->everyMinute()->withoutOverlapping();
 Schedule::command('pm:automations-run')->everyMinute()->withoutOverlapping();
 Schedule::command('pm:replies-fetch')->everyFiveMinutes()->withoutOverlapping();
+Schedule::command('pm:retention')->dailyAt('03:30')->withoutOverlapping();
