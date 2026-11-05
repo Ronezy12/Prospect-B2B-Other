@@ -15,6 +15,10 @@ if [ ! -f .devcontainer/.mot-de-passe ]; then
 fi
 export PM_DEMO_PASSWORD="$(cat .devcontainer/.mot-de-passe)"
 
+if ! command -v docker >/dev/null 2>&1; then
+  echo "Docker est absent de ce Codespace : lancez « Codespaces: Full Rebuild Container » (⌘/Ctrl + Shift + P)."
+  exit 1
+fi
 docker compose up -d --build
 
 echo ""

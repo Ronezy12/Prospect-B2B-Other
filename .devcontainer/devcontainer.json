@@ -1,13 +1,10 @@
 {
   "name": "Prospection Entreprise AR",
-  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
-  "features": {
-    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
-  },
+  "image": "mcr.microsoft.com/devcontainers/universal:2",
   "hostRequirements": { "cpus": 2 },
   "forwardPorts": [8000],
   "portsAttributes": {
     "8000": { "label": "Site Prospection", "onAutoForward": "notify" }
   },
-  "postStartCommand": "bash .devcontainer/demarrer.sh"
+  "postAttachCommand": "bash .devcontainer/demarrer.sh"
 }
