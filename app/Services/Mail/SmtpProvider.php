@@ -73,14 +73,20 @@ class SmtpProvider implements MailProvider
         return $this->transport = Transport::fromDsn($dsn);
     }
 
-    /** Message d'erreur sans identifiants. */
+    /** Message d'erreur sans mot de passe, avec une explication en clair pour les cas fréquents. */
     private function clean(Throwable $e): string
     {
         $text = $e->getMessage();
-        foreach (['password', 'username'] as $key) {
-            if ($secret = (string) $this->account->setting($key)) {
-                $text = str_replace([$secret, rawurlencode($secret)], '***', $text);
-            }
+        if ($secret = (string) $this->account->setting('password')) {
+            $text = str_replace([$secret, rawurlencode($secret)], '***', $text);
+        }
+        if (str_contains($text, '535')) {
+            $user = (string) $this->account->setting('username');
+            $text = 'Identifiant ou mot de passe refusé par le serveur (identifiant utilisé : « '.$user.' »). '
+                .(str_ends_with(strtolower((string) $this->account->setting('host')), 'gmail.com')
+                    ? 'Avec Gmail : l\'identifiant doit être l\'adresse Gmail complète, et le mot de passe un « mot de passe d\'application » de 16 lettres créé sur ce même compte. '
+                    : '')
+                .'Détail : '.$text;
         }
 
         return $text;

@@ -120,7 +120,9 @@ class MailAccountController extends Controller
             if (filled($settings['password'] ?? null)) {
                 $settings['password'] = preg_replace('/\s+/', '', $settings['password']);
             }
-            $settings['username'] = filled($settings['username'] ?? null) ? trim($settings['username']) : $data['from_email'];
+            // Un identifiant qui n'est pas une adresse (ou rempli par le navigateur avec un autre compte) est remplacé par l'adresse d'expédition.
+            $username = trim((string) ($settings['username'] ?? ''));
+            $settings['username'] = filter_var($username, FILTER_VALIDATE_EMAIL) && ! str_ends_with(strtolower($username), '.test') ? $username : $data['from_email'];
         }
 
         // Jeton secret de l'URL de webhook (Brevo) : généré une fois, jamais modifiable par formulaire.

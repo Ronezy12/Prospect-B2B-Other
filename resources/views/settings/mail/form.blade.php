@@ -55,7 +55,7 @@
                     @foreach (['tls' => 'STARTTLS (port 587)', 'ssl' => 'SSL/TLS (port 465)', 'none' => 'Aucun (déconseillé)'] as $key => $label)<option value="{{ $key }}" @selected(old('encryption', $account->setting('encryption', 'tls')) === $key)>{{ $label }}</option>@endforeach
                 </select>
             </div>
-            <div class="field"><label for="username">Identifiant</label><input type="text" id="username" name="username" value="{{ old('username', $account->setting('username')) }}" maxlength="190" autocomplete="off"></div>
+            <div class="field"><label for="username">Identifiant</label><input type="text" id="username" name="username" value="{{ old('username', $account->setting('username')) }}" maxlength="190" autocomplete="off" data-lpignore="true" placeholder="votre.adresse@gmail.com"><div class="hint">Pour Gmail : votre adresse Gmail complète. Vérifiez que le navigateur n'y a pas mis un autre identifiant.</div></div>
             <div class="field">
                 <label for="password">Mot de passe</label>
                 <input type="password" id="password" name="password" autocomplete="new-password" placeholder="{{ $account->hasSecret('password') ? '•••••••• (enregistré)' : '' }}">
