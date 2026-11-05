@@ -37,6 +37,57 @@
     });
     document.querySelectorAll('[data-print]').forEach(function (b) { b.addEventListener('click', function () { window.print(); }); });
 
+    // Signature HTML : fichier glissé-déposé, signature collée depuis Gmail, aperçu isolé.
+    var sigField = document.getElementById('signature_html');
+    var sigPreview = document.querySelector('[data-sig-preview]');
+    if (sigField && sigPreview) {
+      var refresh = function () { sigPreview.click(); };
+      var setCode = function (code) {
+        sigField.value = code;
+        var details = sigField.closest('details');
+        if (details) { details.open = true; }
+        refresh();
+      };
+      var readFile = function (file) {
+        if (!file || file.size > 500000) { return; }
+        var reader = new FileReader();
+        reader.onload = function () { setCode(String(reader.result || '')); };
+        reader.readAsText(file);
+      };
+      var drop = document.querySelector('[data-sig-drop]');
+      var picker = document.querySelector('[data-sig-file]');
+      if (drop && picker) {
+        ['dragenter', 'dragover'].forEach(function (t) { drop.addEventListener(t, function (e) { e.preventDefault(); drop.classList.add('over'); }); });
+        ['dragleave', 'drop'].forEach(function (t) { drop.addEventListener(t, function () { drop.classList.remove('over'); }); });
+        drop.addEventListener('drop', function (e) {
+          e.preventDefault();
+          var dt = e.dataTransfer;
+          if (dt.files && dt.files.length) { readFile(dt.files[0]); }
+          else if (dt.getData('text/html')) { setCode(dt.getData('text/html')); }
+          else if (dt.getData('text/plain')) { setCode(dt.getData('text/plain')); }
+        });
+        drop.addEventListener('click', function () { picker.click(); });
+        drop.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); picker.click(); } });
+        picker.addEventListener('change', function () { readFile(picker.files[0]); picker.value = ''; });
+      }
+      var paste = document.querySelector('[data-sig-paste]');
+      if (paste) {
+        paste.addEventListener('paste', function (e) {
+          e.preventDefault();
+          var cd = e.clipboardData || window.clipboardData;
+          var html = cd.getData('text/html');
+          var text = cd.getData('text/plain');
+          setCode(html || text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\n/g, '<br>'));
+          paste.textContent = 'Signature collée ✓ — vérifiez l\'aperçu ci-dessous, puis enregistrez.';
+        });
+      }
+      var clear = document.querySelector('[data-sig-clear]');
+      if (clear) { clear.addEventListener('click', function () { sigField.value = ''; refresh(); }); }
+      var timer;
+      sigField.addEventListener('input', function () { clearTimeout(timer); timer = setTimeout(refresh, 800); });
+      if (sigField.value.trim()) { refresh(); }
+    }
+
     // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.
     var preset = document.querySelector('[data-mail-preset]');
     if (preset) {

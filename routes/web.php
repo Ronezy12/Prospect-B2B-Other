@@ -191,6 +191,8 @@ Route::middleware(['auth', EnsureTwoFactorEnrolled::class])->group(function () {
             Route::put('suivi', [TrackingSettingsController::class, 'update'])->name('tracking.update');
             Route::post('boites/{inbox}/verifier', [InboxController::class, 'check'])->middleware('throttle:10,1')->name('inboxes.check');
             Route::resource('boites', InboxController::class)->except(['show', 'destroy'])->parameters(['boites' => 'inbox'])->names('inboxes');
+            // PUT aussi : l'aperçu est envoyé depuis le formulaire de modification (méthode PUT).
+            Route::match(['post', 'put'], 'envoi/signature-apercu', [MailAccountController::class, 'signaturePreview'])->middleware('throttle:60,1')->name('mail.signature_preview');
             Route::post('envoi/{account}/test', [MailAccountController::class, 'test'])->middleware('throttle:10,1')->name('mail.test');
             Route::resource('envoi', MailAccountController::class)->except(['show', 'destroy'])->parameters(['envoi' => 'account'])->names('mail');
             Route::get('pipelines', [PipelineSettingsController::class, 'index'])->name('pipelines.index');

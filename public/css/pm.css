@@ -811,3 +811,14 @@ details.danger-zone summary { color: var(--danger); }
 .auth-single { grid-template-columns: 1fr; }
 .sidebar-user .who { display: none; }
 .block { display: block; }
+
+/* Signature HTML */
+.sig-drop { display: grid; justify-items: center; gap: .3rem; padding: 1.2rem; border: 2px dashed var(--border-strong); border-radius: 14px; background: var(--surface-2); cursor: pointer; text-align: center; transition: border-color .15s ease, background .15s ease; }
+.sig-drop:hover, .sig-drop:focus, .sig-drop.over { border-color: var(--accent); background: var(--accent-soft); outline: none; }
+.sig-drop .icon { width: 26px; height: 26px; color: var(--primary); }
+.sig-paste { margin-top: .6rem; padding: .8rem 1rem; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); color: var(--muted); font-size: .86rem; min-height: 2.6rem; }
+.sig-paste:focus { outline: 2px solid var(--primary); color: var(--text); }
+textarea.code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .8rem; }
+.sig-preview-head { display: flex; align-items: center; gap: .6rem; margin: .8rem 0 .4rem; }
+.sig-preview-head .btn-link { margin-left: auto; }
+.sig-preview { width: 100%; height: 190px; border: 1px solid var(--border); border-radius: 12px; background: #fff; }

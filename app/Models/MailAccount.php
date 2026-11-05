@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Support\HtmlSanitizer;
 use Illuminate\Database\Eloquent\Model;
 
 class MailAccount extends Model
 {
     protected $table = 'pm_mail_accounts';
 
-    protected $fillable = ['name', 'driver', 'from_email', 'from_name', 'reply_to', 'signature', 'hourly_limit', 'daily_limit', 'is_active'];
+    protected $fillable = ['name', 'driver', 'from_email', 'from_name', 'reply_to', 'signature', 'signature_html', 'hourly_limit', 'daily_limit', 'is_active'];
 
     /** Les secrets ne sortent jamais du serveur : ni dans les vues, ni en JSON. */
     protected $hidden = ['settings'];
@@ -35,6 +36,10 @@ class MailAccount extends Model
     /** Signature en HTML sûr : texte échappé, retours à la ligne, liens web et adresses cliquables. */
     public function signatureHtml(): ?string
     {
+        // Signature HTML (déjà nettoyée à l'enregistrement) prioritaire sur la version texte.
+        if (filled($this->signature_html)) {
+            return '<div style="margin-top:20px">'.HtmlSanitizer::clean((string) $this->signature_html).'</div>';
+        }
         $text = trim((string) $this->signature);
         if ($text === '') {
             return null;

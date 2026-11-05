@@ -25,10 +25,32 @@
             <div class="field"><label for="from_name">Nom d'expéditeur *</label><input type="text" id="from_name" name="from_name" value="{{ old('from_name', $account->from_name) }}" required maxlength="120" placeholder="Entreprise AR"></div>
             <div class="field"><label for="from_email">Adresse d'expédition *</label><input type="email" id="from_email" name="from_email" value="{{ old('from_email', $account->from_email) }}" required maxlength="190" placeholder="contact@votre-domaine.fr">@error('from_email')<div class="error">{{ $message }}</div>@enderror</div>
             <div class="field"><label for="reply_to">Adresse de réponse</label><input type="email" id="reply_to" name="reply_to" value="{{ old('reply_to', $account->reply_to) }}" maxlength="190"></div>
-            <div class="field full">
-                <label for="signature">Signature</label>
-                <textarea id="signature" name="signature" rows="5" maxlength="2000" placeholder="Yanis Moreau&#10;Chargé d'affaires — Entreprise AR&#10;06 12 34 56 78&#10;https://www.entreprise-ar.fr">{{ old('signature', $account->signature) }}</textarea>
-                <div class="hint">Ajoutée automatiquement en bas de chaque e-mail envoyé depuis cette adresse. La signature configurée dans Gmail n'est <strong>pas</strong> reprise lors d'un envoi par le module : recopiez-la ici. Les liens et adresses deviennent cliquables.</div>
+            <div class="field full signature-field">
+                <span class="label">Signature</span>
+                <p class="hint">Ajoutée automatiquement en bas de chaque e-mail envoyé depuis cette adresse. La signature de Gmail n'est <strong>pas</strong> reprise lors d'un envoi par le module : ajoutez-la ici, de l'une de ces façons.</p>
+                <div class="sig-drop" data-sig-drop tabindex="0" role="button" aria-label="Glissez votre fichier de signature ici ou cliquez pour le choisir">
+                    <x-icon name="upload" />
+                    <strong>Glissez ici votre fichier de signature</strong>
+                    <span class="small muted">.html, .htm ou .txt — ou cliquez pour le choisir</span>
+                    <input type="file" accept=".html,.htm,.txt,text/html,text/plain" data-sig-file hidden>
+                </div>
+                <div class="sig-paste" contenteditable="true" data-sig-paste aria-label="Collez ici la signature copiée depuis Gmail">Ou <strong>collez ici</strong> votre signature copiée depuis Gmail (Paramètres Gmail › Signature : sélectionnez-la, Ctrl/⌘ + C, puis Ctrl/⌘ + V ici).</div>
+                <details class="more-options" @if (old('signature_html', $account->signature_html)) open @endif>
+                    <summary>Code HTML de la signature</summary>
+                    <textarea id="signature_html" name="signature_html" rows="7" maxlength="60000" spellcheck="false" class="code" placeholder="<table>…</table>">{{ old('signature_html', $account->signature_html) }}</textarea>
+                    <div class="hint">Le code est nettoyé pour la sécurité : scripts, formulaires et liens douteux sont retirés ; mise en page, images (adresse https) et liens sont conservés.</div>
+                </details>
+                <div class="sig-preview-head">
+                    <span class="small muted">Aperçu</span>
+                    <button type="submit" class="btn btn-sm" formaction="{{ route('pm.settings.mail.signature_preview') }}" formtarget="sig-preview" formnovalidate data-sig-preview>Actualiser l'aperçu</button>
+                    <button type="button" class="btn-link small danger" data-sig-clear>Retirer la signature HTML</button>
+                </div>
+                <iframe name="sig-preview" class="sig-preview" title="Aperçu de la signature" sandbox></iframe>
+                <details class="more-options">
+                    <summary>Ou une signature simple en texte</summary>
+                    <textarea id="signature" name="signature" rows="5" maxlength="2000" placeholder="Yanis Moreau&#10;Chargé d'affaires — Entreprise AR&#10;06 12 34 56 78&#10;https://www.entreprise-ar.fr">{{ old('signature', $account->signature) }}</textarea>
+                    <div class="hint">Utilisée seulement s'il n'y a pas de signature HTML. Les liens et adresses deviennent cliquables.</div>
+                </details>
             </div>
             <div class="field"><label class="checkbox"><input type="hidden" name="is_active" value="0"><input type="checkbox" name="is_active" value="1" @checked(old('is_active', $account->is_active))> Compte actif</label></div>
         </div>

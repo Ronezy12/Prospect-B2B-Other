@@ -7,8 +7,10 @@ use App\Models\MailAccount;
 use App\Services\AuditLogger;
 use App\Services\Mail\MailProviderFactory;
 use App\Services\Mail\OutgoingMessage;
+use App\Support\HtmlSanitizer;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
@@ -84,6 +86,17 @@ class MailAccountController extends Controller
             : back()->withErrors(['test_email' => 'Échec du test : '.$result->error]);
     }
 
+    /** Aperçu de la signature HTML nettoyée, affiché dans un cadre isolé (aucun script possible). */
+    public function signaturePreview(Request $request): Response
+    {
+        $this->guard($request);
+        $html = HtmlSanitizer::clean((string) $request->input('signature_html', ''));
+        $body = $html !== '' ? $html : '<p style="font:14px Arial,sans-serif;color:#6a7690">Aucune signature HTML : collez ou glissez votre code, puis cliquez sur « Aperçu ».</p>';
+
+        return response('<!DOCTYPE html><html lang="fr"><head><meta charset="utf-8"><title>Aperçu</title></head><body style="margin:12px;background:#fff">'.$body.'</body></html>')
+            ->header('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'; img-src https: data:; font-src https: data:; frame-ancestors 'self'; sandbox");
+    }
+
     private function save(Request $request, MailAccount $account): void
     {
         $data = $request->validate([
@@ -93,6 +106,7 @@ class MailAccountController extends Controller
             'from_name' => ['required', 'string', 'max:120'],
             'reply_to' => ['nullable', 'email', 'max:190'],
             'signature' => ['nullable', 'string', 'max:2000'],
+            'signature_html' => ['nullable', 'string', 'max:60000'],
             'hourly_limit' => ['required', 'integer', 'min:1', 'max:100000'],
             'daily_limit' => ['required', 'integer', 'min:1', 'max:1000000'],
             'is_active' => ['nullable', 'boolean'],
@@ -130,6 +144,7 @@ class MailAccountController extends Controller
             $settings['webhook_token'] = Str::random(48);
         }
         $account->fill(collect($data)->only(['name', 'driver', 'from_email', 'from_name', 'reply_to', 'signature', 'hourly_limit', 'daily_limit'])->all());
+        $account->signature_html = filled($data['signature_html'] ?? null) ? (HtmlSanitizer::clean($data['signature_html']) ?: null) : null;
         $account->is_active = (bool) ($data['is_active'] ?? false);
         $account->settings = $settings;
         // Toute modification de la configuration impose un nouveau test avant envoi.

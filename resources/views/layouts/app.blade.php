@@ -8,10 +8,10 @@
     <title>@yield('title', 'Prospection') — {{ config('app.name') }}</title>
     <link rel="preload" href="{{ asset('fonts/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=10">
-    <script src="{{ asset('js/theme.js') }}?v=10"></script>
-    <script src="{{ asset('js/pm.js') }}?v=10" defer></script>
-    <script src="{{ asset('js/tour.js') }}?v=10" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=11">
+    <script src="{{ asset('js/theme.js') }}?v=11"></script>
+    <script src="{{ asset('js/pm.js') }}?v=11" defer></script>
+    <script src="{{ asset('js/tour.js') }}?v=11" defer></script>
     @stack('head')
 </head>
 <body>

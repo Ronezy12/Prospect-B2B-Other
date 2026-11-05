@@ -137,7 +137,7 @@ class SimpleEmailController extends Controller
             'preview' => [
                 'to' => $first ? trim($first->fullName().' — '.$first->company?->name) : null,
                 'subject' => $this->replace($message['subject'], $data),
-                'body' => $this->replace($message['body'], $data)."\n\n".(trim((string) MailAccount::find($message['mail_account_id'])?->signature) ?: $request->user()->name),
+                'body' => $this->replace($message['body'], $data)."\n\n".$this->signatureText(MailAccount::find($message['mail_account_id']), $request->user()->name),
             ],
             'account' => MailAccount::find($message['mail_account_id']),
             'senders' => MailAccount::whereIn('id', $message['account_ids'] ?? [$message['mail_account_id']])->get(['id', 'from_email', 'daily_limit', 'driver']),
@@ -301,6 +301,18 @@ class SimpleEmailController extends Controller
         $template->addVersion(['subject' => $message['subject'], 'html' => $html], $request->user()->id);
 
         return $template->fresh('latestVersion');
+    }
+
+    /** Signature affichée dans l'aperçu texte (version HTML ramenée à du texte). */
+    private function signatureText(?MailAccount $account, string $fallback): string
+    {
+        if (filled($account?->signature_html)) {
+            $text = html_entity_decode(strip_tags(preg_replace('#<br\s*/?>|</(p|div|tr|li|h\d)>#i', "\n", (string) $account->signature_html)), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+            return trim(preg_replace("/\n{3,}/", "\n\n", preg_replace('/[ \t]+/', ' ', $text)));
+        }
+
+        return trim((string) $account?->signature) ?: $fallback;
     }
 
     private function replace(string $text, array $data): string
