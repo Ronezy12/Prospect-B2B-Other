@@ -191,7 +191,7 @@ class SeedDemo extends Command
         $this->seedSocial();
 
         $this->newLine();
-        $this->info('Données de démonstration prêtes. Comptes (mot de passe : '.self::PASSWORD.') :');
+        $this->info('Données de démonstration prêtes. Comptes (mot de passe : '.(env('PM_DEMO_PASSWORD') ? 'celui de PM_DEMO_PASSWORD' : self::PASSWORD).') :');
         $this->table(['Rôle', 'E-mail'], [
             ['Administrateur', 'admin@demo.test'],
             ['Responsable commercial', 'responsable@demo.test'],
@@ -208,7 +208,8 @@ class SeedDemo extends Command
     {
         $user = User::updateOrCreate(['email' => $email], [
             'name' => $name,
-            'password' => self::PASSWORD,
+            // En ligne, le mot de passe public de démonstration est remplacé par PM_DEMO_PASSWORD.
+            'password' => env('PM_DEMO_PASSWORD') ?: self::PASSWORD,
             'team_id' => $teamId,
             'is_active' => true,
         ]);

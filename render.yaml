@@ -1,0 +1,48 @@
+# Déploiement « en un clic » sur Render depuis GitHub (New › Blueprint › ce dépôt).
+# Offre « starter » requise : l'offre gratuite de Render bloque l'envoi d'e-mails par SMTP (Gmail)
+# et n'a pas de disque permanent.
+services:
+  - type: web
+    name: prospection-entreprise-ar
+    runtime: docker
+    plan: starter
+    region: frankfurt
+    branch: claude/prospection-marketing-module-yphs51
+    healthCheckPath: /up
+    disk:
+      name: donnees
+      mountPath: /var/www/html/database/data
+      sizeGB: 1
+    envVars:
+      - key: APP_NAME
+        value: Entreprise AR - Prospection
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_LOCALE
+        value: fr
+      - key: DB_CONNECTION
+        value: sqlite
+      - key: DB_DATABASE
+        value: /var/www/html/database/data/database.sqlite
+      - key: SESSION_DRIVER
+        value: database
+      - key: SESSION_SECURE_COOKIE
+        value: "true"
+      - key: QUEUE_CONNECTION
+        value: database
+      - key: CACHE_STORE
+        value: database
+      - key: LOG_CHANNEL
+        value: stderr
+      - key: MAIL_MAILER
+        value: log
+      - key: TRUSTED_PROXIES
+        value: "*"
+      # Données de démonstration pour la présentation. Passer à "false" pour l'usage réel.
+      - key: PM_DEMO
+        value: "true"
+      # Mot de passe des comptes de démonstration (généré par Render, visible dans Environment).
+      - key: PM_DEMO_PASSWORD
+        generateValue: true

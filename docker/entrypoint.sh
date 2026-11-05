@@ -6,6 +6,16 @@ DATA=database/data
 
 [ -f .env ] || cp .env.example .env
 
+# Hébergeurs qui imposent un port (Render, Fly…) : Apache écoute sur $PORT.
+if [ -n "${PORT:-}" ] && [ "$PORT" != "80" ]; then
+    sed -ri "s/^Listen 80$/Listen ${PORT}/" /etc/apache2/ports.conf
+    sed -ri "s/<VirtualHost \*:80>/<VirtualHost *:${PORT}>/" /etc/apache2/sites-available/000-default.conf
+fi
+# Adresse publique fournie par Render si APP_URL n'est pas défini.
+if [ -z "${APP_URL:-}" ] && [ -n "${RENDER_EXTERNAL_URL:-}" ]; then
+    export APP_URL="$RENDER_EXTERNAL_URL"
+fi
+
 # Clés générées une seule fois et conservées dans le volume de données.
 [ -f "$DATA/app.key" ] || php -r 'echo "base64:".base64_encode(random_bytes(32));' > "$DATA/app.key"
 [ -f "$DATA/suppression.key" ] || php -r 'echo bin2hex(random_bytes(32));' > "$DATA/suppression.key"

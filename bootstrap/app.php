@@ -14,6 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Derrière un hébergeur (Render, répartiteur de charge…) : HTTPS et IP réelles via X-Forwarded-*.
+        // Ne définir TRUSTED_PROXIES que si un proxy est réellement devant l'application.
+        if ($proxies = env('TRUSTED_PROXIES')) {
+            $middleware->trustProxies(at: $proxies === '*' ? '*' : array_map('trim', explode(',', $proxies)));
+        }
         $middleware->web(append: [
             EnsureUserIsActive::class,
             SecurityHeaders::class,
