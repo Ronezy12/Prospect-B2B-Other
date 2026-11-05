@@ -114,6 +114,14 @@ class MailAccountController extends Controller
                 $settings[$key] = $data[$key];
             }
         }
+        // Gmail : le mot de passe d'application s'affiche par groupes de 4 lettres (« abcd efgh … »),
+        // les espaces copiés avec lui sont retirés ; l'identifiant est l'adresse complète.
+        if (str_ends_with(strtolower((string) ($settings['host'] ?? '')), 'gmail.com')) {
+            if (filled($settings['password'] ?? null)) {
+                $settings['password'] = preg_replace('/\s+/', '', $settings['password']);
+            }
+            $settings['username'] = filled($settings['username'] ?? null) ? trim($settings['username']) : $data['from_email'];
+        }
 
         // Jeton secret de l'URL de webhook (Brevo) : généré une fois, jamais modifiable par formulaire.
         if ($data['driver'] === 'brevo' && blank($settings['webhook_token'] ?? null)) {
