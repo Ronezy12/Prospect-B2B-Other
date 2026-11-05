@@ -32,6 +32,15 @@ Les 24 entreprises de démonstration sont fictives (domaines `.test`, tag « Exe
 
 Ce mode de démonstration (SQLite, `APP_ENV=demo`) sert au test. Pour la production, suivre [02-installation-exploitation.md](02-installation-exploitation.md) (MySQL, HTTPS, Supervisor, sauvegardes) ; la commande `pm:demo` y est refusée.
 
+## 2 bis. Tester en ligne avec GitHub Codespaces (sans rien installer)
+
+1. Sur la page du dépôt GitHub, choisissez la branche `claude/prospection-marketing-module-yphs51`, puis **Code › Codespaces › Create codespace**.
+2. Attendez la fin de la préparation (5 à 10 minutes la première fois). Le terminal affiche l'adresse du site et le **mot de passe** des comptes de démonstration, généré pour ce Codespace.
+3. Onglet **PORTS** › port 8000 › clic droit › **Visibilité du port › Public**. Copiez l'adresse et transmettez-la avec le mot de passe.
+4. Le Codespace s'arrête après 30 minutes sans activité : relancez-le depuis https://github.com/codespaces. Le quota gratuit est d'environ 60 heures par mois avec 2 cœurs.
+
+Solution de démonstration temporaire : pour un usage quotidien, hébergez le module sur un serveur (VPS ou Render).
+
 ## 3. Scénarios de recette suggérés
 
 1. Se connecter en commercial, vérifier qu'on ne voit que ses fiches ; ouvrir l'URL d'une fiche d'un collègue → accès refusé.

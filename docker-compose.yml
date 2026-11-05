@@ -10,7 +10,7 @@ services:
       APP_NAME: "Entreprise AR - Prospection"
       APP_ENV: demo
       APP_DEBUG: "false"
-      APP_URL: http://localhost:8000
+      APP_URL: ${APP_URL:-http://localhost:8000}
       APP_LOCALE: fr
       DB_CONNECTION: sqlite
       DB_DATABASE: /var/www/html/database/data/database.sqlite
@@ -21,6 +21,10 @@ services:
       MAIL_MAILER: log
       LOG_CHANNEL: stderr
       PM_DEMO: "true"
+      # Mot de passe des comptes de démonstration (vide = mot de passe public de démo, usage local uniquement).
+      PM_DEMO_PASSWORD: ${PM_DEMO_PASSWORD:-}
+      # Défini automatiquement dans GitHub Codespaces (le site passe par un proxy HTTPS).
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
     volumes:
       - prospection-data:/var/www/html/database/data
 volumes:
