@@ -15,6 +15,10 @@ final class Navigation
     /** @return array<int, array{key: string, label: string, icon: string, route: string, active: array<int, string>, tabs: array<int, array{label: string, route: string, params?: array, active: array<int, string>}>}> */
     public static function sections(User $user): array
     {
+        if ($user->isSimple()) {
+            return self::simpleSections($user);
+        }
+
         $sections = [
             [
                 'key' => 'accueil', 'label' => 'Ma journée', 'icon' => 'house', 'can' => 'prospects.view',
@@ -124,6 +128,19 @@ final class Navigation
         }
 
         return $visible;
+    }
+
+    /** Mode simple : 4 gros boutons, sans onglets. */
+    private static function simpleSections(User $user): array
+    {
+        $items = [
+            ['key' => 'accueil', 'label' => 'Ma journée', 'icon' => 'house', 'route' => 'pm.dashboard', 'can' => 'prospects.view', 'active' => ['pm.dashboard', 'pm.notifications.*', 'pm.tasks.*']],
+            ['key' => 'prospects', 'label' => 'Mes prospects', 'icon' => 'building-2', 'route' => 'pm.companies.index', 'can' => 'prospects.view', 'active' => ['pm.companies.*', 'pm.contacts.*']],
+            ['key' => 'emails', 'label' => 'Écrire un e-mail', 'icon' => 'mail', 'route' => 'pm.simple-email.create', 'can' => 'campaigns.manage', 'active' => ['pm.simple-email.*', 'pm.campaigns.*']],
+            ['key' => 'guide', 'label' => 'Aide', 'icon' => 'circle-help', 'route' => 'pm.guide', 'can' => 'prospects.view', 'active' => ['pm.guide']],
+        ];
+
+        return array_values(array_map(fn ($i) => $i + ['tabs' => []], array_filter($items, fn ($i) => self::allowed($user, $i['can']))));
     }
 
     /** Rubrique de la page courante (pour les onglets). */

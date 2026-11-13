@@ -40,6 +40,15 @@ class CompanyController extends Controller
         $sort = in_array($request->query('sort'), self::SORTS, true) ? $request->query('sort') : 'created_at';
         $direction = $request->query('dir') === 'asc' ? 'asc' : 'desc';
 
+        if ($request->user()->isSimple()) {
+            return view('simple.companies-index', [
+                'filters' => $filters,
+                'companies' => Company::query()->visibleTo($request->user())->filter($filters)
+                    ->with(['contacts' => fn ($c) => $c->orderByDesc('is_primary')])
+                    ->orderBy('name')->paginate(config('prospection.per_page'))->withQueryString(),
+            ]);
+        }
+
         $companies = Company::query()
             ->visibleTo($request->user())
             ->filter($filters)
@@ -58,9 +67,12 @@ class CompanyController extends Controller
         ] + $this->referenceData());
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
         Gate::authorize('create', Company::class);
+        if ($request->user()->isSimple()) {
+            return view('simple.companies-create');
+        }
 
         return view('companies.form', ['company' => new Company(['status' => 'nouveau', 'country' => 'FR'])] + $this->referenceData());
     }
@@ -118,6 +130,13 @@ class CompanyController extends Controller
         Gate::authorize('view', $company);
 
         $company->load(['sector', 'subsector', 'source', 'owner', 'tags', 'contacts' => fn ($q) => $q->orderByDesc('is_primary')->orderBy('last_name'), 'socialProfiles.contact']);
+        if ($request->user()->isSimple()) {
+            return view('simple.companies-show', [
+                'company' => $company,
+                'activities' => $company->activities()->limit(8)->get(),
+                'nextTask' => $company->tasks()->where('status', 'a_faire')->orderBy('due_at')->first(),
+            ]);
+        }
         $suppressed = app(SuppressionService::class)->suppressedAmong($company->contacts->pluck('email')->filter()->all());
 
         $audit = $request->user()->can('audit.view')

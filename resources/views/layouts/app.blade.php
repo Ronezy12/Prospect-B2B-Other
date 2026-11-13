@@ -8,14 +8,14 @@
     <title>@yield('title', 'Prospection') — {{ config('app.name') }}</title>
     <link rel="preload" href="{{ asset('fonts/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=11">
-    <script src="{{ asset('js/theme.js') }}?v=11"></script>
-    <script src="{{ asset('js/pm.js') }}?v=11" defer></script>
-    <script src="{{ asset('js/tour.js') }}?v=11" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=12">
+    <script src="{{ asset('js/theme.js') }}?v=12"></script>
+    <script src="{{ asset('js/pm.js') }}?v=12" defer></script>
+    <script src="{{ asset('js/tour.js') }}?v=12" defer></script>
     @stack('head')
 </head>
-<body>
 @php($u = auth()->user())
+<body @class(['simple' => $u->isSimple()])>
 @php($overdueTasks = \App\Models\Task::where('assignee_id', $u->id)->where('status', 'a_faire')->where('due_at', '<', now())->count())
 @php($unreadSocial = $u->can('social.inbox') ? \App\Models\SocialConversation::visibleTo($u)->where('unread', true)->count() : 0)
 @php($unreadNotifications = \App\Models\UserNotification::where('user_id', $u->id)->whereNull('read_at')->count())
@@ -39,6 +39,12 @@
                 </a>
             @endforeach
         </nav>
+        <form method="POST" action="{{ route('pm.mode.toggle') }}" class="mode-switch">
+            @csrf
+            <button type="submit" class="mode-btn" title="{{ $u->isSimple() ? 'Afficher toutes les fonctions' : 'Revenir aux écrans simplifiés' }}">
+                <x-icon name="{{ $u->isSimple() ? 'settings' : 'sparkles' }}" /> {{ $u->isSimple() ? 'Passer en mode complet' : 'Passer en mode simple' }}
+            </button>
+        </form>
         <div class="sidebar-user">
             <x-avatar :user="$u" />
             <div class="who"><strong>{{ $u->name }}</strong><span>{{ $u->email }}</span></div>

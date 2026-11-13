@@ -42,6 +42,7 @@ use App\Http\Controllers\TourController;
 use App\Http\Controllers\TrackingController;
 use App\Http\Controllers\UnsubscribeController;
 use App\Http\Middleware\EnsureTwoFactorEnrolled;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/prospection');
@@ -72,6 +73,12 @@ Route::middleware(['auth', EnsureTwoFactorEnrolled::class])->group(function () {
     Route::prefix('prospection')->name('pm.')->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::get('guide', GuideController::class)->name('guide');
+        Route::post('mode', function (Request $request) {
+            $user = $request->user();
+            $user->forceFill(['simple_mode' => ! $user->isSimple()])->save();
+
+            return redirect()->route('pm.dashboard')->with('success', $user->isSimple() ? 'Mode simple activé : seulement l\'essentiel.' : 'Mode complet activé : toutes les fonctions sont visibles.');
+        })->name('mode.toggle');
         Route::get('securite', [SecurityController::class, 'show'])->name('security.show');
         Route::post('securite/activer', [SecurityController::class, 'enable'])->middleware('throttle:10,1')->name('security.enable');
         Route::post('securite/codes', [SecurityController::class, 'regenerate'])->middleware('throttle:5,1')->name('security.codes');

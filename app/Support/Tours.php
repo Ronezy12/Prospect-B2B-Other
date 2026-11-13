@@ -15,6 +15,10 @@ final class Tours
     /** @return array{title: string, steps: array<int, array{target?: string, title: string, text: string}>, next?: array{label: string, url: string}}|null */
     public static function for(?string $route, User $user): ?array
     {
+        if ($user->isSimple()) {
+            return self::simple($route, $user);
+        }
+
         $tour = match ($route) {
             'pm.dashboard' => [
                 'title' => 'Ma journée',
@@ -235,5 +239,29 @@ final class Tours
     private static function link(User $user, string $permission, string $label, string $route): ?array
     {
         return $user->can($permission) ? ['label' => $label, 'url' => route($route)] : null;
+    }
+
+    /** Visites du mode simple : très courtes, une idée par étape. */
+    private static function simple(?string $route, User $user): ?array
+    {
+        $tour = match ($route) {
+            'pm.dashboard' => ['title' => 'Ma journée', 'steps' => [
+                ['title' => 'Bienvenue !', 'text' => 'Ici, c\'est très simple : vous appelez les personnes de la liste, puis vous touchez ce qui s\'est passé. L\'outil s\'occupe du reste.'],
+                ['target' => '.s-call', 'title' => '1. Appelez', 'text' => 'Touchez le bouton vert pour appeler (sur téléphone) ou lisez le numéro.'],
+                ['target' => '.s-outcomes', 'title' => '2. Touchez le résultat', 'text' => 'Pas de réponse, intéressé, rendez-vous… L\'outil note tout et vous rappellera le bon jour.'],
+                ['target' => '.s-big', 'title' => 'Pour le reste', 'text' => 'Ajouter un prospect ou voir toute la liste : ces gros boutons.'],
+            ]],
+            'pm.companies.show' => ['title' => 'Fiche', 'steps' => [
+                ['target' => '.s-actions', 'title' => 'Appeler ou écrire', 'text' => 'Un bouton pour appeler, un pour envoyer un e-mail.'],
+                ['target' => '.s-outcomes', 'title' => 'Après l\'appel', 'text' => 'Touchez ce qui s\'est passé. C\'est tout.'],
+                ['target' => '.s-note', 'title' => 'Une info à retenir ?', 'text' => 'Écrivez-la ici : toute l\'équipe la verra.'],
+            ]],
+            'pm.companies.create' => ['title' => 'Ajouter', 'steps' => [
+                ['target' => '#name', 'title' => 'Le nom suffit', 'text' => 'Seul le nom de l\'entreprise est obligatoire. Le reste peut attendre.'],
+            ]],
+            default => null,
+        };
+
+        return $tour ? $tour + ['next' => null] : null;
     }
 }

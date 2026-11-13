@@ -30,10 +30,17 @@ class User extends Authenticatable
             'last_login_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
+            'simple_mode' => 'boolean',
             'two_factor_secret' => 'encrypted',
             'two_factor_recovery_codes' => 'encrypted:array',
             'two_factor_confirmed_at' => 'datetime',
         ];
+    }
+
+    /** Écrans simplifiés (par défaut). Le mode complet se réactive d'un clic. */
+    public function isSimple(): bool
+    {
+        return (bool) ($this->simple_mode ?? true);
     }
 
     public function hasTwoFactor(): bool

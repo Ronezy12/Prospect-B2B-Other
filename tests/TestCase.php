@@ -25,7 +25,9 @@ abstract class TestCase extends BaseTestCase
 
     protected function userWithRole(string $role, array $attributes = []): User
     {
+        // Les tests existants portent sur le mode complet ; le mode simple a ses propres tests.
         $user = User::factory()->create($attributes + ['is_active' => true]);
+        $user->forceFill(['simple_mode' => $attributes['simple_mode'] ?? false])->save();
         $user->assignRole($role);
 
         return $user;

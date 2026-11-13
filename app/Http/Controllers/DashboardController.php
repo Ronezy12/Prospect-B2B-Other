@@ -10,6 +10,7 @@ use App\Models\Import;
 use App\Models\Opportunity;
 use App\Models\SocialProfile;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -19,6 +20,10 @@ class DashboardController extends Controller
     {
         $user = $request->user();
         abort_unless($user->can('prospects.view'), 403);
+
+        if ($user->isSimple()) {
+            return $this->simple($user);
+        }
 
         $prospects = Company::visibleTo($user)->prospects();
 
@@ -65,5 +70,31 @@ class DashboardController extends Controller
                 ? Import::where('user_id', $user->id)->latest('id')->limit(5)->get()
                 : collect(),
         ]);
+    }
+
+    /** Mode simple : une seule liste « à appeler aujourd'hui » (rappels échus puis nouveaux prospects). */
+    private function simple(User $user): View
+    {
+        $items = collect();
+        Task::where('assignee_id', $user->id)->where('status', 'a_faire')->where('due_at', '<=', today()->endOfDay())
+            ->whereNotNull('company_id')->whereHas('company')
+            ->with(['company.contacts' => fn ($c) => $c->orderByDesc('is_primary')])
+            ->orderBy('due_at')->limit(30)->get()
+            ->each(function (Task $task) use ($items) {
+                if (! $items->has($task->company_id)) {
+                    $late = $task->due_at->lt(today());
+                    $items->put($task->company_id, ['company' => $task->company, 'why' => ($late ? '⚠️ En retard — ' : '').$task->title]);
+                }
+            });
+        if ($user->can('prospects.update')) {
+            Company::visibleTo($user)->prospects()->where('status', 'nouveau')
+                ->where(fn ($q) => $q->where('owner_id', $user->id)->orWhereNull('owner_id'))
+                ->whereDoesntHave('tasks', fn ($t) => $t->where('status', 'a_faire'))
+                ->with(['contacts' => fn ($c) => $c->orderByDesc('is_primary')])
+                ->latest('id')->limit(10)->get()
+                ->each(fn (Company $c) => $items->has($c->id) ? null : $items->put($c->id, ['company' => $c, 'why' => '🆕 Nouveau, jamais appelé']));
+        }
+
+        return view('simple.dashboard', ['toCallToday' => $items->values()]);
     }
 }

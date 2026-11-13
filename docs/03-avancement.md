@@ -384,3 +384,14 @@ Les écrans détaillés restent disponibles, mais le parcours par défaut devien
 - Mettre en ligne sur le VPS en HTTPS et programmer les sauvegardes (voir `02-installation-exploitation.md`).
 - Remplacer les données de démonstration par les vrais utilisateurs et prospects (`PM_DEMO=false`).
 
+## Mode simple (retour de la direction : « trop complexe »)
+
+- **Activé par défaut** pour chaque utilisateur. Le bouton « Passer en mode complet / simple » en bas du menu bascule entre les deux modes, et le choix est mémorisé par utilisateur.
+- **Menu réduit à 4 entrées** : Ma journée, Mes prospects, Écrire un e-mail (si le rôle le permet), Aide.
+- **Ma journée** : une seule liste « À appeler aujourd'hui » (rappels échus, puis nouveaux prospects jamais appelés). Chaque ligne affiche le bouton vert d'appel et 5 gros boutons de résultat (Pas de réponse, Intéressé, Rendez-vous, Signé !, Pas intéressé), qui font tout le suivi automatiquement.
+- **Mes prospects** : une recherche et une liste en cartes.
+- **Fiche** : appeler, écrire, prochain rappel, boutons de résultat, note rapide, historique récent. « Voir tous les détails » passe en mode complet.
+- **Ajout** : nom de l'entreprise, ville, personne, téléphone et e-mail. Seul le nom est obligatoire.
+- Grands caractères, émojis, visites guidées de 1 à 4 étapes.
+- Les droits et contrôles serveur sont inchangés : le mode simple n'affiche que moins de choses.
+
