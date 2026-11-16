@@ -18,7 +18,7 @@ class SimpleModeTest extends TestCase
         $this->assertTrue(User::factory()->create()->fresh()->isSimple(), 'activé par défaut');
 
         $this->actingAs($sales)->get(route('pm.dashboard'))->assertOk()
-            ->assertSee('À appeler aujourd')->assertSee('Mes prospects')->assertSee('Passer en mode complet')
+            ->assertSee('à appeler')->assertSee('Mes prospects')->assertSee('Réseaux sociaux')->assertSee('Passer en mode complet')
             ->assertDontSee(route('pm.pipelines.show'));
 
         $this->actingAs($sales)->post(route('pm.mode.toggle'))->assertRedirect(route('pm.dashboard'));
@@ -38,12 +38,12 @@ class SimpleModeTest extends TestCase
         $this->companyFor($sales, ['name' => 'Garage Neuf', 'phone' => '0410203040']);
 
         $this->actingAs($sales)->get(route('pm.dashboard'))->assertOk()
-            ->assertSee('Agence du Parc')->assertSee('En retard')->assertSee('Garage Neuf')->assertSee('jamais appelé')
+            ->assertSee('Agence du Parc')->assertSee('En retard')->assertSee('Garage Neuf')->assertSee('jamais appelé')->assertSee('Rendez-vous')
             ->assertSee('tel:+33410203040', false)->assertSee('Pas de réponse');
 
         $this->actingAs($sales)->get(route('pm.companies.index'))->assertOk()->assertSee('Agence du Parc')->assertSee('Chercher');
         $this->actingAs($sales)->get(route('pm.companies.show', $company))->assertOk()
-            ->assertSee('Comment ça s\'est passé', false)->assertSee('Écrire une note')->assertSee('Prochain rappel');
+            ->assertSee('Résultat de votre dernier appel')->assertSee('Ajouter une note')->assertSee('Prochain rappel')->assertSee('Réseaux sociaux');
 
         $this->actingAs($sales)->post(route('pm.companies.outcome', $company), ['outcome' => 'rdv'])->assertSessionHas('success');
         $this->assertSame('qualifie', $company->fresh()->status);

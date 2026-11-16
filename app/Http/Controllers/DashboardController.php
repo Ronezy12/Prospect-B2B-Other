@@ -72,18 +72,17 @@ class DashboardController extends Controller
         ]);
     }
 
-    /** Mode simple : une seule liste « à appeler aujourd'hui » (rappels échus puis nouveaux prospects). */
+    /** Mode simple : trois listes (appels, réseaux sociaux, rendez-vous) et quelques chiffres clés. */
     private function simple(User $user): View
     {
-        $items = collect();
+        $calls = collect();
         Task::where('assignee_id', $user->id)->where('status', 'a_faire')->where('due_at', '<=', today()->endOfDay())
             ->whereNotNull('company_id')->whereHas('company')
             ->with(['company.contacts' => fn ($c) => $c->orderByDesc('is_primary')])
             ->orderBy('due_at')->limit(30)->get()
-            ->each(function (Task $task) use ($items) {
-                if (! $items->has($task->company_id)) {
-                    $late = $task->due_at->lt(today());
-                    $items->put($task->company_id, ['company' => $task->company, 'why' => ($late ? '⚠️ En retard — ' : '').$task->title]);
+            ->each(function (Task $task) use ($calls) {
+                if (! $calls->has($task->company_id)) {
+                    $calls->put($task->company_id, ['company' => $task->company, 'why' => $task->title, 'late' => $task->due_at->lt(today()), 'new' => false]);
                 }
             });
         if ($user->can('prospects.update')) {
@@ -92,9 +91,30 @@ class DashboardController extends Controller
                 ->whereDoesntHave('tasks', fn ($t) => $t->where('status', 'a_faire'))
                 ->with(['contacts' => fn ($c) => $c->orderByDesc('is_primary')])
                 ->latest('id')->limit(10)->get()
-                ->each(fn (Company $c) => $items->has($c->id) ? null : $items->put($c->id, ['company' => $c, 'why' => '🆕 Nouveau, jamais appelé']));
+                ->each(fn (Company $c) => $calls->has($c->id) ? null : $calls->put($c->id, ['company' => $c, 'why' => 'Nouveau prospect, jamais appelé', 'late' => false, 'new' => true]));
         }
 
-        return view('simple.dashboard', ['toCallToday' => $items->values()]);
+        $social = $user->can('social.use') ? SocialProfile::visibleTo($user)->whereNotIn('status', config('prospection.social.closed_statuses'))
+            ->where(fn ($q) => $q->where('next_action_at', '<=', now()->endOfDay())->orWhere(fn ($w) => $w->whereNull('next_action_at')->where('status', 'a_contacter')))
+            ->with(['company:id,name,city', 'contact:id,first_name,last_name,job_title'])->orderByRaw('next_action_at is null')->orderBy('next_action_at')->limit(20)->get() : collect();
+
+        $appointments = Task::where('assignee_id', $user->id)->where('status', 'a_faire')->where('type', 'rendez_vous')
+            ->where('due_at', '>=', today())->where('due_at', '<=', today()->addDays(30)->endOfDay())
+            ->with(['company.contacts' => fn ($c) => $c->orderByDesc('is_primary')])->orderBy('due_at')->limit(15)->get();
+
+        $views = ['appels' => 'À appeler', 'reseaux' => 'Réseaux sociaux', 'rdv' => 'Rendez-vous'];
+        if (! $user->can('social.use')) {
+            unset($views['reseaux']);
+        }
+        $view = array_key_exists(request()->query('vue'), $views) ? request()->query('vue') : 'appels';
+
+        return view('simple.dashboard', [
+            'calls' => $calls->values(),
+            'social' => $social,
+            'appointments' => $appointments,
+            'views' => $views,
+            'view' => $view,
+            'openDeals' => Opportunity::visibleTo($user)->active()->whereNull('closed_at')->count(),
+        ]);
     }
 }

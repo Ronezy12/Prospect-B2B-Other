@@ -2,8 +2,9 @@
 @section('title', 'Ajouter un prospect')
 
 @section('content')
-<a class="s-back" href="{{ route('pm.companies.index') }}">‹ Mes prospects</a>
+<a class="s-back" href="{{ route('pm.companies.index') }}"><x-icon name="chevron-right" class="flip" /> Mes prospects</a>
 <h1 class="s-h1">Ajouter un prospect</h1>
+<p class="s-lead">Seul le nom de l'entreprise est obligatoire. Vous pourrez compléter plus tard.</p>
 
 @if ($duplicate = session('duplicate'))
     <div class="alert alert-warning" role="alert"><x-icon name="circle-alert" /><div>
@@ -25,6 +26,6 @@
     <div class="field"><label for="phone">Téléphone</label><input type="tel" id="phone" name="contact[phone]" value="{{ old('contact.phone') }}" maxlength="40" placeholder="06 12 34 56 78">@error('contact.phone')<div class="error">{{ $message }}</div>@enderror</div>
     <div class="field"><label for="email">E-mail</label><input type="email" id="email" name="contact[email]" value="{{ old('contact.email') }}" maxlength="190" placeholder="prenom@entreprise.fr">@error('contact.email')<div class="error">{{ $message }}</div>@enderror</div>
     @if (session('duplicate'))<label class="checkbox"><input type="checkbox" name="confirm_duplicate" value="1"> C'est une autre entreprise, créer quand même</label>@endif
-    <button type="submit" class="s-submit">✅ Enregistrer</button>
+    <button type="submit" class="btn btn-primary s-submit"><x-icon name="check" /> Enregistrer le prospect</button>
 </form>
 @endsection

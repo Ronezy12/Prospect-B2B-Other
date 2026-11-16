@@ -246,14 +246,15 @@ final class Tours
     {
         $tour = match ($route) {
             'pm.dashboard' => ['title' => 'Ma journée', 'steps' => [
-                ['title' => 'Bienvenue !', 'text' => 'Ici, c\'est très simple : vous appelez les personnes de la liste, puis vous touchez ce qui s\'est passé. L\'outil s\'occupe du reste.'],
-                ['target' => '.s-call', 'title' => '1. Appelez', 'text' => 'Touchez le bouton vert pour appeler (sur téléphone) ou lisez le numéro.'],
-                ['target' => '.s-outcomes', 'title' => '2. Touchez le résultat', 'text' => 'Pas de réponse, intéressé, rendez-vous… L\'outil note tout et vous rappellera le bon jour.'],
-                ['target' => '.s-big', 'title' => 'Pour le reste', 'text' => 'Ajouter un prospect ou voir toute la liste : ces gros boutons.'],
+                ['title' => 'Bienvenue', 'text' => 'Vous appelez les personnes de la liste, puis vous indiquez le résultat. L\'outil s\'occupe du suivi.'],
+                ['target' => '.s-kpis', 'title' => 'Votre journée en chiffres', 'text' => 'Appels, réseaux sociaux, rendez-vous et affaires en cours. Cliquez sur un chiffre pour voir la liste.'],
+                ['target' => '.s-call', 'title' => '1. Appelez', 'text' => 'Le bouton vert lance l\'appel depuis un téléphone ; sinon, le numéro est affiché.'],
+                ['target' => '.s-outcomes', 'title' => '2. Indiquez le résultat', 'text' => 'Pas de réponse, intéressé, rendez-vous… L\'outil met à jour la fiche et crée le prochain rappel.'],
+                ['target' => '.s-tabs', 'title' => 'Réseaux sociaux et rendez-vous', 'text' => 'Les autres onglets regroupent les profils à contacter sur les réseaux et vos prochains rendez-vous.'],
             ]],
             'pm.companies.show' => ['title' => 'Fiche', 'steps' => [
                 ['target' => '.s-actions', 'title' => 'Appeler ou écrire', 'text' => 'Un bouton pour appeler, un pour envoyer un e-mail.'],
-                ['target' => '.s-outcomes', 'title' => 'Après l\'appel', 'text' => 'Touchez ce qui s\'est passé. C\'est tout.'],
+                ['target' => '.s-outcomes', 'title' => 'Après l\'appel', 'text' => 'Indiquez le résultat : le reste est automatique.'],
                 ['target' => '.s-note', 'title' => 'Une info à retenir ?', 'text' => 'Écrivez-la ici : toute l\'équipe la verra.'],
             ]],
             'pm.companies.create' => ['title' => 'Ajouter', 'steps' => [

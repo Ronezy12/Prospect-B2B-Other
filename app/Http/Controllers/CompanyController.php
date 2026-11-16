@@ -131,6 +131,8 @@ class CompanyController extends Controller
 
         $company->load(['sector', 'subsector', 'source', 'owner', 'tags', 'contacts' => fn ($q) => $q->orderByDesc('is_primary')->orderBy('last_name'), 'socialProfiles.contact']);
         if ($request->user()->isSimple()) {
+            $company->load('socialProfiles.contact');
+
             return view('simple.companies-show', [
                 'company' => $company,
                 'activities' => $company->activities()->limit(8)->get(),
