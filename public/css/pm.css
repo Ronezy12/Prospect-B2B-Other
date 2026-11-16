@@ -1053,3 +1053,48 @@ a.s-name:hover { color: var(--primary); }
 .pc-opt-non_pertinent::before { background: var(--danger); }
 .pc-opt-en_sommeil::before { background: var(--muted); }
 @media (prefers-reduced-motion: reduce) { .pc-card, .pc-btn, .pc-caret { transition: none; } .pc-status-list { animation: none; } .pc-btn:hover { transform: none; } }
+
+/* Cartes prospects : bloc entièrement coloré selon le statut, tranche 3D assortie */
+.pc-card {
+  --c1: #64748b; --c2: #7b8aa0; --edge: #4b5768; --ink: #ffffff; --ink-soft: rgba(255, 255, 255, .82);
+  background: linear-gradient(160deg, var(--c2) 0%, var(--c1) 100%);
+  border: 0;
+  color: var(--ink);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .28),
+    0 6px 0 var(--edge),
+    0 16px 26px -10px rgba(14, 26, 51, .35),
+    0 30px 44px -26px rgba(14, 26, 51, .4);
+}
+.pc-card:hover, .pc-card:focus, .pc-grid .pc-card:hover { border: 0; box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, .28), 0 6px 0 var(--edge),
+    0 16px 26px -10px rgba(14, 26, 51, .35), 0 30px 44px -26px rgba(14, 26, 51, .4); }
+.pc-card::before { content: none; }
+.pc-card .pc-agency, .pc-card h1.pc-agency { color: var(--ink); }
+.pc-card .pc-agency:hover { color: var(--ink); text-decoration: underline; }
+.pc-card .pc-person, .pc-card .pc-city, .pc-card .s-sub { color: var(--ink-soft); }
+.pc-card .pc-status, .pc-card .pc-status-menu > summary { color: var(--ink) !important; }
+.pc-card .pc-caret { color: var(--ink); opacity: .75; }
+.pc-card .c360-coords { border-top-color: color-mix(in srgb, var(--ink) 25%, transparent); }
+.pc-card .c360-coords dt { color: var(--ink-soft); }
+.pc-card .c360-coords dd { color: var(--ink); }
+
+.pc-nouveau { --c1: #0a3f94; --c2: #1d5fd0; --edge: #062a66; }
+.pc-a_qualifier { --c1: #f2ad00; --c2: #ffcc33; --edge: #b88300; --ink: #1b1400; --ink-soft: rgba(27, 20, 0, .72); }
+.pc-qualifie { --c1: #0c8a5d; --c2: #19b77f; --edge: #08603f; }
+.pc-non_pertinent { --c1: #c02b4f; --c2: #e0577a; --edge: #8c1d38; }
+.pc-en_sommeil { --c1: #5b677b; --c2: #8190a6; --edge: #414b5b; }
+
+/* Boutons ronds blancs sur la couleur de la carte */
+.pc-card .pc-btn { background: #ffffff; color: #0e1a33; box-shadow: 0 3px 0 rgba(0, 0, 0, .18), 0 10px 16px -8px rgba(0, 0, 0, .45); }
+.pc-card .pc-btn:hover { background: #ffffff; color: #0e1a33; filter: brightness(.96); }
+.pc-card .pc-btn.call { background: #ffffff; color: #0a3f94; }
+.pc-card .pc-btn.wa { background: #25d366; color: #ffffff; }
+.pc-card .pc-btn.off { background: rgba(255, 255, 255, .22); color: color-mix(in srgb, var(--ink) 55%, transparent); box-shadow: none; border: 0; }
+.pc-a_qualifier .pc-btn.off { background: rgba(27, 20, 0, .1); }
+.pc-card .pc-btn::after { background: #0e1a33; color: #fff; }
+
+/* Menu de statut : panneau clair, lisible quelle que soit la couleur de la carte */
+.pc-card .pc-status-list { color: var(--text); }
+.pc-card .pc-status-menu > summary:focus-visible { outline-color: var(--ink); }
+.pc-card:focus-visible { outline: 3px solid var(--edge); outline-offset: 3px; }
