@@ -116,27 +116,6 @@
       });
     }
 
-    // Cartes : légère inclinaison 3D qui suit la souris (désactivée sur écran tactile et si l'utilisateur limite les animations).
-    var canTilt = window.matchMedia('(hover: hover) and (pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (canTilt) {
-      document.querySelectorAll('.pc-grid .pc-card').forEach(function (card) {
-        card.addEventListener('mousemove', function (e) {
-          if (card.classList.contains('menu-open')) { return; }
-          var r = card.getBoundingClientRect();
-          var x = (e.clientX - r.left) / r.width - 0.5;
-          var y = (e.clientY - r.top) / r.height - 0.5;
-          card.style.setProperty('--ry', (x * 7).toFixed(2) + 'deg');
-          card.style.setProperty('--rx', (-y * 7).toFixed(2) + 'deg');
-          card.style.setProperty('--mx', ((x + 0.5) * 100).toFixed(1) + '%');
-          card.style.setProperty('--my', ((y + 0.5) * 100).toFixed(1) + '%');
-        });
-        card.addEventListener('mouseleave', function () {
-          card.style.setProperty('--rx', '0deg');
-          card.style.setProperty('--ry', '0deg');
-        });
-      });
-    }
-
     // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.
     var preset = document.querySelector('[data-mail-preset]');
     if (preset) {
