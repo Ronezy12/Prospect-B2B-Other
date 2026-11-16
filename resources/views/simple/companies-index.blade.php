@@ -29,7 +29,7 @@
         @php($phone = $contact?->mobile ?? $contact?->phone ?? $company->phone)
         @php($mobile = $contact?->mobile ?? $phone)
         @php($email = $contact?->email ?? $company->email)
-        <article class="pc-card pc-{{ $company->status }}" data-open="{{ route('pm.companies.show', $company) }}" tabindex="0" aria-label="{{ $company->name }} — double-cliquez pour ouvrir la fiche">
+        <article id="prospect-{{ $company->id }}" class="pc-card pc-{{ $company->status }}" data-open="{{ route('pm.companies.show', $company) }}" tabindex="0" aria-label="{{ $company->name }} — double-cliquez pour ouvrir la fiche">
             <div class="pc-top">
                 <a class="pc-agency" href="{{ route('pm.companies.show', $company) }}">{{ $company->name }}</a>
                 <span class="pc-person">{{ $contact?->fullName() ?? '—' }}</span>

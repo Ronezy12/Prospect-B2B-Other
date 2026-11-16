@@ -6,7 +6,7 @@
 @php($phone = $contact?->mobile ?? $contact?->phone ?? $company->phone)
 @php($mobile = $contact?->mobile ?? $phone)
 @php($email = $contact?->email ?? $company->email)
-<a class="s-back" href="{{ route('pm.companies.index') }}"><x-icon name="chevron-right" class="flip" /> Mes prospects</a>
+<a class="s-back" data-back href="{{ route('pm.companies.index') }}#prospect-{{ $company->id }}"><x-icon name="chevron-right" class="flip" /> Retour</a>
 
 <div class="c360">
     {{-- Colonne gauche : qui est ce prospect --}}

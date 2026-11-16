@@ -116,6 +116,83 @@
       });
     }
 
+    // Bouton « Retour » : revient à la page précédente là où on l'avait laissée (le navigateur
+    // restaure la position) ; sinon, ouvre la liste directement sur la bonne carte.
+    document.querySelectorAll('[data-back]').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        var sameSite = document.referrer && document.referrer.indexOf(window.location.origin + '/') === 0;
+        if (sameSite && window.history.length > 1 && document.referrer !== window.location.href) {
+          e.preventDefault();
+          window.history.back();
+        }
+      });
+    });
+
+    // Garder sa place : avant une action (statut, résultat d'appel, note…) ou avant d'ouvrir une fiche
+    // depuis la liste, on mémorise la carte concernée et sa position à l'écran ; au retour sur la
+    // page, elle est replacée exactement au même endroit (même si un message s'affiche en haut).
+    var scrollKey = 'pm-place';
+    var rememberPlace = function (el, maxAgeMs) {
+      var anchor = el && el.closest ? el.closest('[id^="prospect-"]') : null;
+      try {
+        sessionStorage.setItem(scrollKey, JSON.stringify({
+          path: location.pathname + location.search, y: window.scrollY,
+          id: anchor ? anchor.id : null, top: anchor ? anchor.getBoundingClientRect().top : null,
+          t: Date.now(), ttl: maxAgeMs,
+        }));
+      } catch (err) { /* ignoré */ }
+    };
+    document.addEventListener('submit', function (e) {
+      var form = e.target;
+      if (form.matches('form[method="POST"], form[method="post"]') && !form.target) { rememberPlace(form, 30000); }
+    }, true);
+    document.addEventListener('click', function (e) {
+      var link = e.target.closest('[id^="prospect-"] a[href]');
+      if (link && !link.target) { rememberPlace(link, 900000); }
+    }, true);
+    document.querySelectorAll('[data-open]').forEach(function (card) {
+      card.addEventListener('dblclick', function () { rememberPlace(card, 900000); }, true);
+    });
+    var restorePlace = function () {
+      var saved;
+      try {
+        saved = JSON.parse(sessionStorage.getItem(scrollKey) || 'null');
+      } catch (err) { return; }
+      if (!saved || saved.path !== location.pathname + location.search || Date.now() - saved.t > (saved.ttl || 30000) || location.hash) { return; }
+      try { sessionStorage.removeItem(scrollKey); } catch (err) { /* ignoré */ }
+      var apply = function () {
+        var el = saved.id ? document.getElementById(saved.id) : null;
+        if (el && saved.top !== null) {
+          window.scrollTo(0, window.scrollY + el.getBoundingClientRect().top - saved.top);
+        } else {
+          window.scrollTo(0, saved.y);
+        }
+        return el;
+      };
+      // Appliqué tout de suite, puis réajusté une fois polices et mise en page stabilisées.
+      var el = apply();
+      requestAnimationFrame(apply);
+      if (document.fonts && document.fonts.ready) { document.fonts.ready.then(apply); }
+      window.addEventListener('load', apply, { once: true });
+      if (el) {
+        el.classList.add('pc-flash');
+        setTimeout(function () { el.classList.remove('pc-flash'); }, 1200);
+      }
+    };
+    if ('scrollRestoration' in history) { history.scrollRestoration = 'manual'; }
+    restorePlace();
+    window.addEventListener('pageshow', function (e) { if (e.persisted) { restorePlace(); } });
+
+    // Arrivée sur la liste avec #prospect-N : la carte est centrée et mise en évidence un instant.
+    if (location.hash.indexOf('#prospect-') === 0) {
+      var target = document.getElementById(location.hash.slice(1));
+      if (target) {
+        target.scrollIntoView({ block: 'center' });
+        target.classList.add('pc-flash');
+        setTimeout(function () { target.classList.remove('pc-flash'); }, 1600);
+      }
+    }
+
     // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.
     var preset = document.querySelector('[data-mail-preset]');
     if (preset) {

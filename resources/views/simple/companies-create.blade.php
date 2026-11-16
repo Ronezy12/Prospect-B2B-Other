@@ -2,7 +2,7 @@
 @section('title', 'Ajouter un prospect')
 
 @section('content')
-<a class="s-back" href="{{ route('pm.companies.index') }}"><x-icon name="chevron-right" class="flip" /> Mes prospects</a>
+<a class="s-back" data-back href="{{ route('pm.companies.index') }}"><x-icon name="chevron-right" class="flip" /> Retour</a>
 <h1 class="s-h1">Ajouter un prospect</h1>
 <p class="s-lead">Seul le nom de l'entreprise est obligatoire. Vous pourrez compléter plus tard.</p>
 

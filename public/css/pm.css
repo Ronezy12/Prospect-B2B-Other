@@ -1098,3 +1098,10 @@ a.s-name:hover { color: var(--primary); }
 .pc-card .pc-status-list { color: var(--text); }
 .pc-card .pc-status-menu > summary:focus-visible { outline-color: var(--ink); }
 .pc-card:focus-visible { outline: 3px solid var(--edge); outline-offset: 3px; }
+
+/* Retour à la carte ouverte */
+.pc-card { scroll-margin: 120px; }
+.pc-card.pc-flash { outline: 3px solid var(--edge); outline-offset: 4px; }
+html { scroll-behavior: auto; }
+.s-back { padding: .45rem .8rem .45rem .55rem; border-radius: 10px; border: 1px solid var(--border); background: var(--surface); box-shadow: var(--shadow-sm); text-decoration: none; }
+.s-back:hover { border-color: var(--primary); }

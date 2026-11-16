@@ -2,6 +2,7 @@
 @section('title', $profile->company->name.' — '.$profile->platformLabel())
 
 @section('content')
+<a class="s-back" data-back href="{{ route('pm.social.index') }}"><x-icon name="chevron-right" class="flip" /> Retour</a>
 <div class="page-header">
     <div>
         <div class="breadcrumb"><a href="{{ route('pm.social.index') }}">Réseaux sociaux</a> <x-icon name="chevron-right" /> <a href="{{ route('pm.companies.show', $profile->company) }}">{{ $profile->company->name }}</a></div>
