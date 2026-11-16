@@ -7,7 +7,10 @@
         <h1>Mes prospects</h1>
         <p class="s-lead">Un clic sur le statut pour le changer, un double-clic sur la carte pour ouvrir la fiche.</p>
     </div>
-    @can('prospects.create')<a class="btn btn-primary" href="{{ route('pm.companies.create') }}"><x-icon name="plus" /> Ajouter un prospect</a>@endcan
+    <div class="s-head-actions">
+        @if (auth()->user()->can('prospects.import') || auth()->user()->can('export', App\Models\Company::class))<a class="btn" href="{{ route('pm.companies.transfer') }}"><x-icon name="file-spreadsheet" /> Importer / exporter</a>@endif
+        @can('prospects.create')<a class="btn btn-primary" href="{{ route('pm.companies.create') }}"><x-icon name="plus" /> Ajouter un prospect</a>@endcan
+    </div>
 </div>
 
 <form method="GET" class="s-search">
@@ -34,7 +37,7 @@
                 <a class="pc-agency" href="{{ route('pm.companies.show', $company) }}">{{ $company->name }}</a>
                 <span class="pc-person">{{ $contact?->fullName() ?? '—' }}</span>
             </div>
-            <div class="pc-city"><x-icon name="map-pin" /> {{ $company->city ?: 'Ville non renseignée' }}</div>
+            <div class="pc-city"><x-icon name="map-pin" /> {{ trim($company->postal_code.' '.$company->city) ?: 'Ville non renseignée' }}</div>
             @can('update', $company)
                 <details class="pc-status-menu">
                     <summary class="pc-status" title="Changer le statut">{{ $company->statusLabel() }} <x-icon name="chevron-right" class="pc-caret" /></summary>

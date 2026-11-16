@@ -193,7 +193,22 @@
       }
     }
 
-    // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.
+    // Dépôt de fichier (import) : glisser-déposer et nom du fichier choisi.
+  document.querySelectorAll('[data-drop]').forEach(function (zone) {
+    var input = zone.querySelector('input[type=file]');
+    var name = zone.querySelector('[data-drop-name]');
+    if (!input) { return; }
+    function show() { if (name) { name.textContent = input.files && input.files[0] ? input.files[0].name : ''; } }
+    input.addEventListener('change', show);
+    ['dragenter', 'dragover'].forEach(function (t) { zone.addEventListener(t, function (e) { e.preventDefault(); zone.classList.add('over'); }); });
+    ['dragleave', 'drop'].forEach(function (t) { zone.addEventListener(t, function () { zone.classList.remove('over'); }); });
+    zone.addEventListener('drop', function (e) {
+      e.preventDefault();
+      if (e.dataTransfer && e.dataTransfer.files.length) { input.files = e.dataTransfer.files; show(); }
+    });
+  });
+
+  // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.
     var preset = document.querySelector('[data-mail-preset]');
     if (preset) {
       preset.addEventListener('change', function () {

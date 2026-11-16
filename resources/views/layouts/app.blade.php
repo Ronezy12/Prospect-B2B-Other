@@ -8,10 +8,10 @@
     <title>@yield('title', 'Prospection') — {{ config('app.name') }}</title>
     <link rel="preload" href="{{ asset('fonts/inter-latin-wght-normal.woff2') }}" as="font" type="font/woff2" crossorigin>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
-    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=20">
-    <script src="{{ asset('js/theme.js') }}?v=20"></script>
-    <script src="{{ asset('js/pm.js') }}?v=20" defer></script>
-    <script src="{{ asset('js/tour.js') }}?v=20" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/pm.css') }}?v=22">
+    <script src="{{ asset('js/theme.js') }}?v=22"></script>
+    <script src="{{ asset('js/pm.js') }}?v=22" defer></script>
+    <script src="{{ asset('js/tour.js') }}?v=22" defer></script>
     @stack('head')
 </head>
 @php($u = auth()->user())

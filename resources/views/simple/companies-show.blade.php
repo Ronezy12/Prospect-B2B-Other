@@ -17,7 +17,8 @@
                 <span class="pc-person">{{ $contact?->fullName() ?? '—' }}</span>
             </div>
             @if ($contact?->job_title)<div class="s-sub">{{ $contact->job_title }}</div>@endif
-            <div class="pc-city"><x-icon name="map-pin" /> {{ $company->city ?: 'Ville non renseignée' }}</div>
+            <div class="pc-city"><x-icon name="map-pin" /> {{ trim($company->postal_code.' '.$company->city) ?: 'Ville non renseignée' }}</div>
+            @if ($company->address)<div class="s-sub">{{ $company->address }}</div>@endif
             @if ($company->isClient())
                 <div class="pc-status">Client</div>
             @else

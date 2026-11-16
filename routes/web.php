@@ -9,6 +9,7 @@ use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CompanyBulkController;
 use App\Http\Controllers\CompanyController;
 use App\Http\Controllers\CompanyExportController;
+use App\Http\Controllers\CompanyTransferController;
 use App\Http\Controllers\ComplianceController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\DashboardController;
@@ -87,6 +88,9 @@ Route::middleware(['auth', EnsureTwoFactorEnrolled::class])->group(function () {
         Route::post('visites/preference', [TourController::class, 'preference'])->name('tours.preference');
 
         Route::post('prospects/actions-groupees', CompanyBulkController::class)->name('companies.bulk');
+        Route::get('prospects/importer-exporter', [CompanyTransferController::class, 'show'])->name('companies.transfer');
+        Route::get('prospects/modele-import', [CompanyTransferController::class, 'template'])->name('companies.template');
+        Route::post('prospects/importer', [CompanyTransferController::class, 'import'])->middleware('throttle:10,1')->name('companies.import');
         Route::get('prospects/export', CompanyExportController::class)->middleware('throttle:10,1')->name('companies.export');
         Route::post('prospects/{company}/statut', [CompanyController::class, 'updateStatus'])->middleware('throttle:120,1')->name('companies.status');
         Route::post('prospects/{company}/resultat', QuickOutcomeController::class)->middleware('throttle:60,1')->name('companies.outcome');

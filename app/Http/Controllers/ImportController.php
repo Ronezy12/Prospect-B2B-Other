@@ -48,6 +48,20 @@ class ImportController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $import = $this->upload($request);
+        if ($import instanceof RedirectResponse) {
+            return $import;
+        }
+
+        return redirect()->route('pm.imports.mapping', $import);
+    }
+
+    /**
+     * Réception et contrôle du fichier, partagé avec l'import express du mode simple.
+     * Renvoie l'import créé, ou une redirection avec l'erreur à afficher.
+     */
+    public function upload(Request $request): Import|RedirectResponse
+    {
         Gate::authorize('create', Import::class);
 
         $request->validate([
@@ -105,7 +119,7 @@ class ImportController extends Controller
         ]);
         $this->audit->log('import.uploaded', $import, ['fichier' => $import->original_name, 'lignes' => $total]);
 
-        return redirect()->route('pm.imports.mapping', $import);
+        return $import;
     }
 
     public function mapping(Request $request, Import $import): View|RedirectResponse
