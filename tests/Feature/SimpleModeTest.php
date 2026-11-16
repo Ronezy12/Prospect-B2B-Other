@@ -41,9 +41,9 @@ class SimpleModeTest extends TestCase
             ->assertSee('Agence du Parc')->assertSee('En retard')->assertSee('Garage Neuf')->assertSee('jamais appelé')->assertSee('Rendez-vous')
             ->assertSee('tel:+33410203040', false)->assertSee('Pas de réponse');
 
-        $this->actingAs($sales)->get(route('pm.companies.index'))->assertOk()->assertSee('Agence du Parc')->assertSee('Chercher');
+        $this->actingAs($sales)->get(route('pm.companies.index'))->assertOk()->assertSee('Agence du Parc')->assertSee('data-open=', false)->assertSee('sms:', false)->assertSee('Rechercher');
         $this->actingAs($sales)->get(route('pm.companies.show', $company))->assertOk()
-            ->assertSee('Résultat de votre dernier appel')->assertSee('Ajouter une note')->assertSee('Prochain rappel')->assertSee('Réseaux sociaux');
+            ->assertSee('Résultat de votre dernier appel')->assertSee('Ajouter une note')->assertSee('Prochain rappel')->assertSee('Réseaux sociaux')->assertSee('Interlocuteurs')->assertSee('Affaires');
 
         $this->actingAs($sales)->post(route('pm.companies.outcome', $company), ['outcome' => 'rdv'])->assertSessionHas('success');
         $this->assertSame('qualifie', $company->fresh()->status);

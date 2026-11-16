@@ -41,11 +41,14 @@ class CompanyController extends Controller
         $direction = $request->query('dir') === 'asc' ? 'asc' : 'desc';
 
         if ($request->user()->isSimple()) {
+            $base = Company::query()->visibleTo($request->user())->filter(array_diff_key($filters, ['status' => true]));
+
             return view('simple.companies-index', [
                 'filters' => $filters,
+                'statusCounts' => (clone $base)->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'),
                 'companies' => Company::query()->visibleTo($request->user())->filter($filters)
-                    ->with(['contacts' => fn ($c) => $c->orderByDesc('is_primary')])
-                    ->orderBy('name')->paginate(config('prospection.per_page'))->withQueryString(),
+                    ->with(['contacts' => fn ($c) => $c->orderByDesc('is_primary'), 'socialProfiles'])
+                    ->orderBy('name')->paginate(24)->withQueryString(),
             ]);
         }
 
@@ -135,8 +138,10 @@ class CompanyController extends Controller
 
             return view('simple.companies-show', [
                 'company' => $company,
-                'activities' => $company->activities()->limit(8)->get(),
+                'activities' => $company->activities()->with('user:id,name')->limit(12)->get(),
                 'nextTask' => $company->tasks()->where('status', 'a_faire')->orderBy('due_at')->first(),
+                'openTasks' => $company->tasks()->where('status', 'a_faire')->orderBy('due_at')->limit(6)->get(),
+                'deals' => $company->opportunities()->visibleTo($request->user())->with('stage:id,name,type')->latest('id')->limit(5)->get(),
             ]);
         }
         $suppressed = app(SuppressionService::class)->suppressedAmong($company->contacts->pluck('email')->filter()->all());

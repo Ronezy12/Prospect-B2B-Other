@@ -252,7 +252,12 @@ final class Tours
                 ['target' => '.s-outcomes', 'title' => '2. Indiquez le résultat', 'text' => 'Pas de réponse, intéressé, rendez-vous… L\'outil met à jour la fiche et crée le prochain rappel.'],
                 ['target' => '.s-tabs', 'title' => 'Réseaux sociaux et rendez-vous', 'text' => 'Les autres onglets regroupent les profils à contacter sur les réseaux et vos prochains rendez-vous.'],
             ]],
+            'pm.companies.index' => ['title' => 'Mes prospects', 'steps' => [
+                ['target' => '.s-filters', 'title' => 'Filtrer par statut', 'text' => 'Affichez seulement les nouveaux, les prospects à qualifier, les qualifiés…'],
+                ['target' => '.pc-card', 'title' => 'Une carte = un prospect', 'text' => 'Les boutons ronds permettent d\'écrire, d\'appeler ou d\'envoyer un SMS. Double-cliquez sur la carte pour ouvrir la fiche complète.'],
+            ]],
             'pm.companies.show' => ['title' => 'Fiche', 'steps' => [
+                ['target' => '.c360-id .pc-actions', 'title' => 'Contacter', 'text' => 'E-mail, appel ou SMS en un clic.'],
                 ['target' => '.s-actions', 'title' => 'Appeler ou écrire', 'text' => 'Un bouton pour appeler, un pour envoyer un e-mail.'],
                 ['target' => '.s-outcomes', 'title' => 'Après l\'appel', 'text' => 'Indiquez le résultat : le reste est automatique.'],
                 ['target' => '.s-note', 'title' => 'Une info à retenir ?', 'text' => 'Écrivez-la ici : toute l\'équipe la verra.'],

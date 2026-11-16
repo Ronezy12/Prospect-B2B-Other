@@ -88,6 +88,16 @@
       if (sigField.value.trim()) { refresh(); }
     }
 
+    // Mes prospects (mode simple) : double-clic ou Entrée sur une carte = ouvrir la fiche.
+    document.querySelectorAll('[data-open]').forEach(function (card) {
+      var open = function (e) {
+        if (e.target.closest('a, button, input, select, textarea')) { return; }
+        window.location.href = card.getAttribute('data-open');
+      };
+      card.addEventListener('dblclick', open);
+      card.addEventListener('keydown', function (e) { if (e.key === 'Enter') { open(e); } });
+    });
+
     // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.
     var preset = document.querySelector('[data-mail-preset]');
     if (preset) {
