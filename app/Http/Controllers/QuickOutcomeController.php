@@ -16,6 +16,7 @@ class QuickOutcomeController extends Controller
     public function __invoke(Request $request, Company $company, QuickOutcomeService $outcomes): RedirectResponse
     {
         Gate::authorize('update', $company);
+        abort_if($company->isArchived(), 409, 'Sortez d\'abord la fiche des archives.');
         $data = $request->validate([
             'outcome' => ['required', Rule::in(array_keys(config('prospection.quick_outcomes')))],
             'note' => ['nullable', 'string', 'max:1000'],

@@ -47,6 +47,7 @@ class CompanyController extends Controller
             return view('simple.companies-index', [
                 'filters' => $filters,
                 'statusCounts' => (clone $base)->selectRaw('status, count(*) as total')->groupBy('status')->pluck('total', 'status'),
+                'archivedCount' => Company::query()->visibleTo($request->user())->where('lifecycle', 'archive')->count(),
                 'companies' => Company::query()->visibleTo($request->user())->filter($filters)
                     ->with(['contacts' => fn ($c) => $c->orderByDesc('is_primary'), 'socialProfiles'])
                     ->orderBy('name')->paginate(24)->withQueryString(),
@@ -209,6 +210,7 @@ class CompanyController extends Controller
     public function updateStatus(Request $request, Company $company): RedirectResponse
     {
         Gate::authorize('update', $company);
+        abort_if($company->isArchived(), 409, 'Sortez d\'abord la fiche des archives.');
         $status = $request->validate(['status' => ['required', Rule::in(array_keys(config('prospection.company_statuses')))]])['status'];
         $before = $company->status;
         if ($before === $status) {
@@ -230,7 +232,46 @@ class CompanyController extends Controller
         $company->delete();
         $this->audit->log('company.deleted', $company, ['name' => $company->name]);
 
-        return redirect()->route('pm.companies.index')->with('success', 'Fiche supprimée (archivée, restaurable par un administrateur).');
+        return redirect()->route('pm.companies.index')->with('success', 'Prospect « '.$company->name.' » supprimé.');
+    }
+
+    /** Archivage : la fiche sort des listes et des envois, mais reste consultable et restaurable. */
+    public function archive(Request $request, Company $company): RedirectResponse
+    {
+        Gate::authorize('update', $company);
+        abort_if($company->isArchived(), 409);
+
+        DB::transaction(function () use ($request, $company) {
+            $company->forceFill([
+                'archived_from' => $company->lifecycle,
+                'lifecycle' => 'archive',
+                'archived_at' => now(),
+                'archived_by' => $request->user()->id,
+            ])->save();
+            // Les rappels en attente n'ont plus lieu d'être.
+            $cancelled = $company->tasks()->where('status', 'a_faire')->update(['status' => 'annule']);
+            $this->activities->record($company, 'systeme', 'Fiche archivée'.($cancelled ? ' ('.$cancelled.' rappel(s) annulé(s))' : '').'.');
+            $this->audit->log('company.archived', $company, ['rappels_annules' => $cancelled]);
+        });
+
+        return redirect()->route('pm.companies.index')->with('success', 'Prospect « '.$company->name.' » archivé. Retrouvez-le dans l\'onglet « Archivés ».');
+    }
+
+    public function unarchive(Request $request, Company $company): RedirectResponse
+    {
+        Gate::authorize('update', $company);
+        abort_unless($company->isArchived(), 409);
+
+        $company->forceFill([
+            'lifecycle' => $company->archived_from === 'client' ? 'client' : 'prospect',
+            'archived_at' => null,
+            'archived_by' => null,
+            'archived_from' => null,
+        ])->save();
+        $this->activities->record($company, 'systeme', 'Fiche sortie des archives.');
+        $this->audit->log('company.unarchived', $company);
+
+        return redirect()->route('pm.companies.show', $company)->with('success', 'Prospect sorti des archives.');
     }
 
     /** Conversion explicite et tracée : jamais automatique. */

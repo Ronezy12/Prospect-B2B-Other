@@ -1175,3 +1175,11 @@ mark { background: #fff4cc; color: inherit; padding: 0 .2rem; border-radius: 4px
 .pb-picker { display: flex; flex-wrap: wrap; gap: .5rem; align-items: flex-end; margin-bottom: 1rem; }
 .pb-picker .field { margin: 0; flex: 1; min-width: 240px; }
 .pb-suggest { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-bottom: .8rem; }
+/* Archivage / suppression (fiche simple) */
+.s-archived > div { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; }
+.s-archived form { margin: 0; }
+.s-danger-zone { border-style: dashed; }
+.s-danger-actions { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: .4rem 1.2rem; align-items: start; }
+.s-danger-actions form { margin: 0 0 .4rem; }
+.s-danger-actions .s-hint { margin: 0 0 .6rem; }
+.s-filter-archive .icon { width: .95rem; height: .95rem; }

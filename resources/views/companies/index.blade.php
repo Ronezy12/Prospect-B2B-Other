@@ -32,6 +32,7 @@
             <select id="lifecycle" name="lifecycle">
                 <option value="prospect" @selected(($filters['lifecycle'] ?? 'prospect') === 'prospect')>Prospects</option>
                 <option value="client" @selected(($filters['lifecycle'] ?? null) === 'client')>Convertis en clients</option>
+                <option value="archive" @selected(($filters['lifecycle'] ?? null) === 'archive')>Archivés</option>
                 <option value="all" @selected(request('lifecycle') === 'all')>Tous</option>
             </select>
         </div>

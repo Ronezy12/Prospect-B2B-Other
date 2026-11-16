@@ -97,6 +97,8 @@ Route::middleware(['auth', EnsureTwoFactorEnrolled::class])->group(function () {
         Route::get('prospects/export', CompanyExportController::class)->middleware('throttle:10,1')->name('companies.export');
         Route::post('prospects/{company}/statut', [CompanyController::class, 'updateStatus'])->middleware('throttle:120,1')->name('companies.status');
         Route::post('prospects/{company}/resultat', QuickOutcomeController::class)->middleware('throttle:60,1')->name('companies.outcome');
+        Route::post('prospects/{company}/archiver', [CompanyController::class, 'archive'])->name('companies.archive');
+        Route::post('prospects/{company}/desarchiver', [CompanyController::class, 'unarchive'])->name('companies.unarchive');
         Route::post('prospects/{company}/convertir', [CompanyController::class, 'convert'])->name('companies.convert');
         Route::post('prospects/{company}/activites', [ActivityController::class, 'store'])->name('companies.activities.store');
         Route::resource('prospects', CompanyController::class)->parameters(['prospects' => 'company'])->names('companies');

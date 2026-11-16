@@ -41,7 +41,8 @@ class AudienceBuilder
         if ($companyFilters['lifecycle'] === 'all') {
             unset($companyFilters['lifecycle']);
         }
-        $query->whereHas('company', fn ($c) => $c->filter($companyFilters));
+        // Une fiche archivée ne reçoit jamais d'envoi, même avec le cycle « tous ».
+        $query->whereHas('company', fn ($c) => $c->filter($companyFilters)->where('lifecycle', '!=', 'archive'));
         $query->filter(array_filter(array_intersect_key($filters, array_flip(self::CONTACT_FILTERS)), fn ($v) => filled($v)));
 
         $exclusions = (array) ($campaign->exclusions ?? []);

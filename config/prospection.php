@@ -57,6 +57,7 @@ return [
     'lifecycles' => [
         'prospect' => 'Prospect',
         'client' => 'Client',
+        'archive' => 'Archivé',
     ],
 
     'audience_types' => [

@@ -7,7 +7,8 @@
         <div class="breadcrumb"><a href="{{ route('pm.companies.index') }}">Base de prospects</a> <x-icon name="chevron-right" /> Fiche</div>
         <h1>{{ $company->name }}</h1>
         <p class="subtitle">
-            @if ($company->isClient())<span class="badge badge-success">Client depuis le {{ $company->converted_at?->format('d/m/Y') }}</span>
+            @if ($company->isArchived())<span class="badge">Archivé le {{ $company->archived_at?->format('d/m/Y') }}</span>
+            @elseif ($company->isClient())<span class="badge badge-success">Client depuis le {{ $company->converted_at?->format('d/m/Y') }}</span>
             @else @include('partials.status-badge', ['status' => $company->status]) @endif
             {{ $company->sector?->name }}@if ($company->city) · {{ $company->city }}@endif
         </p>
@@ -16,8 +17,15 @@
         @can('update', $company)
             <a class="btn" href="{{ route('pm.companies.edit', $company) }}"><x-icon name="pencil" /> Modifier</a>
         @endcan
+        @can('update', $company)
+            @if ($company->isArchived())
+                <form method="POST" action="{{ route('pm.companies.unarchive', $company) }}">@csrf<button type="submit" class="btn"><x-icon name="history" /> Sortir des archives</button></form>
+            @else
+                <form method="POST" action="{{ route('pm.companies.archive', $company) }}" data-confirm="Archiver cette fiche ? Elle sortira des listes et des envois ; ses rappels en attente seront annulés.">@csrf<button type="submit" class="btn"><x-icon name="layers" /> Archiver</button></form>
+            @endif
+        @endcan
         @can('delete', $company)
-            <form method="POST" action="{{ route('pm.companies.destroy', $company) }}" data-confirm="Supprimer cette fiche ? Elle sera archivée.">
+            <form method="POST" action="{{ route('pm.companies.destroy', $company) }}" data-confirm="Supprimer cette fiche ? Elle disparaîtra de l'application.">
                 @csrf @method('DELETE')
                 <button type="submit" class="btn btn-danger"><x-icon name="trash-2" /> Supprimer</button>
             </form>
@@ -25,7 +33,7 @@
     </div>
 </div>
 
-@unless ($company->isClient())
+@unless ($company->isClient() || $company->isArchived())
     <section class="card outcome-card" data-tour="outcomes">
         @include('partials.outcomes', ['company' => $company])
     </section>

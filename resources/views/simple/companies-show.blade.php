@@ -6,12 +6,20 @@
 @php($phone = $contact?->mobile ?? $contact?->phone ?? $company->phone)
 @php($mobile = $contact?->mobile ?? $phone)
 @php($email = $contact?->email ?? $company->email)
-<a class="s-back" data-back href="{{ route('pm.companies.index') }}#prospect-{{ $company->id }}"><x-icon name="chevron-right" class="flip" /> Retour</a>
+<a class="s-back" data-back href="{{ route('pm.companies.index', $company->isArchived() ? ['lifecycle' => 'archive'] : []) }}#prospect-{{ $company->id }}"><x-icon name="chevron-right" class="flip" /> Retour</a>
+@if ($company->isArchived())
+    <div class="alert alert-warning s-archived"><x-icon name="layers" /><div>
+        <strong>Prospect archivé</strong> le {{ $company->archived_at?->format('d/m/Y') }}. Il n'apparaît plus dans « Mes prospects » et n'est plus inclus dans les envois à plusieurs entreprises.
+        @can('update', $company)
+            <form method="POST" action="{{ route('pm.companies.unarchive', $company) }}">@csrf<button type="submit" class="btn btn-sm btn-primary"><x-icon name="history" /> Sortir des archives</button></form>
+        @endcan
+    </div></div>
+@endif
 
 <div class="c360">
     {{-- Colonne gauche : qui est ce prospect --}}
     <aside class="c360-side">
-        <section class="pc-card c360-id pc-{{ $company->isClient() ? 'qualifie' : $company->status }}">
+        <section class="pc-card c360-id pc-{{ $company->isArchived() ? 'en_sommeil' : ($company->isClient() ? 'qualifie' : $company->status) }}">
             <div class="pc-top">
                 <h1 class="pc-agency">{{ $company->name }}</h1>
                 <span class="pc-person">{{ $contact?->fullName() ?? '—' }}</span>
@@ -19,7 +27,9 @@
             @if ($contact?->job_title)<div class="s-sub">{{ $contact->job_title }}</div>@endif
             <div class="pc-city"><x-icon name="map-pin" /> {{ trim($company->postal_code.' '.$company->city) ?: 'Ville non renseignée' }}</div>
             @if ($company->address)<div class="s-sub">{{ $company->address }}</div>@endif
-            @if ($company->isClient())
+            @if ($company->isArchived())
+                <div class="pc-status">Archivé</div>
+            @elseif ($company->isClient())
                 <div class="pc-status">Client</div>
             @else
                 @can('update', $company)
@@ -127,7 +137,7 @@
                 <a class="btn btn-sm" href="{{ route('pm.playbooks.index') }}">Voir toutes les fiches secteur</a>
             @endif
         </section>
-        @unless ($company->isClient())
+        @unless ($company->isClient() || $company->isArchived())
             <section class="s-card">
                 <h2 class="s-title">Résultat de votre dernier appel</h2>
                 @include('simple.outcomes', ['company' => $company])
@@ -183,6 +193,34 @@
                 @endforelse
             </ul>
         </section>
+
+        @if (! $company->isArchived() && auth()->user()->can('update', $company) || auth()->user()->can('delete', $company))
+            <section class="s-card s-danger-zone">
+                <h2 class="s-title"><x-icon name="settings" /> Ranger ou supprimer ce prospect</h2>
+                <div class="s-danger-actions">
+                    @if (! $company->isArchived())
+                        @can('update', $company)
+                            <div>
+                            <form method="POST" action="{{ route('pm.companies.archive', $company) }}" data-confirm="Archiver « {{ $company->name }} » ? Il sortira de vos listes et des envois à plusieurs entreprises. Vous pourrez le ressortir à tout moment.">
+                                @csrf
+                                <button type="submit" class="btn"><x-icon name="layers" /> Archiver</button>
+                            </form>
+                            <p class="s-hint">Pour une entreprise à mettre de côté (fermée, hors cible, pas maintenant). Ses rappels en attente sont annulés. Elle reste consultable dans l'onglet « Archivés ».</p>
+                            </div>
+                        @endcan
+                    @endif
+                    @can('delete', $company)
+                        <div>
+                        <form method="POST" action="{{ route('pm.companies.destroy', $company) }}" data-confirm="Supprimer « {{ $company->name }} » ? La fiche disparaîtra de l'application.">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="btn btn-danger"><x-icon name="trash-2" /> Supprimer</button>
+                        </form>
+                        <p class="s-hint">Pour une fiche créée par erreur ou en double. Préférez « Archiver » si vous avez déjà échangé avec cette entreprise.</p>
+                        </div>
+                    @endcan
+                </div>
+            </section>
+        @endif
 
         <form method="POST" action="{{ route('pm.mode.toggle') }}" class="s-more">@csrf<button type="submit" class="btn-link small">Afficher tous les détails (mode complet)</button></form>
     </div>

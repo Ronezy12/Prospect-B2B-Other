@@ -28,6 +28,7 @@ class Company extends Model
         return [
             'acquired_at' => 'date',
             'converted_at' => 'datetime',
+            'archived_at' => 'datetime',
         ];
     }
 
@@ -124,6 +125,11 @@ class Company extends Model
     public function statusLabel(): string
     {
         return config('prospection.company_statuses')[$this->status] ?? $this->status;
+    }
+
+    public function isArchived(): bool
+    {
+        return $this->lifecycle === 'archive';
     }
 
     public function isClient(): bool

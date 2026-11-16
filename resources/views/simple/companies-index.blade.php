@@ -13,17 +13,22 @@
     </div>
 </div>
 
+@php($inArchive = ($filters['lifecycle'] ?? null) === 'archive')
 <form method="GET" class="s-search">
+    @if ($inArchive)<input type="hidden" name="lifecycle" value="archive">@endif
     @isset($filters['status'])<input type="hidden" name="status" value="{{ $filters['status'] }}">@endisset
     <span class="s-search-field"><x-icon name="search" /><label class="sr-only" for="q">Rechercher</label><input type="search" id="q" name="q" value="{{ $filters['q'] ?? '' }}" placeholder="Agence, personne, ville, e-mail…"></span>
     <button type="submit" class="btn btn-primary">Rechercher</button>
 </form>
 
 <nav class="s-filters" aria-label="Filtrer par statut">
-    <a href="{{ route('pm.companies.index', array_filter(['q' => $filters['q'] ?? null])) }}" @class(['s-filter', 'active' => empty($filters['status'])])>Tous <span>{{ $statusCounts->sum() }}</span></a>
-    @foreach (config('prospection.company_statuses') as $key => $label)
-        <a href="{{ route('pm.companies.index', array_filter(['q' => $filters['q'] ?? null, 'status' => $key])) }}" @class(['s-filter', 'active' => ($filters['status'] ?? null) === $key])>{{ $label }} <span>{{ $statusCounts[$key] ?? 0 }}</span></a>
-    @endforeach
+    <a href="{{ route('pm.companies.index', array_filter(['q' => $filters['q'] ?? null])) }}" @class(['s-filter', 'active' => empty($filters['status']) && ! $inArchive])>Tous @unless ($inArchive)<span>{{ $statusCounts->sum() }}</span>@endunless</a>
+    @unless ($inArchive)
+        @foreach (config('prospection.company_statuses') as $key => $label)
+            <a href="{{ route('pm.companies.index', array_filter(['q' => $filters['q'] ?? null, 'status' => $key])) }}" @class(['s-filter', 'active' => ($filters['status'] ?? null) === $key])>{{ $label }} <span>{{ $statusCounts[$key] ?? 0 }}</span></a>
+        @endforeach
+    @endunless
+    <a href="{{ route('pm.companies.index', array_filter(['q' => $filters['q'] ?? null, 'lifecycle' => 'archive'])) }}" @class(['s-filter', 's-filter-archive', 'active' => $inArchive])><x-icon name="layers" /> Archivés <span>{{ $archivedCount }}</span></a>
 </nav>
 
 <div class="pc-grid">
@@ -32,13 +37,15 @@
         @php($phone = $contact?->mobile ?? $contact?->phone ?? $company->phone)
         @php($mobile = $contact?->mobile ?? $phone)
         @php($email = $contact?->email ?? $company->email)
-        <article id="prospect-{{ $company->id }}" class="pc-card pc-{{ $company->status }}" data-open="{{ route('pm.companies.show', $company) }}" tabindex="0" aria-label="{{ $company->name }} — double-cliquez pour ouvrir la fiche">
+        <article id="prospect-{{ $company->id }}" class="pc-card pc-{{ $company->isArchived() ? 'en_sommeil' : $company->status }}" data-open="{{ route('pm.companies.show', $company) }}" tabindex="0" aria-label="{{ $company->name }} — double-cliquez pour ouvrir la fiche">
             <div class="pc-top">
                 <a class="pc-agency" href="{{ route('pm.companies.show', $company) }}">{{ $company->name }}</a>
                 <span class="pc-person">{{ $contact?->fullName() ?? '—' }}</span>
             </div>
             <div class="pc-city"><x-icon name="map-pin" /> {{ trim($company->postal_code.' '.$company->city) ?: 'Ville non renseignée' }}</div>
-            @can('update', $company)
+            @if ($company->isArchived())
+                <div class="pc-status">Archivé</div>
+            @elsecan('update', $company)
                 <details class="pc-status-menu">
                     <summary class="pc-status" title="Changer le statut">{{ $company->statusLabel() }} <x-icon name="chevron-right" class="pc-caret" /></summary>
                     <form method="POST" action="{{ route('pm.companies.status', $company) }}" class="pc-status-list">
@@ -78,7 +85,11 @@
             </div>
         </article>
     @empty
+        @if ($inArchive)
+        <div class="s-empty"><x-icon name="layers" /><strong>Aucun prospect archivé</strong><span>Archivez une fiche depuis le bas de sa page pour la mettre de côté.</span></div>
+        @else
         <div class="s-empty"><x-icon name="building-2" /><strong>Aucun prospect trouvé</strong>@can('prospects.create')<span><a href="{{ route('pm.companies.create') }}">Ajouter le premier</a></span>@endcan</div>
+        @endif
     @endforelse
 </div>
 {{ $companies->links('partials.pagination') }}
