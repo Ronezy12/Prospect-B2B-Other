@@ -12,6 +12,7 @@ use App\Services\AuditLogger;
 use App\Services\Mail\AudienceBuilder;
 use App\Services\Mail\CampaignService;
 use App\Services\Mail\TemplateRenderer;
+use App\Support\Playbooks;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -60,6 +61,9 @@ class SimpleEmailController extends Controller
     {
         $this->guard($request);
         $filters = $this->filters($request->has('vu') ? $request->query() : (array) session(self::SESSION.'.filters', []));
+        if (Playbooks::email($request->query('modele'))) {
+            session([self::SESSION.'.model' => $request->query('modele')]);
+        }
         $estimate = $this->estimate($filters, $request);
 
         return view('simple-email.who', [
@@ -80,7 +84,9 @@ class SimpleEmailController extends Controller
         }
         session([self::SESSION.'.filters' => $filters]);
 
-        return redirect()->route('pm.simple-email.message');
+        $model = session()->pull(self::SESSION.'.model');
+
+        return redirect()->route('pm.simple-email.message', Playbooks::email($model) ? ['modele' => $model] : []);
     }
 
     /** Étape 2 : quel message ? */
@@ -90,7 +96,7 @@ class SimpleEmailController extends Controller
         if (! session()->has(self::SESSION.'.filters')) {
             return redirect()->route('pm.simple-email.create');
         }
-        $example = self::EXAMPLES[$request->query('exemple')] ?? null;
+        $example = self::EXAMPLES[$request->query('exemple')] ?? Playbooks::email($request->query('modele'));
         $draft = (array) session(self::SESSION.'.message', []);
 
         return view('simple-email.message', [
@@ -99,6 +105,8 @@ class SimpleEmailController extends Controller
             'selectedAccounts' => array_map('intval', $draft['account_ids'] ?? $this->accounts()->pluck('id')->all()),
             'accounts' => $this->accounts(),
             'examples' => self::EXAMPLES,
+            'models' => Playbooks::options(true),
+            'model' => $request->query('modele'),
         ]);
     }
 
@@ -111,6 +119,9 @@ class SimpleEmailController extends Controller
             'account_ids' => ['required', 'array', 'min:1'],
             'account_ids.*' => ['integer', Rule::in($this->accounts()->pluck('id')->all())],
         ], ['account_ids.required' => 'Choisissez au moins une adresse d\'envoi (ou demandez à un administrateur d\'en configurer une dans Paramètres).'], ['subject' => 'objet', 'body' => 'message', 'account_ids' => 'adresses d\'envoi']);
+        if (Playbooks::hasPlaceholder($data['subject'], $data['body'])) {
+            return back()->withInput()->withErrors(['body' => 'Le message contient encore « [à compléter … ] » : remplacez ce texte avant de continuer.']);
+        }
         // La première adresse cochée est le compte principal ; les autres reçoivent une part de l'envoi.
         $data['account_ids'] = array_values(array_unique(array_map('intval', $data['account_ids'])));
         $data['mail_account_id'] = $data['account_ids'][0];
@@ -317,7 +328,7 @@ class SimpleEmailController extends Controller
 
     private function replace(string $text, array $data): string
     {
-        return preg_replace_callback('/\{\{\s*([a-z_]+)\s*\}\}/i', fn ($m) => (string) ($data[strtolower($m[1])] ?? ''), $text);
+        return TemplateRenderer::fill($text, $data);
     }
 
     private function guard(Request $request): void

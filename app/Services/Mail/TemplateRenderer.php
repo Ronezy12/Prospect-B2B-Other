@@ -47,10 +47,25 @@ class TemplateRenderer
     /** @param array<string, string|null> $data */
     private function replace(string $content, array $data, bool $escape): string
     {
-        return preg_replace_callback('/\{\{\s*([a-z_]+)\s*\}\}/i', function ($m) use ($data, $escape) {
-            $value = (string) ($data[strtolower($m[1])] ?? '');
+        return self::fill($content, $data, $escape);
+    }
 
-            return $escape ? e($value) : $value;
+    /**
+     * Remplace les variables. Une variable vide ne laisse pas d'espace orphelin :
+     * « Bonjour {{prenom}}, » devient « Bonjour, » quand le prénom est inconnu.
+     *
+     * @param  array<string, string|null>  $data
+     */
+    public static function fill(string $content, array $data, bool $escape = false): string
+    {
+        return preg_replace_callback('/([ \t]?)\{\{\s*([a-z_]+)\s*\}\}([ \t]*[,;:!?.])?/iu', function ($m) use ($data, $escape) {
+            $value = trim((string) ($data[strtolower($m[2])] ?? ''));
+            $after = $m[3] ?? '';
+            if ($value === '') {
+                return $after !== '' ? ltrim($after) : $m[1];
+            }
+
+            return $m[1].($escape ? e($value) : $value).$after;
         }, $content);
     }
 

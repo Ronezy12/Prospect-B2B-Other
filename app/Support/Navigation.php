@@ -31,6 +31,11 @@ final class Navigation
                 'tabs' => [],
             ],
             [
+                'key' => 'secteurs', 'label' => 'Secteurs et modèles', 'icon' => 'target', 'can' => 'prospects.view',
+                'active' => ['pm.playbooks.*'],
+                'tabs' => [],
+            ],
+            [
                 'key' => 'prospects', 'label' => 'Prospects', 'icon' => 'building-2', 'can' => 'prospects.view', 'help' => 'Les entreprises à démarcher (prospects) et les personnes à joindre (contacts).', 'guide' => 'prospects',
                 'active' => ['pm.companies.*', 'pm.contacts.index', 'pm.contacts.create', 'pm.contacts.edit', 'pm.imports.*'],
                 'tabs' => [
@@ -120,6 +125,7 @@ final class Navigation
             $section['route'] = $section['tabs'][0]['route'] ?? match ($section['key']) {
                 'accueil' => 'pm.dashboard',
                 'guide' => 'pm.guide',
+                'secteurs' => 'pm.playbooks.index',
                 'taches' => 'pm.tasks.index',
                 'automatisations' => 'pm.automations.index',
                 default => 'pm.reports.index',
@@ -136,6 +142,7 @@ final class Navigation
         $items = [
             ['key' => 'accueil', 'label' => 'Ma journée', 'icon' => 'house', 'route' => 'pm.dashboard', 'can' => 'prospects.view', 'active' => ['pm.dashboard', 'pm.notifications.*', 'pm.tasks.*']],
             ['key' => 'prospects', 'label' => 'Mes prospects', 'icon' => 'building-2', 'route' => 'pm.companies.index', 'can' => 'prospects.view', 'active' => ['pm.companies.*', 'pm.contacts.*']],
+            ['key' => 'secteurs', 'label' => 'Secteurs et modèles', 'icon' => 'target', 'route' => 'pm.playbooks.index', 'can' => 'prospects.view', 'active' => ['pm.playbooks.*']],
             ['key' => 'social', 'label' => 'Réseaux sociaux', 'icon' => 'share-2', 'route' => 'pm.social.index', 'can' => 'social.use', 'active' => ['pm.social.*']],
             ['key' => 'emails', 'label' => 'Écrire un e-mail', 'icon' => 'mail', 'route' => 'pm.simple-email.create', 'can' => 'campaigns.manage', 'active' => ['pm.simple-email.*', 'pm.campaigns.*']],
             ['key' => 'guide', 'label' => 'Aide', 'icon' => 'circle-help', 'route' => 'pm.guide', 'can' => 'prospects.view', 'active' => ['pm.guide']],

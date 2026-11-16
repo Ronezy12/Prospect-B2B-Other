@@ -14,6 +14,11 @@ class SectorSeeder extends Seeder
         'Concessionnaires automobiles',
         'Restaurants et commerces',
         'Syndics de copropriété',
+        'Bailleurs et gestionnaires locatifs',
+        'Architectes et maîtres d’œuvre',
+        'Cuisinistes et agenceurs',
+        'Plombiers-chauffagistes',
+        'Installateurs solaires',
         'Professionnels et entreprises tous secteurs',
         'Autres',
     ];

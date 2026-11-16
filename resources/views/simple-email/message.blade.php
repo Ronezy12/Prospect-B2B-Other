@@ -11,6 +11,18 @@
     <span class="small muted">Partir d'un exemple :</span>
     @foreach ($examples as $key => $ex)<a class="btn btn-sm" href="{{ route('pm.simple-email.message', ['exemple' => $key]) }}">{{ $ex['label'] }}</a>@endforeach
 </div>
+<form method="GET" action="{{ route('pm.simple-email.message') }}" class="pb-picker">
+    <div class="field">
+        <label for="modele">Ou un modèle par secteur (<a href="{{ route('pm.playbooks.index') }}">voir les explications</a>)</label>
+        <select id="modele" name="modele">
+            <option value="">Choisir un modèle…</option>
+            @foreach ($models as $group => $options)
+                <optgroup label="{{ $group }}">@foreach ($options as $key => $label)<option value="{{ $key }}" @selected($model === $key)>{{ $label }}</option>@endforeach</optgroup>
+            @endforeach
+        </select>
+    </div>
+    <button type="submit" class="btn">Utiliser ce modèle</button>
+</form>
 
 <form method="POST" action="{{ route('pm.simple-email.message.store') }}" class="card wizard-card">
     @csrf

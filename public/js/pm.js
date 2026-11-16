@@ -254,10 +254,22 @@
           label.textContent = ' Copié';
           setTimeout(function () { label.textContent = previous; }, 1800);
         };
+        var text = 'value' in field ? field.value : field.textContent;
+        var subject = button.getAttribute('data-copy-subject');
+        if (subject) { text = 'Objet : ' + subject + '\n\n' + text; }
+        var fallback = function () {
+          var temp = document.createElement('textarea');
+          temp.value = text;
+          temp.setAttribute('readonly', '');
+          temp.className = 'sr-only';
+          document.body.appendChild(temp);
+          temp.select(); document.execCommand('copy');
+          temp.remove(); done();
+        };
         if (navigator.clipboard && window.isSecureContext) {
-          navigator.clipboard.writeText(field.value).then(done, function () { field.select(); document.execCommand('copy'); done(); });
+          navigator.clipboard.writeText(text).then(done, fallback);
         } else {
-          field.select(); document.execCommand('copy'); done();
+          fallback();
         }
       });
     });

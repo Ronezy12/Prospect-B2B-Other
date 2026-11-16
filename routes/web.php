@@ -21,6 +21,7 @@ use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\OpportunityController;
 use App\Http\Controllers\PipelineBoardController;
+use App\Http\Controllers\PlaybookController;
 use App\Http\Controllers\QuickOutcomeController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\SecurityController;
@@ -74,6 +75,8 @@ Route::middleware(['auth', EnsureTwoFactorEnrolled::class])->group(function () {
     Route::prefix('prospection')->name('pm.')->group(function () {
         Route::get('/', DashboardController::class)->name('dashboard');
         Route::get('guide', GuideController::class)->name('guide');
+        Route::get('secteurs', [PlaybookController::class, 'index'])->name('playbooks.index');
+        Route::get('secteurs/{playbook}', [PlaybookController::class, 'show'])->where('playbook', '[a-z0-9-]+')->name('playbooks.show');
         Route::post('mode', function (Request $request) {
             $user = $request->user();
             $user->forceFill(['simple_mode' => ! $user->isSimple()])->save();

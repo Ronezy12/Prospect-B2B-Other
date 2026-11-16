@@ -7,6 +7,8 @@ use App\Models\Contact;
 use App\Models\MailAccount;
 use App\Services\Mail\CampaignService;
 use App\Services\Mail\ComplianceGate;
+use App\Services\Mail\TemplateRenderer;
+use App\Support\Playbooks;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -19,8 +21,16 @@ class IndividualEmailController extends Controller
         $this->guard($request, $contact);
         $probe = new Campaign(['type' => 'individuel']);
 
+        $contact->load('company.sector.parent');
+        $model = Playbooks::email($request->query('modele'));
+        $data = ['prenom' => $contact->first_name, 'nom' => $contact->last_name, 'entreprise' => $contact->company?->name, 'ville' => $contact->company?->city];
+
         return view('emails.individual', [
-            'contact' => $contact->load('company'),
+            'contact' => $contact,
+            'prefill' => $model ? ['subject' => TemplateRenderer::fill($model['subject'], $data), 'body' => TemplateRenderer::fill($model['body'], $data)] : null,
+            'models' => Playbooks::options(),
+            'model' => $model ? $request->query('modele') : null,
+            'suggested' => Playbooks::forSector($contact->company?->sector),
             'accounts' => MailAccount::where('is_active', true)->where('last_test_result', 'ok')->orderBy('name')->get(),
             'blocked' => $gate->check($probe, $contact),
         ]);
@@ -34,6 +44,9 @@ class IndividualEmailController extends Controller
             'subject' => ['required', 'string', 'max:190'],
             'body' => ['required', 'string', 'max:20000'],
         ], [], ['mail_account_id' => 'compte d\'envoi', 'subject' => 'objet', 'body' => 'message']);
+        if (Playbooks::hasPlaceholder($data['subject'], $data['body'])) {
+            return back()->withInput()->withErrors(['body' => 'Le message contient encore « [à compléter … ] » : remplacez ce texte avant d\'envoyer.']);
+        }
 
         if ($reason = $gate->check(new Campaign(['type' => 'individuel']), $contact)) {
             return back()->withInput()->withErrors(['body' => 'Envoi impossible : '.(config('prospection.exclusion_reasons')[$reason] ?? $reason).'.']);

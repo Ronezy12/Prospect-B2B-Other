@@ -1130,3 +1130,48 @@ html { scroll-behavior: auto; }
 .s-back:hover { border-color: var(--primary); }
 .s-head-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
 .s-h3 { font-size: 1rem; margin: 1.4rem 0 .2rem; }
+/* Secteurs et modèles */
+.pb-rules h2, .pb-quad h3 { display: flex; align-items: center; gap: .5rem; margin: 0 0 .5rem; }
+.pb-rules h2 { font-size: 1.1rem; }
+.pb-rules ol { margin: 0 0 .6rem; padding-left: 1.2rem; display: grid; gap: .3rem; color: var(--text-2); }
+.pb-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1rem; margin-top: 1rem; }
+.pb-card { display: flex; flex-direction: column; gap: .45rem; padding: 1.1rem 1.2rem; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; color: var(--text); text-decoration: none; box-shadow: 0 4px 0 var(--border); }
+.pb-card:hover { border-color: var(--primary); }
+.pb-card strong { font-size: 1.05rem; }
+.pb-pitch { color: var(--text-2); font-size: .9rem; flex: 1; }
+.pb-more { display: inline-flex; align-items: center; gap: .3rem; color: var(--primary); font-weight: 600; font-size: .88rem; }
+.pb-icon { display: inline-grid; place-items: center; width: 2.6rem; height: 2.6rem; border-radius: 12px; background: var(--primary); color: #fff; flex-shrink: 0; }
+.pb-icon .icon { width: 1.35rem; height: 1.35rem; }
+.pb-title { display: flex; gap: .9rem; align-items: flex-start; max-width: 860px; }
+.pb-toc { display: flex; flex-wrap: wrap; gap: .4rem; margin: .2rem 0 1rem; }
+.pb-toc a { padding: .35rem .8rem; border-radius: 999px; border: 1px solid var(--border); background: var(--surface); font-size: .86rem; font-weight: 600; text-decoration: none; color: var(--text-2); }
+.pb-toc a:hover { border-color: var(--primary); color: var(--primary); }
+.pb-h2 { font-size: 1.2rem; margin: 1.6rem 0 .6rem; scroll-margin-top: 1rem; }
+.pb-quad { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+@media (max-width: 760px) { .pb-quad { grid-template-columns: 1fr; } }
+.pb-quad h3 { font-size: 1rem; color: var(--primary); }
+.pb-quad ul, .pb-check { margin: 0; padding-left: 1.1rem; display: grid; gap: .3rem; color: var(--text-2); }
+.pb-deal { border-color: var(--accent, #f5b400); box-shadow: inset 4px 0 0 var(--accent, #f5b400); }
+.pb-questions { margin: .4rem 0 0; padding-left: 1.3rem; display: grid; gap: .35rem; }
+.pb-objections { display: grid; gap: .5rem; margin-bottom: 1rem; }
+.pb-objections details { margin: 0; }
+.pb-objections summary { cursor: pointer; font-weight: 600; }
+.pb-objections p { margin: .6rem 0 0; color: var(--text-2); }
+.pb-emails { list-style: none; margin: 0; padding: 0; display: grid; gap: .9rem; }
+.pb-email { scroll-margin-top: 1rem; }
+.pb-email-head { display: flex; align-items: center; gap: .8rem; margin-bottom: .6rem; }
+.pb-email-head > div { display: grid; flex: 1; }
+.pb-step { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; background: var(--primary); color: #fff; font-weight: 700; flex-shrink: 0; }
+.pb-when { display: inline-flex; align-items: center; gap: .3rem; color: var(--muted); font-size: .85rem; }
+.pb-tag { font-size: .75rem; font-weight: 700; padding: .2rem .6rem; border-radius: 999px; background: var(--bg); border: 1px solid var(--border); color: var(--text-2); white-space: nowrap; }
+.pb-tag.mass { background: #fff4cc; border-color: #f5b400; color: #6b4e00; }
+.pb-subject { margin: 0 0 .4rem; font-weight: 600; }
+.pb-subject span { color: var(--muted); font-weight: 500; }
+.pb-body { white-space: pre-wrap; font-family: inherit; font-size: .93rem; line-height: 1.55; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: .9rem 1rem; margin: 0 0 .6rem; color: var(--text); }
+.pb-why { display: flex; gap: .5rem; align-items: flex-start; margin: 0 0 .6rem; color: var(--text-2); font-size: .9rem; }
+.pb-why .icon { color: #c48f00; flex-shrink: 0; margin-top: .15rem; }
+.pb-actions { display: flex; flex-wrap: wrap; gap: .5rem; }
+mark { background: #fff4cc; color: inherit; padding: 0 .2rem; border-radius: 4px; }
+.pb-picker { display: flex; flex-wrap: wrap; gap: .5rem; align-items: flex-end; margin-bottom: 1rem; }
+.pb-picker .field { margin: 0; flex: 1; min-width: 240px; }
+.pb-suggest { display: flex; flex-wrap: wrap; gap: .4rem; align-items: center; margin-bottom: .8rem; }

@@ -110,6 +110,23 @@
 
     {{-- Colonne droite : agir et suivre --}}
     <div class="c360-main">
+        @php($playbook = \App\Support\Playbooks::forSector($company->sector))
+        <section class="s-card pb-fiche">
+            @if ($playbook)
+                <h2 class="s-title"><x-icon :name="$playbook['icon']" /> {{ $playbook['name'] }} : quoi leur proposer</h2>
+                <p class="s-sub">{{ $playbook['pitch'] }}</p>
+                <div class="pb-actions">
+                    <a class="btn btn-sm" href="{{ route('pm.playbooks.show', $playbook['slug']) }}"><x-icon name="target" /> Voir la fiche secteur</a>
+                    @if ($contact?->email && auth()->user()->can('emails.individual'))
+                        <a class="btn btn-sm btn-primary" href="{{ route('pm.contacts.email.create', ['contact' => $contact, 'modele' => $playbook['slug'].'-1']) }}"><x-icon name="mail" /> Écrire avec un modèle</a>
+                    @endif
+                </div>
+            @else
+                <h2 class="s-title"><x-icon name="target" /> Quoi leur proposer ?</h2>
+                <p class="s-sub">{{ $company->sector ? 'Pas encore de fiche pour le secteur « '.$company->sector->name.' ».' : 'Indiquez le secteur de cette entreprise pour voir quoi lui proposer et les modèles d\'e-mails adaptés.' }}</p>
+                <a class="btn btn-sm" href="{{ route('pm.playbooks.index') }}">Voir toutes les fiches secteur</a>
+            @endif
+        </section>
         @unless ($company->isClient())
             <section class="s-card">
                 <h2 class="s-title">Résultat de votre dernier appel</h2>

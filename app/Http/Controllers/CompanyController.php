@@ -75,7 +75,7 @@ class CompanyController extends Controller
     {
         Gate::authorize('create', Company::class);
         if ($request->user()->isSimple()) {
-            return view('simple.companies-create');
+            return view('simple.companies-create', ['sectors' => Sector::roots()->where('is_active', true)->orderBy('position')->orderBy('name')->get(['id', 'name'])]);
         }
 
         return view('companies.form', ['company' => new Company(['status' => 'nouveau', 'country' => 'FR'])] + $this->referenceData());

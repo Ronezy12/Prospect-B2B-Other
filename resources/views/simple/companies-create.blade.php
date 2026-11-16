@@ -21,6 +21,7 @@
         <fieldset class="s-fieldset">
             <legend><x-icon name="building-2" /> L'entreprise</legend>
             <div class="field"><label for="name">Nom de l'entreprise *</label><input type="text" id="name" name="name" value="{{ old('name') }}" required maxlength="190" placeholder="Ex. : Agence du Parc" autofocus>@error('name')<div class="error">{{ $message }}</div>@enderror</div>
+            <div class="field"><label for="sector_id">Secteur</label><select id="sector_id" name="sector_id"><option value="">Choisir…</option>@foreach ($sectors as $s)<option value="{{ $s->id }}" @selected(old('sector_id') == $s->id)>{{ $s->name }}</option>@endforeach</select><div class="s-hint">Le secteur permet de proposer les bons modèles d'e-mails.</div>@error('sector_id')<div class="error">{{ $message }}</div>@enderror</div>
             <div class="field"><label for="address">Adresse postale</label><input type="text" id="address" name="address" value="{{ old('address') }}" maxlength="255" placeholder="Ex. : 12 rue de la République" autocomplete="street-address">@error('address')<div class="error">{{ $message }}</div>@enderror</div>
             <div class="s-cp-city">
                 <div class="field"><label for="postal_code">Code postal</label><input type="text" id="postal_code" name="postal_code" value="{{ old('postal_code') }}" maxlength="12" inputmode="numeric" placeholder="75001" autocomplete="postal-code">@error('postal_code')<div class="error">{{ $message }}</div>@enderror</div>
