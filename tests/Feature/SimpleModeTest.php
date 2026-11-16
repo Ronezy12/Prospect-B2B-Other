@@ -41,7 +41,7 @@ class SimpleModeTest extends TestCase
             ->assertSee('Agence du Parc')->assertSee('En retard')->assertSee('Garage Neuf')->assertSee('jamais appelé')->assertSee('Rendez-vous')
             ->assertSee('tel:+33410203040', false)->assertSee('Pas de réponse');
 
-        $this->actingAs($sales)->get(route('pm.companies.index'))->assertOk()->assertSee('Agence du Parc')->assertSee('data-open=', false)->assertSee('sms:', false)->assertSee('Rechercher');
+        $this->actingAs($sales)->get(route('pm.companies.index'))->assertOk()->assertSee('Agence du Parc')->assertSee('data-open=', false)->assertSee('Rechercher');
         $this->actingAs($sales)->get(route('pm.companies.show', $company))->assertOk()
             ->assertSee('Résultat de votre dernier appel')->assertSee('Ajouter une note')->assertSee('Prochain rappel')->assertSee('Réseaux sociaux')->assertSee('Interlocuteurs')->assertSee('Affaires');
 
@@ -61,5 +61,20 @@ class SimpleModeTest extends TestCase
         $company = Company::where('name', 'Boulangerie Martin')->firstOrFail();
         $this->assertSame('paul@boulangerie.fr', $company->contacts()->value('email'));
         $this->assertSame($sales->id, $company->owner_id);
+    }
+
+    public function test_status_can_be_changed_from_the_card_and_whatsapp_link_is_shown(): void
+    {
+        $sales = $this->userWithRole('commercial', ['simple_mode' => true]);
+        $company = $this->companyFor($sales, ['name' => 'Agence Rapide', 'phone' => '06 12 34 56 78']);
+
+        $this->actingAs($sales)->get(route('pm.companies.index'))->assertOk()
+            ->assertSee('https://wa.me/33612345678', false)->assertSee(route('pm.companies.status', $company), false)->assertDontSee('sms:', false);
+
+        $this->actingAs($sales)->post(route('pm.companies.status', $company), ['status' => 'qualifie'])->assertSessionHas('success');
+        $this->assertSame('qualifie', $company->fresh()->status);
+        $this->assertTrue($company->activities()->where('body', 'like', 'Statut%Qualifié%')->exists());
+        $this->actingAs($sales)->post(route('pm.companies.status', $company), ['status' => 'inconnu'])->assertSessionHasErrors('status');
+        $this->actingAs($this->userWithRole('commercial'))->post(route('pm.companies.status', $company), ['status' => 'nouveau'])->assertForbidden();
     }
 }

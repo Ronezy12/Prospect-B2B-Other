@@ -88,6 +88,7 @@ Route::middleware(['auth', EnsureTwoFactorEnrolled::class])->group(function () {
 
         Route::post('prospects/actions-groupees', CompanyBulkController::class)->name('companies.bulk');
         Route::get('prospects/export', CompanyExportController::class)->middleware('throttle:10,1')->name('companies.export');
+        Route::post('prospects/{company}/statut', [CompanyController::class, 'updateStatus'])->middleware('throttle:120,1')->name('companies.status');
         Route::post('prospects/{company}/resultat', QuickOutcomeController::class)->middleware('throttle:60,1')->name('companies.outcome');
         Route::post('prospects/{company}/convertir', [CompanyController::class, 'convert'])->name('companies.convert');
         Route::post('prospects/{company}/activites', [ActivityController::class, 'store'])->name('companies.activities.store');

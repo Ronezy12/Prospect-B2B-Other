@@ -81,6 +81,14 @@ final class Normalizer
         return $phone;
     }
 
+    /** Lien WhatsApp (wa.me) à partir d'un numéro ; null si le numéro est inexploitable. */
+    public static function whatsappUrl(?string $phone): ?string
+    {
+        $digits = preg_replace('/\D/', '', (string) self::phone($phone));
+
+        return strlen($digits) >= 8 ? 'https://wa.me/'.$digits : null;
+    }
+
     public static function domain(?string $url): ?string
     {
         $url = trim((string) $url);

@@ -19,6 +19,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class CompanyController extends Controller
@@ -202,6 +203,24 @@ class CompanyController extends Controller
         });
 
         return redirect()->route('pm.companies.show', $company)->with('success', 'Fiche enregistrée.');
+    }
+
+    /** Changement rapide du statut depuis une carte (un clic sur le statut). */
+    public function updateStatus(Request $request, Company $company): RedirectResponse
+    {
+        Gate::authorize('update', $company);
+        $status = $request->validate(['status' => ['required', Rule::in(array_keys(config('prospection.company_statuses')))]])['status'];
+        $before = $company->status;
+        if ($before === $status) {
+            return back();
+        }
+        $company->forceFill(['status' => $status])->save();
+        $labels = config('prospection.company_statuses');
+        $this->activities->record($company, 'systeme', sprintf('Statut : %s → %s.', $labels[$before] ?? $before, $labels[$status]));
+        $this->audit->log('company.updated', $company, ['status' => ['avant' => $before, 'après' => $status]]);
+        app(AutomationEngine::class)->fire('company.status_changed', $company, 'status:'.$before.'>'.$status.':'.now()->timestamp, ['avant' => $before, 'après' => $status]);
+
+        return back()->with('success', '« '.$company->name.' » est maintenant : '.$labels[$status].'.');
     }
 
     public function destroy(Company $company): RedirectResponse

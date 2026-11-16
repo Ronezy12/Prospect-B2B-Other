@@ -15,9 +15,15 @@ class Icon extends Component
 
     public function __construct(public string $name, public string $class = '') {}
 
+    /** @var array<string, bool> icônes pleines (logos) plutôt qu'au trait */
+    private static array $filled = [];
+
     public function render(): string
     {
         $inner = self::$cache[$this->name] ??= $this->load();
+        if (self::$filled[$this->name] ?? false) {
+            return '<svg class="icon '.e($this->class).'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false">'.$inner.'</svg>';
+        }
 
         return '<svg class="icon '.e($this->class).'" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">'.$inner.'</svg>';
     }
@@ -28,7 +34,9 @@ class Icon extends Component
         if (! is_file($path)) {
             return '';
         }
-        preg_match('#<svg[^>]*>(.*)</svg>#s', file_get_contents($path), $m);
+        $content = file_get_contents($path);
+        self::$filled[$this->name] = str_contains($content, 'data-filled="true"');
+        preg_match('#<svg[^>]*>(.*)</svg>#s', $content, $m);
 
         return trim(preg_replace('/\s+/', ' ', $m[1] ?? ''));
     }

@@ -91,12 +91,51 @@
     // Mes prospects (mode simple) : double-clic ou Entrée sur une carte = ouvrir la fiche.
     document.querySelectorAll('[data-open]').forEach(function (card) {
       var open = function (e) {
-        if (e.target.closest('a, button, input, select, textarea')) { return; }
+        if (e.target.closest('a, button, input, select, textarea, summary, details')) { return; }
         window.location.href = card.getAttribute('data-open');
       };
       card.addEventListener('dblclick', open);
       card.addEventListener('keydown', function (e) { if (e.key === 'Enter') { open(e); } });
     });
+
+    // Cartes : un seul menu de statut ouvert à la fois, fermé au clic à l'extérieur ou avec Échap.
+    var statusMenus = document.querySelectorAll('.pc-status-menu');
+    if (statusMenus.length) {
+      statusMenus.forEach(function (menu) {
+        menu.addEventListener('toggle', function () {
+          if (menu.open) { statusMenus.forEach(function (other) { if (other !== menu) { other.open = false; } }); }
+          var card = menu.closest('.pc-card');
+          if (card) { card.classList.toggle('menu-open', menu.open); }
+        });
+      });
+      document.addEventListener('click', function (e) {
+        statusMenus.forEach(function (menu) { if (menu.open && !menu.contains(e.target)) { menu.open = false; } });
+      });
+      document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { statusMenus.forEach(function (menu) { menu.open = false; }); }
+      });
+    }
+
+    // Cartes : légère inclinaison 3D qui suit la souris (désactivée sur écran tactile et si l'utilisateur limite les animations).
+    var canTilt = window.matchMedia('(hover: hover) and (pointer: fine)').matches && !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (canTilt) {
+      document.querySelectorAll('.pc-grid .pc-card').forEach(function (card) {
+        card.addEventListener('mousemove', function (e) {
+          if (card.classList.contains('menu-open')) { return; }
+          var r = card.getBoundingClientRect();
+          var x = (e.clientX - r.left) / r.width - 0.5;
+          var y = (e.clientY - r.top) / r.height - 0.5;
+          card.style.setProperty('--ry', (x * 7).toFixed(2) + 'deg');
+          card.style.setProperty('--rx', (-y * 7).toFixed(2) + 'deg');
+          card.style.setProperty('--mx', ((x + 0.5) * 100).toFixed(1) + '%');
+          card.style.setProperty('--my', ((y + 0.5) * 100).toFixed(1) + '%');
+        });
+        card.addEventListener('mouseleave', function () {
+          card.style.setProperty('--rx', '0deg');
+          card.style.setProperty('--ry', '0deg');
+        });
+      });
+    }
 
     // Compte d'envoi : préréglages (Gmail, Outlook…) qui remplissent le formulaire.
     var preset = document.querySelector('[data-mail-preset]');

@@ -5,7 +5,7 @@
 <div class="s-head">
     <div>
         <h1>Mes prospects</h1>
-        <p class="s-lead">Double-cliquez sur une carte pour ouvrir la fiche complète.</p>
+        <p class="s-lead">Un clic sur le statut pour le changer, un double-clic sur la carte pour ouvrir la fiche.</p>
     </div>
     @can('prospects.create')<a class="btn btn-primary" href="{{ route('pm.companies.create') }}"><x-icon name="plus" /> Ajouter un prospect</a>@endcan
 </div>
@@ -35,7 +35,19 @@
                 <span class="pc-person">{{ $contact?->fullName() ?? '—' }}</span>
             </div>
             <div class="pc-city"><x-icon name="map-pin" /> {{ $company->city ?: 'Ville non renseignée' }}</div>
-            <div class="pc-status">{{ $company->statusLabel() }}</div>
+            @can('update', $company)
+                <details class="pc-status-menu">
+                    <summary class="pc-status" title="Changer le statut">{{ $company->statusLabel() }} <x-icon name="chevron-right" class="pc-caret" /></summary>
+                    <form method="POST" action="{{ route('pm.companies.status', $company) }}" class="pc-status-list">
+                        @csrf
+                        @foreach (config('prospection.company_statuses') as $key => $label)
+                            <button type="submit" name="status" value="{{ $key }}" @class(['pc-status-opt', 'pc-opt-'.$key, 'current' => $company->status === $key])>{{ $label }}</button>
+                        @endforeach
+                    </form>
+                </details>
+            @else
+                <div class="pc-status">{{ $company->statusLabel() }}</div>
+            @endcan
             <div class="pc-actions">
                 @if ($email)
                     @if ($contact?->email && auth()->user()->can('emails.individual'))
@@ -51,10 +63,10 @@
                 @else
                     <span class="pc-btn off" title="Pas de téléphone renseigné"><x-icon name="phone" /></span>
                 @endif
-                @if ($mobile)
-                    <a class="pc-btn" href="sms:{{ $mobile }}" title="Envoyer un SMS" aria-label="Envoyer un SMS"><x-icon name="message-square-more" /></a>
+                @if ($mobile && ($wa = \App\Support\Normalizer::whatsappUrl($mobile)))
+                    <a class="pc-btn wa" href="{{ $wa }}" target="_blank" rel="noopener noreferrer" title="Écrire sur WhatsApp" aria-label="Écrire sur WhatsApp"><x-icon name="whatsapp" /></a>
                 @else
-                    <span class="pc-btn off" title="Pas de numéro pour un SMS"><x-icon name="message-square-more" /></span>
+                    <span class="pc-btn off" title="Pas de numéro pour WhatsApp"><x-icon name="whatsapp" /></span>
                 @endif
                 @php($social = $company->socialProfiles->first(fn ($p) => ! $p->isOpposed()))
                 @if ($social)
